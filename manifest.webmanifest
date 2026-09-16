@@ -1,0 +1,17 @@
+{
+  "name": "Transload Log",
+  "short_name": "Transload",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f4",
+  "theme_color": "#6f876f",
+  "description": "Fast transload truck, trailer, location, time and driver log.",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

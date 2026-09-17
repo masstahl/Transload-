@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#6f876f">
@@ -88,6 +88,12 @@ $("incomingTab").onclick=()=>{$("incomingTab").classList.add("active");$("loadsT
 renderLoads();renderIncoming();renderQuick();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
 })();
-</script>
+</script>const SUPABASE_URL = 'https://ngoibulnsvdcstnyrjki.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nb2lidWxuc3ZkY3N0bnlyamtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Nzk2MTQsImV4cCI6MjEwNTE1NTYxNH0.npQPYruC_-AWV88sW7AfNPZrtU9cGnf7YdGsKdTDIdo';
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 </body>
 </html>

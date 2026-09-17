@@ -64,25 +64,26 @@ const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+  async function initSupabase() {
+  console.log("Starting Supabase...");
 
-async function initSupabase() {
-  const { data, error } = await supabase.auth.signInAnonymously();
+  const { data, error } =
+    await supabaseClient.auth.signInAnonymously();
+
+  console.log("AUTH RESULT:", { data, error });
 
   if (error) {
-    console.error('Supabase anonymous sign-in failed:', error);
-    alert('Supabase error: ' + error.message);
-    return false;
+    alert(error.message);
+    return;
   }
 
-  console.log('Supabase connected:', data.user.id);
-  return true;
+  alert("User created: " + data.user.id);
 }
+
 
 initSupabase();
 
-(() => {
-const locations=["Quincy","Pasco","Warden","Richland"];
-(() => {
+
 const locations=["Quincy","Pasco","Warden","Richland"];
 let selected="", loads=JSON.parse(localStorage.getItem("tl_loads")||"[]"), incoming=JSON.parse(localStorage.getItem("tl_incoming")||"[]");
 const $=id=>document.getElementById(id);

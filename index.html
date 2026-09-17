@@ -1,94 +1,373 @@
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2script>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#6f876f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Transload Log">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Transload Log</title>
-<style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;color:#17211b;background:#f4f6f4}
-*{box-sizing:border-box}body{margin:0;background:#f4f6f4}button,input{font:inherit}
-.app{max-width:760px;margin:auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))}
-.top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}.brand{font-size:27px;font-weight:800;letter-spacing:-.7px}.sub{color:#66736b;font-size:13px;margin-top:3px}.clock{text-align:right;color:#66736b;font-size:12px}.clock strong{display:block;color:#17211b;font-size:17px}
-.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8ece9;padding:4px;border-radius:14px;margin-bottom:12px}.tab{min-height:46px;border:0;border-radius:11px;background:transparent;color:#66736b;font-weight:750}.tab.active{background:#fff;color:#17211b;box-shadow:0 1px 5px #00000012}
-.panel{background:#fff;border:1px solid #dce3de;border-radius:19px;padding:16px;margin-bottom:12px}.title{font-size:14px;font-weight:800;margin-bottom:5px}.note{font-size:12px;color:#66736b;margin-bottom:11px}
-.locations{display:grid;grid-template-columns:1fr 1fr;gap:9px}.loc{min-height:61px;border:1.5px solid #dce3de;border-radius:14px;background:#f8faf8;color:#17211b;font-weight:750;text-align:left;padding:10px 12px}.loc.selected{background:#e7efe7;border-color:#6f876f;box-shadow:inset 0 0 0 1px #6f876f}.check{float:right;color:#6f876f;opacity:0}.selected .check{opacity:1}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;font-weight:750;color:#66736b;margin:0 0 6px}.field input{width:100%;height:53px;border:1.5px solid #dce3de;border-radius:13px;padding:0 13px;font-size:17px;background:#fff;outline:none}.field input:focus{border-color:#6f876f;box-shadow:0 0 0 3px #e7efe7}
-.save{width:100%;height:58px;border:0;border-radius:15px;background:#6f876f;color:#fff;font-weight:800;font-size:17px;margin-top:13px}.save:disabled{opacity:.45}.status{min-height:20px;margin-top:7px;font-size:13px;font-weight:650;color:#a13d35}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#f8faf8;border:1px solid #dce3de;border-radius:13px;padding:11px}.num{font-size:23px;font-weight:850}.lbl{font-size:11px;color:#66736b;margin-top:2px}
-.list{display:flex;flex-direction:column;gap:8px}.row{background:#fff;border:1px solid #dce3de;border-radius:13px;padding:11px 12px}.rowtop{display:flex;justify-content:space-between;gap:8px;font-weight:800}.meta{font-size:12px;color:#66736b;margin-top:4px}.empty{text-align:center;color:#66736b;font-size:13px;padding:20px 6px}.row-actions{display:flex;gap:7px;margin-top:9px}.edit-btn,.delete-btn{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid #dce3de;background:#f8faf8;font-weight:750}.edit-btn{color:#506b53}.delete-btn{color:#9a3b35}.modal{position:fixed;inset:0;background:#00000045;display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:20}.modal.open{display:flex}.modal-card{width:min(100%,560px);background:#fff;border-radius:20px;padding:17px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.modal-title{font-size:18px;font-weight:800}.close{width:42px;height:42px;border:0;border-radius:12px;background:#eef2ef;font-size:20px}.modal-locations{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}.modal-loc{min-height:48px;border:1.5px solid #dce3de;border-radius:12px;background:#f8faf8;font-weight:750}.modal-loc.selected{background:#e7efe7;border-color:#6f876f}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.cancel{height:53px;border:1px solid #dce3de;border-radius:13px;background:#fff;font-weight:800}.update{height:53px;border:0;border-radius:13px;background:#6f876f;color:#fff;font-weight:800}
-.addgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-section{margin-top:14px;padding-top:13px;border-top:1px solid #e4e9e5}.quick-title{font-size:12px;font-weight:800;color:#66736b;margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:49px;border:1.5px solid #dce3de;border-radius:12px;background:#f8faf8;text-align:left;padding:8px 10px;font-weight:750}.quick span{display:block;font-size:11px;color:#66736b;font-weight:600;margin-top:2px}.full{grid-column:1/-1}.small{height:51px;border:1px solid #dce3de;border-radius:13px;background:#fff;font-weight:800}.incoming-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.badge{font-size:12px;background:#eef2ef;border-radius:9px;padding:6px 8px;white-space:nowrap;color:#56625b}
-@media(max-width:420px){.fields,.addgrid{grid-template-columns:1fr}.panel{padding:14px}}
-</style>
-</head>
-<body>
-<main class="app" id="app">
-<header class="top"><div><div class="brand">Transload Log</div><div class="sub">Fast load tracking</div></div><div class="clock"><strong id="time">--:--</strong><span id="date">---</span></div></header>
-<nav class="tabs"><button class="tab active" id="loadsTab">Outgoing Loads</button><button class="tab" id="incomingTab">Incoming Trucks</button></nav>
+(async () => {
 
-<section id="loadsView">
-<div class="panel"><div class="title">1. Select location</div><div class="note">Your selection stays highlighted until you save.</div><div class="locations" id="locations"></div></div>
-<div class="panel"><div class="title">2. Outgoing equipment</div>
-<div class="fields"><div class="field"><label>Truck number</label><input id="outTruck" autocomplete="off" inputmode="text" placeholder="Truck #"></div><div class="field"><label>Trailer number</label><input id="outTrailer" autocomplete="off" inputmode="text" placeholder="Trailer #"></div></div>
-<button class="save" id="save" disabled>Save Load</button><div class="status" id="loadStatus" aria-live="polite"></div></div>
-<div class="panel"><div class="title">Today's activity</div><div class="summary"><div class="stat"><div class="num" id="loadCount">0</div><div class="lbl">Loads</div></div><div class="stat"><div class="num" id="truckCount">0</div><div class="lbl">Trucks</div></div><div class="stat"><div class="num" id="locCount">0</div><div class="lbl">Locations</div></div></div></div>
-<div class="panel"><div class="title">Recent loads</div><div class="list" id="loadList"></div></div>
-</section>
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-<section id="incomingView" style="display:none">
-<div class="panel"><div class="title">Incoming trucks & drivers</div><div class="note">Separate running record of who is bringing product in.</div>
-<div class="addgrid"><div class="field"><label>Incoming truck #</label><input id="inTruck" autocomplete="off" inputmode="text" placeholder="Truck #"></div><div class="field"><label>Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div><button class="small full" id="addIncoming">Add incoming truck</button></div><div class="status" id="incomingStatus" aria-live="polite"></div>
-<div class="quick-section"><div class="quick-title">Quick incoming trucks</div><div class="quick-list" id="quickList"><div class="empty">Add an incoming truck once to create a quick button.</div></div></div></div>
-<div class="panel"><div class="title">Incoming activity</div><div class="summary"><div class="stat"><div class="num" id="inCount">0</div><div class="lbl">Entries</div></div><div class="stat"><div class="num" id="driverCount">0</div><div class="lbl">Drivers</div></div><div class="stat"><div class="num" id="inTruckCount">0</div><div class="lbl">Trucks</div></div></div></div>
-<div class="panel"><div class="title">Incoming truck log</div><div class="list" id="incomingList"></div></div>
-</section>
-</main>
-<div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
-<div class="modal-card">
-<div class="modal-head"><div class="modal-title" id="editTitle">Edit load</div><button class="close" id="closeEdit" aria-label="Close">×</button></div>
-<div class="title">Location</div><div class="modal-locations" id="editLocations"></div>
-<div class="fields"><div class="field"><label>Truck number</label><input id="editTruck" autocomplete="off"></div><div class="field"><label>Trailer number</label><input id="editTrailer" autocomplete="off"></div></div>
-<div class="status" id="editStatus"></div>
-<div class="modal-actions"><button class="cancel" id="cancelEdit">Cancel</button><button class="update" id="updateLoad">Save Changes</button></div>
-</div></div>
-<script>
-(() => {
-const locations=["Quincy","Pasco","Warden","Richland"];
-let selected="", loads=JSON.parse(localStorage.getItem("tl_loads")||"[]"), incoming=JSON.parse(localStorage.getItem("tl_incoming")||"[]");
-const $=id=>document.getElementById(id);
-const save=()=>{localStorage.setItem("tl_loads",JSON.stringify(loads));localStorage.setItem("tl_incoming",JSON.stringify(incoming));};
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const stamp=()=>{const d=new Date();return {time:d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}),date:d.toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"})}};
-function clock(){const s=stamp();$("time").textContent=s.time;$("date").textContent=s.date} setInterval(clock,1000);clock();
-$("locations").innerHTML=locations.map(x=>`<button class="loc" data-loc="${x}">${x}<span class="check">✓</span></button>`).join("");
-document.querySelectorAll(".loc").forEach(b=>b.onclick=()=>{selected=b.dataset.loc;document.querySelectorAll(".loc").forEach(x=>x.classList.toggle("selected",x===b));$("save").disabled=false;$("loadStatus").textContent=""});
-function renderLoads(){let trucks=new Set(loads.map(x=>x.truck.toUpperCase())),locs=new Set(loads.map(x=>x.location));$("loadCount").textContent=loads.length;$("truckCount").textContent=trucks.size;$("locCount").textContent=locs.size;$("loadList").innerHTML=loads.length?loads.slice().reverse().map((x,rev)=>{let i=loads.length-1-rev;return `<div class="row"><div class="rowtop"><span>${esc(x.location)}</span><span>${esc(x.time)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · ${esc(x.date)}</div><div class="row-actions"><button class="edit-btn" data-edit="${i}">Edit</button><button class="delete-btn" data-delete="${i}">Delete</button></div></div>`}).join(""):'<div class="empty">No loads recorded yet.</div>';
-document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openEdit(Number(b.dataset.edit)));
-document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{let i=Number(b.dataset.delete);if(confirm("Delete this saved load?")){loads.splice(i,1);save();renderLoads();}});
+const db = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let userName = localStorage.getItem("tl_user");
+
+if (!userName) {
+  userName = prompt("Enter your name");
+  if (!userName) userName = "Unknown";
+  localStorage.setItem("tl_user", userName);
 }
-function getQuick(){try{return JSON.parse(localStorage.getItem("tl_quick_incoming")||"[]")}catch(e){return []}}
-function setQuick(a){localStorage.setItem("tl_quick_incoming",JSON.stringify(a))}
-function renderQuick(){const q=getQuick();$("quickList").innerHTML=q.length?q.map((x,i)=>`<button type="button" class="quick" data-quick="${i}">${esc(x.truck)}<span>${esc(x.driver)}</span></button>`).join(""):'<div class="empty">Add an incoming truck once to create a quick button.</div>';document.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>{const x=q[Number(b.dataset.quick)];const st=stamp();incoming.push({truck:x.truck,driver:x.driver,...st});save();renderIncoming();$("incomingStatus").style.color="#55705a";$("incomingStatus").textContent=`${x.driver} · Truck ${x.truck} added.`;setTimeout(()=>{$("incomingStatus").textContent=""},1500)})}
-function renderIncoming(){let ds=new Set(incoming.map(x=>x.driver.toLowerCase())),ts=new Set(incoming.map(x=>x.truck.toUpperCase()));$("inCount").textContent=incoming.length;$("driverCount").textContent=ds.size;$("inTruckCount").textContent=ts.size;$("incomingList").innerHTML=incoming.length?incoming.slice().reverse().map(x=>`<div class="row"><div class="incoming-row"><div><b>${esc(x.driver)}</b><div class="meta">${esc(x.time)} · ${esc(x.date)}</div></div><span class="badge">Truck ${esc(x.truck)}</span></div></div>`).join(""):'<div class="empty">No incoming trucks recorded yet.</div>'}
-let editingIndex=-1,editLocation="";
-function openEdit(i){editingIndex=i;const x=loads[i];editLocation=x.location;$("editTruck").value=x.truck;$("editTrailer").value=x.trailer;$("editStatus").textContent="";$("editLocations").innerHTML=locations.map(l=>`<button type="button" class="modal-loc ${l===editLocation?"selected":""}" data-editloc="${l}">${l}</button>`).join("");document.querySelectorAll("[data-editloc]").forEach(b=>b.onclick=()=>{editLocation=b.dataset.editloc;document.querySelectorAll("[data-editloc]").forEach(x=>x.classList.toggle("selected",x===b))});$("editModal").classList.add("open");$("editTruck").focus();}
-function closeEdit(){$("editModal").classList.remove("open");editingIndex=-1;}
-$("closeEdit").onclick=closeEdit;$("cancelEdit").onclick=closeEdit;
-$("editModal").addEventListener("click",e=>{if(e.target===$("editModal"))closeEdit()});
-$("updateLoad").onclick=()=>{if(editingIndex<0)return;let truck=$("editTruck").value.trim(),trailer=$("editTrailer").value.trim();if(!editLocation){$("editStatus").textContent="Select a location.";return}if(!truck||!trailer){$("editStatus").textContent="Enter truck and trailer number.";return}loads[editingIndex].location=editLocation;loads[editingIndex].truck=truck;loads[editingIndex].trailer=trailer;save();renderLoads();closeEdit();};
-$("save").onclick=()=>{let truck=$("outTruck").value.trim(),trailer=$("outTrailer").value.trim();if(!selected){$("loadStatus").textContent="Select a location first.";return}if(!truck||!trailer){$("loadStatus").textContent="Enter truck and trailer number.";return}let s=stamp();loads.push({location:selected,truck,trailer,...s});save();renderLoads();$("outTruck").value="";$("outTrailer").value="";selected="";document.querySelectorAll(".loc").forEach(x=>x.classList.remove("selected"));$("save").disabled=true;$("loadStatus").style.color="#55705a";$("loadStatus").textContent="Load saved.";setTimeout(()=>{$("loadStatus").textContent=""},1500)};
-$("addIncoming").onclick=()=>{let truck=$("inTruck").value.trim(),driver=$("driver").value.trim();if(!truck||!driver){$("incomingStatus").textContent="Enter truck number and driver name.";return}let s=stamp();incoming.push({truck,driver,...s});let q=getQuick();let key=truck.toUpperCase();let existing=q.findIndex(x=>x.truck.toUpperCase()===key);if(existing>=0)q[existing]={truck,driver};else q.push({truck,driver});setQuick(q);save();renderIncoming();renderQuick();$("inTruck").value="";$("driver").value="";$("incomingStatus").style.color="#55705a";$("incomingStatus").textContent="Incoming truck added.";setTimeout(()=>{$("incomingStatus").textContent=""},1500)};
-$("loadsTab").onclick=()=>{$("loadsTab").classList.add("active");$("incomingTab").classList.remove("active");$("loadsView").style.display="block";$("incomingView").style.display="none"};
-$("incomingTab").onclick=()=>{$("incomingTab").classList.add("active");$("loadsTab").classList.remove("active");$("loadsView").style.display="none";$("incomingView").style.display="block"};
-renderLoads();renderIncoming();renderQuick();
-if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
-})();
-</script>
-</body>
-</html>
+
+const locations = [
+  "Quincy",
+  "Pasco",
+  "Warden",
+  "Richland"
+];
+
+let selected = "";
+let loads = [];
+let incoming = [];
+
+const $ = id => document.getElementById(id);
+
+const esc = s =>
+  String(s).replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&",
+      "<":"<",
+      ">":">",
+      '"':""",
+      "'":"'"
+    }[c])
+  );
+
+function stamp() {
+  const d = new Date();
+
+  return {
+    time: d.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit"
+    }),
+
+    date: d.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    })
+  };
+}
+
+function clock() {
+  const s = stamp();
+
+  $("time").textContent = s.time;
+  $("date").textContent = s.date;
+}
+
+setInterval(clock, 1000);
+clock();
+
+function getQuick() {
+  try {
+    return JSON.parse(
+      localStorage.getItem("tl_quick_incoming") || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function setQuick(a) {
+  localStorage.setItem(
+    "tl_quick_incoming",
+    JSON.stringify(a)
+  );
+}
+
+/* --------------------------
+   LOAD DATA
+-------------------------- */
+
+async function loadLoads() {
+
+  const { data, error } = await db
+    .from("loads")
+    .select("*")
+    .order("created_at", {
+      ascending: true
+    });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  loads = data || [];
+  renderLoads();
+}
+
+async function loadIncoming() {
+
+  const { data, error } = await db
+    .from("incoming")
+    .select("*")
+    .order("created_at", {
+      ascending: true
+    });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  incoming = data || [];
+  renderIncoming();
+}
+
+/* --------------------------
+   LOCATIONS
+-------------------------- */
+
+$("locations").innerHTML =
+  locations.map(x => `
+    
+      ${x}
+      ✓
+    
+  `).join("");
+
+document
+.querySelectorAll(".loc")
+.forEach(btn => {
+
+  btn.onclick = () => {
+
+    selected = btn.dataset.loc;
+
+    document
+      .querySelectorAll(".loc")
+      .forEach(x =>
+        x.classList.toggle(
+          "selected",
+          x === btn
+        )
+      );
+
+    $("save").disabled = false;
+  };
+
+});
+
+/* --------------------------
+   OUTGOING LOADS
+-------------------------- */
+
+let editingIndex = -1;
+let editLocation = "";
+
+function renderLoads() {
+
+  const trucks = new Set(
+    loads.map(x =>
+      (x.truck || "").toUpperCase()
+    )
+  );
+
+  const locs = new Set(
+    loads.map(x => x.location)
+  );
+
+  $("loadCount").textContent =
+    loads.length;
+
+  $("truckCount").textContent =
+    trucks.size;
+
+  $("locCount").textContent =
+    locs.size;
+
+  $("loadList").innerHTML =
+    loads.length
+      ? loads.slice().reverse().map(
+          (x, rev) => {
+
+            const i =
+              loads.length - 1 - rev;
+
+            return `
+
+
+
+${esc(x.location)}
+${esc(x.load_time || "")}
+
+
+
+Truck ${esc(x.truck)}
+· Trailer ${esc(x.trailer)}
+· ${esc(x.load_date || "")}
+
+<ms-copilot-line-break>
+
+Entered by ${esc(x.created_by || "")}
+
+
+
+
+
+✏️ Edit
+
+
+
+🗑 Delete
+
+
+
+
+`;
+          }
+        ).join("")
+      : `
+          No loads recorded yet.
+         `;
+
+  document
+    .querySelectorAll("[data-edit]")
+    .forEach(btn =>
+      btn.onclick = () =>
+        openEdit(
+          Number(btn.dataset.edit)
+        )
+    );
+
+  document
+    .querySelectorAll("[data-delete]")
+    .forEach(btn =>
+      btn.onclick = async () => {
+
+        const i =
+          Number(btn.dataset.delete);
+
+        if (!confirm("Delete load?"))
+          return;
+
+        await db
+          .from("loads")
+          .delete()
+          .eq("id", loads[i].id);
+
+      }
+    );
+}
+
+function openEdit(i) {
+
+  editingIndex = i;
+
+  const x = loads[i];
+
+  editLocation = x.location;
+
+  $("editTruck").value =
+    x.truck || "";
+
+  $("editTrailer").value =
+    x.trailer || "";
+
+  $("editLocations").innerHTML =
+    locations.map(loc => `
+      
+      ${loc}
+      
+    `).join("");
+
+  document
+    .querySelectorAll("[data-editloc]")
+    .forEach(btn => {
+
+      btn.onclick = () => {
+
+        editLocation =
+          btn.dataset.editloc;
+
+        document
+          .querySelectorAll(
+            "[data-editloc]"
+          )
+          .forEach(x =>
+            x.classList.toggle(
+              "selected",
+              x === btn
+            )
+          );
+      };
+
+    });
+
+  $("editModal")
+    .classList
+    .add("open");
+}
+
+function closeEdit() {
+
+  $("editModal")
+    .classList
+    .remove("open");
+
+  editingIndex = -1;
+}
+
+$("closeEdit").onclick = closeEdit;
+$("cancelEdit").onclick = closeEdit;
+
+$("updateLoad").onclick =
+async () => {
+
+  if (editingIndex < 0)
+    return;
+
+  await db
+    .from("loads")
+    .update({
+      location: editLocation,
+      truck: $("editTruck").value.trim(),
+      trailer: $("editTrailer").value.trim(),
+      updated_by: userName,
+      updated_at:
+        new Date().toISOString()
+    })
+    .eq(
+      "id",
+      loads[editingIndex].id
+    );
+
+  closeEdit();
+};
+
+$("save").onclick =
+async () => {
+
+  const truck =
+    $("outTruck").value.trim();
+
+  const trailer =
+    $("outTrailer").value.trim();
+
+  if (!selected)
+    return;
+
+  if (!truck || !trailer)
+    return;
+
+  const s = stamp();
+
+  await db
+    .from("loads")
+    .insert({
+      location: selected,
+      truck,
+      trailer,
+
+      load_date: s

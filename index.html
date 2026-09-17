@@ -34,8 +34,10 @@ const supabase = window.supabase.createClient(
   const { data, error } = await supabase.auth.signInAnonymously();
 
   if (error) {
-    console.error('Supabase anonymous sign-in failed:', error);
-    return false;
+  console.error('Supabase anonymous sign-in failed:', error);
+  alert('Supabase error: ' + error.message);
+  return false;
+}
   }
 
   console.log('Supabase connected:', data.user.id);

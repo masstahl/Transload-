@@ -57,33 +57,54 @@
 <div class="modal-actions"><button class="cancel" id="cancelEdit">Cancel</button><button class="update" id="updateLoad">Save Changes</button></div>
 </div></div>
 <script>
+<script>
 const SUPABASE_URL = 'https://ngoibulnsvdcstnyrjki.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nb2lidWxuc3ZkY3N0bnlyamtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Nzk2MTQsImV4cCI6MjEwNTE1NTYxNH0.npQPYruC_-AWV88sW7AfNPZrtU9cGnf7YdGsKdTDIdo';
 
-const supabase = window.supabase.createClient(
+const SUPABASE_ANON_KEY =
+  'eyJpc3MiOiJzdXBhYmFzZSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nb2lidWxuc3ZkY3N0bnlyamtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Nzk2MTQsImV4cCI6MjEwNTE1NTYxNH0.npQPYruC_-AWV88sW7AfNPZrtU9cGnf7YdGsKdTDIdo';
+
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
 async function initSupabase() {
-  const { data, error } = await supabase.auth.signInAnonymously();
+  console.log("Starting Supabase...");
+
+  const { data, error } =
+    await supabaseClient.auth.signInAnonymously();
 
   if (error) {
-    console.error('Supabase anonymous sign-in failed:', error);
-    alert('Supabase error: ' + error.message);
-    return false;
+    console.error("SUPABASE AUTH ERROR:", error);
+
+    alert(
+      "Supabase login failed:\n\n" +
+      error.message
+    );
+
+    return null;
   }
 
-  console.log('Supabase connected:', data.user.id);
-  return true;
+  console.log("SUPABASE USER CREATED:", data.user.id);
+
+  console.log(
+    "Anonymous:",
+    data.user.is_anonymous
+  );
+
+  return data.user;
 }
 
 initSupabase();
 
 (() => {
-const locations=["Quincy","Pasco","Warden","Richland"];
-(() => {
-const locations=["Quincy","Pasco","Warden","Richland"];
+
+const locations = [
+  "Quincy",
+  "Pasco",
+  "Warden",
+  "Richland"
+];
 let selected="", loads=JSON.parse(localStorage.getItem("tl_loads")||"[]"), incoming=JSON.parse(localStorage.getItem("tl_incoming")||"[]");
 const $=id=>document.getElementById(id);
 const save=()=>{localStorage.setItem("tl_loads",JSON.stringify(loads));localStorage.setItem("tl_incoming",JSON.stringify(incoming));};

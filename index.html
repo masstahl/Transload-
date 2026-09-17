@@ -94,6 +94,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
-);
+);async function initSupabase() {
+  const { data, error } = await supabase.auth.signInAnonymously();
+
+  if (error) {
+    console.error('Supabase anonymous sign-in failed:', error);
+    return false;
+  }
+
+  console.log('Supabase connected:', data.user.id);
+  return true;
+}
+
+initSupabase();
 </body>
 </html>

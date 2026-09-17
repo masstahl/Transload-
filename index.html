@@ -24,7 +24,13 @@
 .list{display:flex;flex-direction:column;gap:8px}.row{background:#fff;border:1px solid #dce3de;border-radius:13px;padding:11px 12px}.rowtop{display:flex;justify-content:space-between;gap:8px;font-weight:800}.meta{font-size:12px;color:#66736b;margin-top:4px}.empty{text-align:center;color:#66736b;font-size:13px;padding:20px 6px}.row-actions{display:flex;gap:7px;margin-top:9px}.edit-btn,.delete-btn{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid #dce3de;background:#f8faf8;font-weight:750}.edit-btn{color:#506b53}.delete-btn{color:#9a3b35}.modal{position:fixed;inset:0;background:#00000045;display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:20}.modal.open{display:flex}.modal-card{width:min(100%,560px);background:#fff;border-radius:20px;padding:17px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.modal-title{font-size:18px;font-weight:800}.close{width:42px;height:42px;border:0;border-radius:12px;background:#eef2ef;font-size:20px}.modal-locations{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}.modal-loc{min-height:48px;border:1.5px solid #dce3de;border-radius:12px;background:#f8faf8;font-weight:750}.modal-loc.selected{background:#e7efe7;border-color:#6f876f}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.cancel{height:53px;border:1px solid #dce3de;border-radius:13px;background:#fff;font-weight:800}.update{height:53px;border:0;border-radius:13px;background:#6f876f;color:#fff;font-weight:800}
 .addgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-section{margin-top:14px;padding-top:13px;border-top:1px solid #e4e9e5}.quick-title{font-size:12px;font-weight:800;color:#66736b;margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:49px;border:1.5px solid #dce3de;border-radius:12px;background:#f8faf8;text-align:left;padding:8px 10px;font-weight:750}.quick span{display:block;font-size:11px;color:#66736b;font-weight:600;margin-top:2px}.full{grid-column:1/-1}.small{height:51px;border:1px solid #dce3de;border-radius:13px;background:#fff;font-weight:800}.incoming-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.badge{font-size:12px;background:#eef2ef;border-radius:9px;padding:6px 8px;white-space:nowrap;color:#56625b}
 @media(max-width:420px){.fields,.addgrid{grid-template-columns:1fr}.panel{padding:14px}}
-</style>
+</style>const SUPABASE_URL = 'https://ngoibulnsvdcstnyrjki.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nb2lidWxuc3ZkY3N0bnlyamtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Nzk2MTQsImV4cCI6MjEwNTE1NTYxNH0.npQPYruC_-AWV88sW7AfNPZrtU9cGnf7YdGsKdTDIdo';
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 </head>
 <body>
 <main class="app" id="app">

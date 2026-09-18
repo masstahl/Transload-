@@ -25,7 +25,8 @@
 .addgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-section{margin-top:14px;padding-top:13px;border-top:1px solid #e4e9e5}.quick-title{font-size:12px;font-weight:800;color:#66736b;margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:49px;border:1.5px solid #dce3de;border-radius:12px;background:#f8faf8;text-align:left;padding:8px 10px;font-weight:750}.quick span{display:block;font-size:11px;color:#66736b;font-weight:600;margin-top:2px}.full{grid-column:1/-1}.small{height:51px;border:1px solid #dce3de;border-radius:13px;background:#fff;font-weight:800}.incoming-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.badge{font-size:12px;background:#eef2ef;border-radius:9px;padding:6px 8px;white-space:nowrap;color:#56625b}
 @media(max-width:420px){.fields,.addgrid{grid-template-columns:1fr}.panel{padding:14px}}
 </style>
-</head>src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">\</script>
+</head>
 <body>
 <main class="app" id="app">
 <header class="top"><div><div class="brand">Transload Log</div><div class="sub">Fast load tracking</div></div><div class="clock"><strong id="time">--:--</strong><span id="date">---</span></div></header>
@@ -56,6 +57,8 @@
 <div class="status" id="editStatus"></div>
 <div class="modal-actions"><button class="cancel" id="cancelEdit">Cancel</button><button class="update" id="updateLoad">Save Changes</button></div>
 </div></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">\</script>
+
 <script>
 const SUPABASE_URL = 'https://ngoibulnsvdcstnyrjki.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nb2lidWxuc3ZkY3N0bnlyamtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Nzk2MTQsImV4cCI6MjEwNTE1NTYxNH0.npQPYruC_-AWV88sW7AfNPZrtU9cGnf7YdGsKdTDIdo';
@@ -68,7 +71,8 @@ const supabase = window.supabase.createClient(
   console.log("Starting Supabase...");
 
   const { data, error } =
-    await supabaseClient.auth.signInAnonymously();
+  await supabase.auth.signInAnonymously();
+
 
   console.log("AUTH RESULT:", { data, error });
 

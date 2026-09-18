@@ -1,26 +1,25 @@
-TRANLOAD LOG PWA
+# Transload Log PWA
 
-Files:
-- index.html
-- manifest.webmanifest
-- sw.js
-- apple-touch-icon.png
+A shared, live log for outgoing loads and incoming trucks/drivers. Every operator signs in anonymously and chooses a display name. The name is saved with each record and every edit, so the team can see who entered or last changed it.
 
-DEPLOYMENT:
-Upload all four files to the same folder on any HTTPS web host. The app does not require a database or server-side code for its current local version. Saved outgoing loads can be edited or deleted from the Recent Loads list.
+## One-time Supabase setup
 
-IMPORTANT:
-Records are stored in the browser on the iPhone using localStorage. They persist on that device/browser, but they are NOT automatically shared between phones or computers.
+1. In the linked Supabase project, open **Authentication → Providers** and enable **Anonymous sign-ins**.
+2. Open the **SQL Editor**, paste and run [`supabase.sql`](supabase.sql).
+3. Deploy all files in this directory together on an HTTPS web host.
 
-iPHONE INSTALL:
+The SQL creates the common database tables, permits authenticated anonymous operators to read/write the shared log, and adds them to Realtime. Do **not** skip it: without it each device cannot share records.
+
+## What is shared
+
+- Outgoing: add, edit location/truck/trailer/date/time, and delete loads.
+- Incoming: add truck/driver, edit truck/driver/date/time, and delete entries.
+- Quick-driver buttons: created/updated from incoming entries and shared by all operators.
+- Live updates: inserts, edits, and deletes from other users appear automatically while the app is open.
+- Attribution: every row shows who entered it and who last edited it.
+
+## iPhone install
+
 1. Open the deployed HTTPS URL in Safari.
-2. Tap Share.
-3. Tap Add to Home Screen.
-4. Keep "Open as Web App" enabled.
-5. Tap Add.
-
-The resulting icon opens the app in standalone mode. Apple documents these current steps here:
-https://support.apple.com/en-ph/guide/iphone/iphea86e5236/ios
-
-QUICK INCOMING TRUCKS:
-The first time an incoming truck number and driver are entered, the pair is saved as a Quick Incoming Truck button. Tapping that button immediately logs the truck/driver with the current time. If the same truck number is entered later with a different driver, its quick button is updated.
+2. Tap **Share**, then **Add to Home Screen**.
+3. Keep **Open as Web App** enabled and tap **Add**.

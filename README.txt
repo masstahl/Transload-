@@ -10,6 +10,17 @@ A shared, live log for outgoing loads and incoming trucks/drivers. Every operato
 
 The SQL creates the common database tables, permits authenticated anonymous operators to read/write the shared log, and adds them to Realtime. Do **not** skip it: without it each device cannot share records.
 
+## Fixing “Invalid API key”
+
+Running `supabase.sql` does **not** fix an invalid API key. That error means the value in `SUPABASE_ANON_KEY` in [`index.html`](index.html) was revoked, rotated, copied incorrectly, or belongs to a different project.
+
+1. In the same Supabase project as `SUPABASE_URL`, open **Project Settings → API**.
+2. Copy the current **Publishable key** (preferred) or legacy **anon key**. Never use the `service_role`/secret key in this browser app.
+3. Replace only the value assigned to `SUPABASE_ANON_KEY` in [`index.html`](index.html), deploy the updated file, then hard-refresh the app (or remove and re-add the installed PWA if it still shows an old cached version).
+4. Run `supabase.sql` only if the next error reports missing tables, policies, or Realtime setup.
+
+The app now distinguishes invalid-key errors from database-setup errors and gives the matching recovery step.
+
 ## What is shared
 
 - Outgoing: add, edit location/truck/trailer/date/time, and delete loads.

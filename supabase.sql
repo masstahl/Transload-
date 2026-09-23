@@ -19,6 +19,7 @@ create table if not exists public.outgoing_loads (
 create table if not exists public.incoming_entries (
   id uuid primary key default gen_random_uuid(),
   truck text not null,
+  field text not null,
   driver text not null,
   occurred_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
@@ -54,3 +55,11 @@ create policy "shared quick drivers" on public.quick_drivers for all to authenti
 alter publication supabase_realtime add table public.outgoing_loads;
 alter publication supabase_realtime add table public.incoming_entries;
 alter publication supabase_realtime add table public.quick_drivers;
+
+
+-- Incoming trucks originate from a field, not a plant.
+-- Safe migration for databases where incoming_entries already exists.
+alter table public.incoming_entries add column if not exists field text;
+
+-- Existing rows may predate field tracking. Keep them usable until field numbers are entered.
+-- New app entries require a field number in the application.

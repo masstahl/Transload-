@@ -344,7 +344,7 @@
       renderNeeds();
       await loadData();
       $("outTruck").value = ""; $("outTrailer").value = "";
-      // Keep field and variety selected so consecutive loads from the same field are faster.
+      // Keep field and variety selected so consecutive loads from the same field and variety are faster.
       // They remain editable at any time before the next load is added.
       state.selected = "";
       renderLocations("locations", "", selectLocation);

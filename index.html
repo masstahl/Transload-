@@ -160,7 +160,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-09-24-v7";
+  const APP_VERSION = "2026-09-24-v8";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -343,7 +343,9 @@
       renderLoads();
       renderNeeds();
       await loadData();
-      $("outTruck").value = ""; $("outTrailer").value = ""; $("outField").value = ""; $("outVariety").value = "";
+      $("outTruck").value = ""; $("outTrailer").value = "";
+      // Keep field and variety selected so consecutive loads from the same field are faster.
+      // They remain editable at any time before the next load is added.
       state.selected = "";
       renderLocations("locations", "", selectLocation);
       setDefaultDates();

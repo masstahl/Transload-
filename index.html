@@ -40,7 +40,6 @@
        <div class="panel"><div class="title">Recent loads</div><div class="list" id="loadList"></div></div>
 <div class="panel"><div class="title">Loads from each field</div><div class="chart-controls"><button class="range-btn active" data-range="30">30 days</button><button class="range-btn" data-range="60">60 days</button></div><div id="fieldChart" class="field-chart"></div></div>
   </section>
-  </section>
   <section id="incomingView" class="hidden">
     <div class="panel"><div class="title">Incoming trucks & drivers</div><div class="note">Each entry is visible to everyone using this log.</div><div class="fields"><div class="field"><label for="inTruck">Incoming truck #</label><input id="inTruck" autocomplete="off" placeholder="Truck #"></div><div class="field"><label for="fieldNumber">Field number</label><div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div></div><div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div><div class="field"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div></div><button class="small" id="addIncoming">Add truck / driver</button><div class="status" id="inStatus" aria-live="polite"></div><div class="quick-section"><div class="quick-title">Shared quick-driver buttons</div><div class="quick-list" id="quickList"></div></div></div>
     <div class="panel"><div class="title">Incoming activity</div><div class="summary"><div class="stat"><div class="num" id="inCount">0</div><div class="lbl">Entries</div></div><div class="stat"><div class="num" id="driverCount">0</div><div class="lbl">Drivers</div></div><div class="stat"><div class="num" id="inTruckCount">0</div><div class="lbl">Trucks</div></div></div></div>
@@ -57,7 +56,8 @@
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const locations = ['Quincy','Pasco','Warden','Richland'];
   const $ = id => document.getElementById(id);
-  const state = { user:null, name:'', selected:'', loads:[], incoming:[], quick:[], varieties:[], plans:[], editing:null, editLocation:'', planDate:new Date().toISOString().slice(0,10), fieldRange:30 };
+  const localDateString = date => { const d=date ? new Date(date) : new Date(); const off=d.getTimezoneOffset()*60000; return new Date(d-off).toISOString().slice(0,10); };
+  const state = { user:null, name:'', selected:'', loads:[], incoming:[], quick:[], varieties:[], plans:[], editing:null, editLocation:'', planDate:localDateString(), fieldRange:30 };
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const localDateTime = date => { const d=date ? new Date(date) : new Date(); const off=d.getTimezoneOffset()*60000; return new Date(d-off).toISOString().slice(0,16); };
   const friendlyTime = value => new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value));
@@ -65,7 +65,7 @@
   function message(id, text, ok=false) { const el=$(id); el.textContent=text; el.style.color=ok ? '#476e50' : '#9a3b35'; }
   function clearMessage(id) { setTimeout(() => { $(id).textContent=''; }, 2200); }
   function identity() { $('identityName').textContent = state.name || 'Unnamed operator'; }
-  function setDefaultDates() { $('outDate').value=localDateTime(); $('inDate').value=localDateTime(); }
+  function setDefaultDates() { $('outDate').value=localDateTime(); $('inDate').value=localDateTime(); if(!$('planDate').value) $('planDate').value=localDateString(); }
    
 function renderVarieties(){ const opts='<option value="">Select variety</option>'+state.varieties.map(v=>`<option value="${esc(v.name)}">${esc(v.name)}</option>`).join(''); $('outVariety').innerHTML=opts; $('editVariety').innerHTML=opts; }
 function planFor(date){ return state.plans.find(p=>p.plan_date===date)||{pasco:0,warden:0,quincy:0,richland:0}; }

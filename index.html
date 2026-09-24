@@ -17,7 +17,6 @@
 <body>
 <main class="app">
   <header class="top"><div><div class="brand">Transload Log</div><div class="sub">Shared live load tracking</div></div><div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div></header>
-</section>
 <nav class="tabs"><button class="tab active" data-tab="outgoing">Outgoing Loads</button><button class="tab" data-tab="incoming">Incoming Trucks</button></nav>
   <section id="outgoingView">
     <div class="panel"><div class="title">1. Select location</div><div class="note">Choose where this outgoing load is headed.</div><div class="locations" id="locations"></div></div>
@@ -40,6 +39,7 @@
   <div id="locationNeeds" class="needs-list"></div>
   <div class="plan-actions"><button class="small secondary" id="setPlan">Set today’s plant needs</button><input id="planDate" type="date" class="plan-date"></div>
   <div class="status" id="planStatus" aria-live="polite"></div>
+  </section>
   </section>
   <section id="incomingView" class="hidden">
     <div class="panel"><div class="title">Incoming trucks & drivers</div><div class="note">Each entry is visible to everyone using this log.</div><div class="fields"><div class="field"><label for="inTruck">Incoming truck #</label><input id="inTruck" autocomplete="off" placeholder="Truck #"></div><div class="field"><label for="fieldNumber">Field number</label><div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div></div><div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div><div class="field"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div></div><button class="small" id="addIncoming">Add truck / driver</button><div class="status" id="inStatus" aria-live="polite"></div><div class="quick-section"><div class="quick-title">Shared quick-driver buttons</div><div class="quick-list" id="quickList"></div></div></div>

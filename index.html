@@ -160,7 +160,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-09-24-v8";
+  const APP_VERSION = "2026-09-24-v9";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -226,9 +226,13 @@
   }
 
   function renderVarieties() {
+    const outValue = $("outVariety").value;
+    const editValue = $("editVariety").value;
     const opts = '<option value="">Select variety</option>' + state.varieties.map((v) => `<option value="${esc(v.name)}">${esc(v.name)}</option>`).join("");
     $("outVariety").innerHTML = opts;
     $("editVariety").innerHTML = opts;
+    if (state.varieties.some((v) => v.name === outValue)) $("outVariety").value = outValue;
+    if (state.varieties.some((v) => v.name === editValue)) $("editVariety").value = editValue;
   }
   function planFor(date) { return state.plans.find((p) => p.plan_date === date) || { pasco: 0, warden: 0, quincy: 0 }; }
   function renderNeeds() {

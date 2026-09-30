@@ -372,7 +372,7 @@
     const { error: quickError } = await db.from("quick_drivers").upsert({ truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
     if (quickError) return message("inStatus", "Entry saved, but quick button failed: " + errText(quickError));
     await loadData();
-    $("fieldNumber").value = ""; $("driver").value = "";
+    $("driver").value = "";
     setDefaultDates();
     message("inStatus", "Incoming driver added.", true);
     clearMessage("inStatus");

@@ -129,6 +129,7 @@
       <div id="inFieldChart" class="field-chart"></div>
     </div>
   </section>
+  </div></div>
 </main>
 <div class="modal" id="planModal" role="dialog" aria-modal="true">
   <div class="modal-card">
@@ -565,14 +566,14 @@
     b.onclick = () => {
       state.fieldRange = Number(b.dataset.range);
       document.querySelectorAll("[data-range]").forEach((x) => x.classList.toggle("active", x === b));
-      renderChart("fieldChart", state.loads, state.fieldRange, "No field loads recorded in this period.");
+      renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     };
   });
   document.querySelectorAll("[data-in-range]").forEach((b) => {
     b.onclick = () => {
       state.inRange = Number(b.dataset.inRange);
       document.querySelectorAll("[data-in-range]").forEach((x) => x.classList.toggle("active", x === b));
-      renderChart("inFieldChart", state.incoming, state.inRange, "No incoming field loads in this period.");
+      renderChart("inFieldChart", state.sharedFieldIncoming, state.inRange, "No incoming field loads in this period.");
     };
   });
   $("addIncoming").onclick = () => addIncoming();

@@ -162,7 +162,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-09-24-v9";
+  const APP_VERSION = "2026-09-30-v10";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -377,7 +377,7 @@
     const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
     const { error } = await db.from("incoming_entries").insert(entry);
     if (error) return message("inStatus", errText(error));
-    const { error: quickError } = await db.from("quick_drivers").upsert({ site_id: state.site, truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
+    const { error: quickError } = await db.from("quick_drivers").upsert({ site_id: state.site, truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "site_id,truck" });
     if (quickError) return message("inStatus", "Entry saved, but quick button failed: " + errText(quickError));
     await loadData();
     $("driver").value = "";
@@ -447,7 +447,7 @@
     else Object.assign(payload, { truck: driverKey(second), driver: second, field });
     const { error } = await db.from(isLoad ? "outgoing_entries" : "incoming_entries").update(payload).eq("id", state.editing.id).eq("site_id", state.site);
     if (error) return message("editStatus", errText(error));
-    if (!isLoad) await db.from("quick_drivers").upsert({ site_id: state.site, truck: driverKey(second), driver: second, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
+    if (!isLoad) await db.from("quick_drivers").upsert({ site_id: state.site, truck: driverKey(second), driver: second, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "site_id,truck" });
     closeEdit();
     await loadData();
   }

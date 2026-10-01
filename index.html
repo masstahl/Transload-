@@ -162,7 +162,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-01-v14";
+  const APP_VERSION = "2026-10-01-v15";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -215,16 +215,27 @@
   function errText(error) { return error?.message || error?.error_description || (typeof error === "string" ? error : "Unknown error"); }
 
   async function bustOldCache() {
-    if (!("serviceWorker" in navigator)) return;
-    const regs = await navigator.serviceWorker.getRegistrations();
-    const cacheKeys = window.caches ? await caches.keys() : [];
-    if (!regs.length && !cacheKeys.length) return;
-    await Promise.all(regs.map((r) => r.unregister()));
-    await Promise.all(cacheKeys.map((k) => caches.delete(k)));
-    if (!sessionStorage.getItem("tl_cache_busted_" + APP_VERSION)) {
-      sessionStorage.setItem("tl_cache_busted_" + APP_VERSION, "1");
-      location.reload();
+    // Home Screen apps can retain an old document even after the website updates.
+    // On launch, remove any legacy worker/cache and navigate once to a versioned URL
+    // so iOS requests the current document instead of reusing the old launch URL.
+    const refreshParam = "tl_refresh";
+    if (new URL(location.href).searchParams.get(refreshParam) === APP_VERSION) return;
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((registration) => registration.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } catch (error) {
+      console.warn("Could not clear an old app cache:", error);
     }
+    const url = new URL(location.href);
+    url.searchParams.set(refreshParam, APP_VERSION);
+    location.replace(url.toString());
+    await new Promise(() => {});
   }
 
   function renderVarieties() {

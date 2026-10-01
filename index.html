@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Transload Log</title>
   <style>
-    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#1c2721;background:#f3efe6;--sage:#3f5c47;--sage-dark:#2f4636;--sage-soft:#e7eee4;--slate:#66736c;--border:#d5ccbe;--panel:#fffcf7;--soft:#ece7dc}*{box-sizing:border-box}body{margin:0;background:#f3efe6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:780px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.8px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:2px 0 0;font-size:11px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:8px}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-height:44px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:#17211b;font-weight:750}.loc.selected{background:var(--sage-soft);border-color:var(--sage)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1.5px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#647269}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#748078;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#647269;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddeda}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 52px;gap:6px}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:1fr 48px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#647269}.need-number{font-size:20px;font-weight:900}.plan-actions{display:grid;grid-template-columns:44px 1fr 44px auto;gap:6px;margin-top:7px;align-items:center}.secondary{background:var(--soft);color:var(--sage-dark)}.nav-btn{height:44px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900}.location-totals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.location-total{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.chart-row{display:grid;grid-template-columns:58px 1fr 34px;gap:7px;align-items:center;font-size:12px}.bar-wrap{height:18px;background:#e8eef0;border-radius:8px;overflow:hidden}.bar{height:100%;background:var(--sage-dark);border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#647269;font-size:12px;padding:12px}.hidden{display:none!important}.span2{grid-column:1/-1}@media(max-width:430px){.fields{grid-template-columns:1fr 1fr}.brand{font-size:22px}}
+    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#1c2721;background:#f3efe6;--sage:#3f5c47;--sage-dark:#2f4636;--sage-soft:#e7eee4;--slate:#66736c;--border:#d5ccbe;--panel:#fffcf7;--soft:#ece7dc}*{box-sizing:border-box}body{margin:0;background:#f3efe6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.workspace{display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;align-items:start}.site-tabs{display:flex;flex-direction:column;gap:6px;position:sticky;top:8px}.site-tab{height:48px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:900;color:var(--slate)}.site-tab.active{background:var(--sage);color:#fff;border-color:var(--sage)}.site-content{min-width:0}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.8px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:2px 0 0;font-size:11px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:8px}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-height:44px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:#17211b;font-weight:750}.loc.selected{background:var(--sage-soft);border-color:var(--sage)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1.5px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#647269}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#748078;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#647269;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddeda}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 52px;gap:6px}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:1fr 48px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#647269}.need-number{font-size:20px;font-weight:900}.plan-actions{display:grid;grid-template-columns:44px 1fr 44px auto;gap:6px;margin-top:7px;align-items:center}.secondary{background:var(--soft);color:var(--sage-dark)}.nav-btn{height:44px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900}.location-totals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.location-total{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.chart-row{display:grid;grid-template-columns:58px 1fr 34px;gap:7px;align-items:center;font-size:12px}.bar-wrap{height:18px;background:#e8eef0;border-radius:8px;overflow:hidden}.bar{height:100%;background:var(--sage-dark);border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#647269;font-size:12px;padding:12px}.hidden{display:none!important}.span2{grid-column:1/-1}@media(max-width:430px){.fields{grid-template-columns:1fr 1fr}.brand{font-size:22px}}
   </style>
 </head>
 <body>
@@ -24,6 +24,7 @@
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
+  <div class="workspace"><nav class="site-tabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button></nav><div class="site-content">
   <nav class="tabs">
     <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
     <button class="tab" data-tab="incoming">Incoming Drivers</button>
@@ -195,7 +196,7 @@
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", selected: "", loads: [], incoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7 };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7 };
 
   function message(id, text, ok = false) {
     const el = $(id);
@@ -275,7 +276,7 @@
     const records = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
     $("listTitle").textContent = "Loads for " + friendlyDay(date);
     renderLocationTotals();
-    renderChart("fieldChart", state.loads, state.fieldRange, "No field loads recorded in this period.");
+    renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     $("loadList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
@@ -287,7 +288,7 @@
     $("inCount").textContent = todayRows.length;
     $("driverCount").textContent = new Set(todayRows.map((x) => x.driver.toLowerCase())).size;
     $("inFieldCount").textContent = new Set(todayRows.map((x) => x.field)).size;
-    renderChart("inFieldChart", records, state.inRange, "No incoming field loads in this period.");
+    renderChart("inFieldChart", state.sharedFieldIncoming, state.inRange, "No incoming field loads in this period.");
     $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Field <b>${esc(x.field || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
     $("incomingList").querySelectorAll("[data-edit-in]").forEach((b) => { b.onclick = () => openEdit("incoming", b.dataset.editIn); });
     $("incomingList").querySelectorAll("[data-delete-in]").forEach((b) => { b.onclick = () => remove("incoming_entries", b.dataset.deleteIn, "inStatus"); });
@@ -307,16 +308,19 @@
 
   async function loadData() {
     const [loads, incoming, quick, varieties, plans] = await Promise.all([
-      db.from("outgoing_entries").select("*").order("occurred_at", { ascending: false }),
-      db.from("incoming_entries").select("*").order("occurred_at", { ascending: false }),
-      db.from("quick_drivers").select("*").order("driver"),
-      db.from("potato_varieties").select("*").eq("active", true).order("name"),
-      db.from("arrival_plans").select("*").order("plan_date", { ascending: false }),
+      db.from("outgoing_entries").select("*").eq("site_id", state.site).order("occurred_at", { ascending: false }),
+      db.from("incoming_entries").select("*").eq("site_id", state.site).order("occurred_at", { ascending: false }),
+      db.from("quick_drivers").select("*").eq("site_id", state.site).order("driver"),
+      db.from("potato_varieties").select("*").eq("site_id", state.site).eq("active", true).order("name"),
+      db.from("arrival_plans").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }),
     ]);
-    const error = loads.error || incoming.error || quick.error || varieties.error || plans.error;
+    const [allLoads, allIncoming] = await Promise.all([db.from("outgoing_entries").select("field,occurred_at"), db.from("incoming_entries").select("field,occurred_at")]);
+    const error = loads.error || incoming.error || quick.error || varieties.error || plans.error || allLoads.error || allIncoming.error;
     if (error) throw error;
     state.loads = loads.data || [];
+    state.sharedFieldLoads = allLoads.data || [];
     state.incoming = incoming.data || [];
+    state.sharedFieldIncoming = allIncoming.data || [];
     state.quick = quick.data || [];
     state.varieties = varieties.data || [];
     state.plans = plans.data || [];
@@ -327,6 +331,8 @@
     renderNeeds();
   }
 
+  function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
+  async function switchSite(site) { if (![1,2].includes(site) || site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
@@ -340,7 +346,7 @@
       if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
       const occurredValue = $("outDate").value;
       if (!occurredValue) return message("outStatus", "Enter a date and time.");
-      const payload = { location: state.selected, truck, trailer, field, variety, occurred_at: new Date(occurredValue).toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
+      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: new Date(occurredValue).toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
       const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
       if (error) throw error;
       if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];
@@ -352,6 +358,7 @@
       // They remain editable at any time before the next load is added.
       state.selected = "";
       renderLocations("locations", "", selectLocation);
+      renderSiteTabs();
       setDefaultDates();
       message("outStatus", "Load added.", true);
       clearMessage("outStatus");
@@ -366,10 +373,10 @@
     const occurredAt = values?.occurred_at || new Date($("inDate").value).toISOString();
     if (!field || !driver) return message("inStatus", "Enter driver name and field number.");
     const truck = driverKey(driver);
-    const entry = { truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
+    const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
     const { error } = await db.from("incoming_entries").insert(entry);
     if (error) return message("inStatus", errText(error));
-    const { error: quickError } = await db.from("quick_drivers").upsert({ truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
+    const { error: quickError } = await db.from("quick_drivers").upsert({ site_id: state.site, truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
     if (quickError) return message("inStatus", "Entry saved, but quick button failed: " + errText(quickError));
     await loadData();
     $("driver").value = "";
@@ -388,7 +395,7 @@
 
   async function remove(table, id, status) {
     if (!confirm("Delete this entry for everyone?")) return;
-    const direct = await db.from(table).delete().eq("id", id);
+    const direct = await db.from(table).delete().eq("id", id).eq("site_id", state.site);
     if (direct.error) {
       const rpc = await db.rpc("delete_transload_entry", { p_entry_type: table === "outgoing_entries" ? "outgoing" : "incoming", p_entry_id: id, p_deleted_by: state.user.id, p_deleted_by_name: state.name });
       if (rpc.error) return message(status, errText(rpc.error));
@@ -437,9 +444,9 @@
     const payload = { occurred_at: new Date(occurredAt).toISOString(), updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
     if (isLoad) Object.assign(payload, { truck: $("editFirst").value.trim(), location: state.editLocation, trailer: second, field, variety: $("editVariety").value });
     else Object.assign(payload, { truck: driverKey(second), driver: second, field });
-    const { error } = await db.from(isLoad ? "outgoing_entries" : "incoming_entries").update(payload).eq("id", state.editing.id);
+    const { error } = await db.from(isLoad ? "outgoing_entries" : "incoming_entries").update(payload).eq("id", state.editing.id).eq("site_id", state.site);
     if (error) return message("editStatus", errText(error));
-    if (!isLoad) await db.from("quick_drivers").upsert({ truck: driverKey(second), driver: second, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
+    if (!isLoad) await db.from("quick_drivers").upsert({ site_id: state.site, truck: driverKey(second), driver: second, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "truck" });
     closeEdit();
     await loadData();
   }
@@ -457,7 +464,7 @@
     const date = $("planDate").value;
     const vals = { pasco: Number($("planPasco").value || 0), warden: Number($("planWarden").value || 0), quincy: Number($("planQuincy").value || 0) };
     if (Object.values(vals).some((n) => !Number.isInteger(n) || n < 0)) return message("planModalStatus", "Enter whole numbers 0 or greater.");
-    const { error } = await db.from("arrival_plans").upsert({ plan_date: date, ...vals, updated_at: new Date().toISOString(), updated_by: state.user.id, updated_by_name: state.name }, { onConflict: "plan_date" });
+    const { error } = await db.from("arrival_plans").upsert({ site_id: state.site, plan_date: date, ...vals, updated_at: new Date().toISOString(), updated_by: state.user.id, updated_by_name: state.name }, { onConflict: "site_id,plan_date" });
     if (error) return message("planModalStatus", errText(error));
     await loadData();
     closePlan();
@@ -469,7 +476,7 @@
     if (name === null) return;
     const clean = name.trim();
     if (!clean) return;
-    const { error } = await db.from("potato_varieties").upsert({ name: clean, created_by: state.user.id, created_by_name: state.name }, { onConflict: "name" });
+    const { error } = await db.from("potato_varieties").upsert({ site_id: state.site, name: clean, created_by: state.user.id, created_by_name: state.name }, { onConflict: "site_id,name" });
     if (error) return message("outStatus", errText(error));
     await loadData();
     $("outVariety").value = clean;
@@ -540,6 +547,8 @@
       $("incomingView").classList.toggle("hidden", !incoming);
     };
   });
+  document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });
+  renderSiteTabs();
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;
   $("closePlan").onclick = closePlan;

@@ -348,7 +348,9 @@
   }
 
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
-  function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }\n  function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }\n  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); }
+  function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
+  function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
@@ -577,7 +579,13 @@
       $("incomingView").classList.toggle("hidden", !incoming);
     };
   });
-  document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });\n  $("siteMenuButton").onclick = openSiteMenu;\n  $("siteMenuBackdrop").onclick = closeSiteMenu;\n  let edgeStartX = null, edgeStartY = null;\n  document.addEventListener("touchstart", (e) => { if (e.touches.length !== 1) return; edgeStartX = e.touches[0].clientX; edgeStartY = e.touches[0].clientY; }, { passive: true });\n  document.addEventListener("touchend", (e) => { if (edgeStartX === null || !e.changedTouches.length) return; const dx = e.changedTouches[0].clientX - edgeStartX, dy = e.changedTouches[0].clientY - edgeStartY; if (Math.abs(dy) < 65 && dx > 65 && edgeStartX < 24) openSiteMenu(); else if (Math.abs(dy) < 65 && dx < -65 && $("siteTabs").classList.contains("open")) closeSiteMenu(); edgeStartX = edgeStartY = null; }, { passive: true });\n  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSiteMenu(); });
+  document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });
+  $("siteMenuButton").onclick = openSiteMenu;
+  $("siteMenuBackdrop").onclick = closeSiteMenu;
+  let edgeStartX = null, edgeStartY = null;
+  document.addEventListener("touchstart", (e) => { if (e.touches.length !== 1) return; edgeStartX = e.touches[0].clientX; edgeStartY = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener("touchend", (e) => { if (edgeStartX === null || !e.changedTouches.length) return; const dx = e.changedTouches[0].clientX - edgeStartX, dy = e.changedTouches[0].clientY - edgeStartY; if (Math.abs(dy) < 65 && dx > 65 && edgeStartX < 24) openSiteMenu(); else if (Math.abs(dy) < 65 && dx < -65 && $("siteTabs").classList.contains("open")) closeSiteMenu(); edgeStartX = edgeStartY = null; }, { passive: true });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSiteMenu(); });
   renderSiteTabs();
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;

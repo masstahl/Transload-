@@ -162,7 +162,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-09-30-v11";
+  const APP_VERSION = "2026-09-30-v12";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -303,8 +303,23 @@
       seen.add(key);
       rows.push(x);
     });
-    $("quickList").innerHTML = rows.length ? rows.map((x) => `<button class="quick" data-quick="${x.id}">${esc(x.driver)}</button>`).join("") : '<div class="empty">Add a driver once to create a shared quick button.</div>';
-    $("quickList").querySelectorAll("[data-quick]").forEach((button) => { button.onclick = () => quickAdd(button.dataset.quick); });
+    $("quickList").innerHTML = rows.length ? rows.map((x) => `<button class="quick" data-quick="${x.id}" title="Tap to use · press and hold to remove">${esc(x.driver)}</button>`).join("") : '<div class="empty">Add a driver once to create a shared quick button.</div>';
+    $("quickList").querySelectorAll("[data-quick]").forEach((button) => {
+      let holdTimer = null, held = false;
+      const cancelHold = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
+      button.addEventListener("pointerdown", () => {
+        held = false;
+        cancelHold();
+        holdTimer = setTimeout(() => {
+          held = true;
+          const quick = state.quick.find((x) => x.id === button.dataset.quick);
+          if (quick) removeQuick(quick);
+        }, 700);
+      });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((eventName) => button.addEventListener(eventName, cancelHold));
+      button.addEventListener("contextmenu", (event) => { event.preventDefault(); cancelHold(); held = true; const quick = state.quick.find((x) => x.id === button.dataset.quick); if (quick) removeQuick(quick); });
+      button.onclick = () => { if (!held) quickAdd(button.dataset.quick); held = false; };
+    });
   }
 
   async function loadData() {
@@ -384,6 +399,20 @@
     setDefaultDates();
     message("inStatus", "Incoming driver added.", true);
     clearMessage("inStatus");
+  }
+
+  async function removeQuick(quick) {
+    if (!confirm("Remove the quick button for " + quick.driver + "? This will not delete any incoming load records.")) return;
+    try {
+      const { error } = await db.from("quick_drivers").delete().eq("id", quick.id).eq("site_id", state.site);
+      if (error) throw error;
+      state.quick = state.quick.filter((x) => x.id !== quick.id);
+      renderQuick();
+      message("inStatus", "Quick button removed.", true);
+      clearMessage("inStatus");
+    } catch (error) {
+      message("inStatus", "Could not remove quick button: " + errText(error));
+    }
   }
 
   async function quickAdd(id) {

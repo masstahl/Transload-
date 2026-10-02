@@ -589,6 +589,21 @@
       if (!user) throw new Error("Could not sign in to the shared log.");
       state.user = user;
       state.name = localStorage.getItem("tl_operator_name") || "";
+      let deviceName = localStorage.getItem("tl_device_name");
+
+if (!deviceName) {
+    deviceName = prompt(
+        "Name this device (example: Matt's iPhone)",
+        ""
+    ) || "";
+    
+    if (deviceName.trim()) {
+        localStorage.setItem("tl_device_name", deviceName.trim());
+    }
+}
+
+state.deviceName = deviceName || "Unknown Device";
+
       if (!state.name) {
         state.name = "Operator " + user.id.slice(0, 6);
         localStorage.setItem("tl_operator_name", state.name);
@@ -598,6 +613,8 @@
       $("planDate").value = state.planDate;
       setDefaultDates();
       await loadData();
+      await updateUserActivity();
+
       subscribe();
     } catch (error) {
       showSetupError(error);
@@ -655,7 +672,13 @@
   $("editModal").onclick = (e) => { if (e.target === $("editModal")) closeEdit(); };
   $("updateEntry").onclick = updateEntry;
   start();
-  const refreshSharedData = () => { if (state.user) loadData().catch(showSetupError); };
+  cconst refreshSharedData = async () => {
+    if (!state.user) return;
+
+    await loadData().catch(showSetupError);
+    await updateUserActivity();
+};
+
   window.addEventListener("pageshow", refreshSharedData);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshSharedData(); });
 })();

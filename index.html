@@ -565,6 +565,25 @@
     localStorage.setItem("tl_operator_name", state.name);
     identity();
   }
+  async function updateUserActivity() {
+    if (!state.user) return;
+
+    try {
+        await db
+            .from("user_activity")
+            .upsert({
+                user_id: state.user.id,
+                display_name: state.name,
+                device_name: state.deviceName,
+                site_id: state.site,
+                app_version: APP_VERSION,
+                last_seen: new Date().toISOString()
+            });
+    } catch (error) {
+        console.warn("User activity update failed", error);
+    }
+}
+
   function showSetupError(error) {
     const hint = errText(error);
     message("outStatus", "Unable to load shared data: " + hint);

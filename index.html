@@ -672,7 +672,7 @@ state.deviceName = deviceName || "Unknown Device";
   $("editModal").onclick = (e) => { if (e.target === $("editModal")) closeEdit(); };
   $("updateEntry").onclick = updateEntry;
   start();
-  cconst refreshSharedData = async () => {
+  const refreshSharedData = async () => {
     if (!state.user) return;
 
     await loadData().catch(showSetupError);

@@ -74,6 +74,7 @@
     <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
       <div class="list" id="loadList"></div>
+      <button class="small secondary" id="expandLoadsBtn" style="display:none;margin-top:8px">Show all loads</button>
     </div>
     <div class="panel">
       <div class="title">Loads from each field</div>
@@ -162,7 +163,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-03-v18";
+  const APP_VERSION = "2026-10-03-v19";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -681,7 +682,7 @@ state.deviceName = deviceName || "Unknown Device";
   $("planModal").onclick = (e) => { if (e.target === $("planModal")) closePlan(); };
   $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
   $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
-  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = shiftDate($("planDate").value, 1); state.loadsExpanded = false; renderNeeds(); renderLoads(); };
+  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
   $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
   $("addVariety").onclick = addVariety;
   $("expandLoadsBtn").onclick = () => { state.loadsExpanded = !state.loadsExpanded; renderLoads(); };

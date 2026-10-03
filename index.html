@@ -162,7 +162,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-02-v16";
+  const APP_VERSION = "2026-10-02-v17";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -198,6 +198,18 @@
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
   const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "" };
+  const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
+  function restoreStickyInputs() {
+    $("outField").value = localStorage.getItem(stickyKey("out_field")) || "";
+    $("fieldNumber").value = localStorage.getItem(stickyKey("in_field")) || "";
+    const savedVariety = localStorage.getItem(stickyKey("variety")) || "";
+    if (savedVariety && [...$("outVariety").options].some((o) => o.value === savedVariety)) $("outVariety").value = savedVariety;
+  }
+  function saveStickyInput(name, value) {
+    const key = stickyKey(name);
+    if (value) localStorage.setItem(key, value);
+    else localStorage.removeItem(key);
+  }
 
   function message(id, text, ok = false) {
     const el = $(id);
@@ -385,7 +397,7 @@
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
@@ -632,6 +644,7 @@ state.deviceName = deviceName || "Unknown Device";
       $("planDate").value = state.planDate;
       setDefaultDates();
       await loadData();
+      restoreStickyInputs();
       await updateUserActivity();
 
       subscribe();
@@ -669,6 +682,9 @@ state.deviceName = deviceName || "Unknown Device";
   $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
   $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
   $("addVariety").onclick = addVariety;
+  $("outField").addEventListener("input", () => saveStickyInput("out_field", $("outField").value));
+  $("fieldNumber").addEventListener("input", () => saveStickyInput("in_field", $("fieldNumber").value));
+  $("outVariety").addEventListener("change", () => saveStickyInput("variety", $("outVariety").value));
   document.querySelectorAll("[data-dash]").forEach((b) => { b.onclick = () => insertDash(b.dataset.dash); });
   document.querySelectorAll("[data-range]").forEach((b) => {
     b.onclick = () => {

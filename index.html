@@ -12,8 +12,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Transload Log</title>
   <style>
-    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#1c2721;background:#f3efe6;--sage:#3f5c47;--sage-dark:#2f4636;--sage-soft:#e7eee4;--slate:#66736c;--border:#d5ccbe;--panel:#fffcf7;--soft:#ece7dc}*{box-sizing:border-box}body{margin:0;background:#f3efe6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.workspace{display:block;position:relative}.site-tabs{position:fixed;z-index:51;left:0;top:0;bottom:0;width:min(78vw,290px);padding:calc(18px + env(safe-area-inset-top)) 14px 18px;background:var(--panel);box-shadow:8px 0 28px #0002;display:flex;flex-direction:column;gap:10px;transform:translateX(-105%);transition:transform .22s ease;visibility:hidden}.site-tabs.open{transform:translateX(0);visibility:visible}.site-tab{height:64px;flex:0 0 64px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:900;color:var(--slate)}.site-tab.active{background:var(--sage);color:#fff;border-color:var(--sage)}.site-content{min-width:0}.site-menu-btn{height:34px;min-width:36px;padding:0 8px;border:1px solid var(--border);border-radius:9px;background:var(--soft);color:var(--sage-dark);font-size:19px;font-weight:800;line-height:1}.site-menu-backdrop{position:fixed;inset:0;z-index:50;background:#0006;display:none}.site-menu-backdrop.open{display:block}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.8px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:2px 0 0;font-size:11px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:8px}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-height:44px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:#17211b;font-weight:750}.loc.selected{background:var(--sage-soft);border-color:var(--sage)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1.5px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#647269}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#748078;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#647269;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddeda}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 52px;gap:6px}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:1fr 48px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#647269}.need-number{font-size:20px;font-weight:900}.plan-actions{display:grid;grid-template-columns:44px 1fr 44px auto;gap:6px;margin-top:7px;align-items:center}.secondary{background:var(--soft);color:var(--sage-dark)}.nav-btn{height:44px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900}.location-totals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.location-total{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.field-chart-item{border:1px solid var(--border);border-radius:10px;overflow:hidden}.chart-expand{width:100%;border:0;background:transparent;padding:7px;text-align:left}.expand-mark{font-size:15px;color:var(--sage);padding-left:2px}.field-detail{padding:8px 10px 10px;background:#faf9f5;border-top:1px solid var(--border)}.field-detail-summary{display:flex;flex-direction:column;gap:3px;font-size:12px}.field-detail-summary span{font-size:11px;color:var(--slate)}.field-day{padding:7px 0;border-top:1px solid #e5e0d7}.field-day-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}.field-day:first-of-type{margin-top:5px}.chart-row{display:grid;grid-template-columns:58px 1fr 34px;gap:7px;align-items:center;font-size:12px}.bar-wrap{height:18px;background:#e8eef0;border-radius:8px;overflow:hidden}.bar{height:100%;background:var(--sage-dark);border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#647269;font-size:12px;padding:12px}.hidden{display:none!important}.span2{grid-column:1/-1}@media(max-width:430px){.fields{grid-template-columns:1fr 1fr}.brand{font-size:22px}}
-  </style>
+    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#1c2721;background:#f3efe6;--sage:#3f5c47;--sage-dark:#2f4636;--sage-soft:#e7eee4;--slate:#66736c;--border:#d5ccbe;--panel:#fffdf7;--soft:#ece7dc}. *{box-sizing:border-box}body{margin:0;background:#f3efe6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.workspace{display:block;position:relative}.site-tabs{position:fixed;z-index:51;left:0;top:0;bottom:0;width:min(78vw,290px);padding:calc(18px + env(safe-area-inset-top)) 14px 18px;background:var(--panel);box-shadow:8px 0 28px #0002;display:flex;flex-direction:column;gap:10px;transform:translateX(-105%);transition:transform .22s ease;visibility:hidden}.site-tabs.open{transform:translateX(0);visibility:visible}.site-tab{height:64px;flex:0 0 64px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:900;color:var(--slate)}.site-tab.active{background:var(--sage);color:#fff;border-color:var(--sage)}.site-content{min-width:0}.site-menu-btn{height:34px;min-width:36px;padding:0 8px;border:1px solid var(--border);border-radius:9px;background:var(--soft);color:var(--sage-dark);font-size:19px;font-weight:800;line-height:1}.site-menu-backdrop{position:fixed;inset:0;z-index:50;background:#0006;display:none}.site-menu-backdrop.open{display:block}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.08px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:2px 0 0;margin-top:0;font-size:11px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:#fff; border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:8px}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--sage);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-height:44px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:#171d1b;font-weight:750}.loc.selected{background:var(--sage-soft);border-color:var(--sage)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus,.plan-date:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#647269}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#748078;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#647269;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddedf}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 48px;gap:6px}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:1fr 48px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#647269}.need-number{font-size:20px;font-weight:900}.location-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.location-total{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}.location-total .lbl{font-size:11px;color:#647269}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.field-chart-item{border:1px solid var(--border);border-radius:10px;overflow:hidden}.chart-row{width:100%;border:0;background:transparent;padding:7px;text-align:left}.chart-expand{display:flex;align-items:center;justify-content:space-between}.bar-wrap{height:18px;border-radius:8px;background:#e8eef0;overflow:hidden}.bar{height:100%;background:var(--sage-dark);border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#647269;font-size:12px;padding:12px 6px}.field-detail{padding:8px 10px 10px;background:#faf9f5;border-top:1px solid var(--border)}.field-detail-summary{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--slate)}.field-day{padding:7px 0;border-top:1px solid #e5e0d7}.field-day:first-child{border-top:0}.field-day-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}.span2{grid-column:1 / -1}.hidden{display:none !important}@media (max-width:430px){.fields,.summary,.location-totals{grid-template-columns:1fr}.quick-list{grid-template-columns:1fr}.rowtop{flex-direction:column}.need-row{grid-template-columns:1fr auto;}.need-row .need-detail{grid-column:1 / -1}} </style>
 </head>
 <body>
 <main class="app">
@@ -24,112 +23,118 @@
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
-  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button></nav><div class="site-content">
-  <nav class="tabs">
-    <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
-    <button class="tab" data-tab="incoming">Incoming Drivers</button>
-  </nav>
-  <section id="outgoingView">
-    <div class="panel">
-      <div class="title">1. Select location</div>
-      <div class="note">Choose where this outgoing load is headed.</div>
-      <div class="locations" id="locations"></div>
-    </div>
-    <div class="panel">
-      <div class="title">2. Outgoing load</div>
-      <div class="fields">
-        <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
-        <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
-        <div class="field">
-          <label for="outField">Field number</label>
-          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField">−</button></div>
-          <div class="hint">Example 6-4. Tap − to insert the dash.</div>
+  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div>
+  <div class="workspace">
+    <nav class="site-tabs" id="siteTabs" aria-label="Transload site">
+      <button class="site-tab active" data-site="1">1</button>
+      <button class="site-tab" data-site="2">2</button>
+    </nav>
+    <nav class="tabs">
+      <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
+      <button class="tab" data-tab="incoming">Incoming Drivers</button>
+    </nav>
+    <section id="outgoingView">
+      <div class="panel">
+        <div class="title">1. Select location</div>
+        <div class="note">Choose where this outgoing load is headed.</div>
+        <div class="locations" id="locations"></div>
+      </div>
+      <div class="panel">
+        <div class="title">2. Outgoing load</div>
+        <div class="fields">
+          <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
+          <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
+          <div class="field">
+            <label for="outField">Field number</label>
+            <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField">−</button></div>
+            <div class="hint">Example 6-4. Tap − to insert the dash.</div>
+          </div>
+          <div class="field">
+            <label for="outVariety">Potato variety</label>
+            <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety">＋</button></div>
+          </div>
+          <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
         </div>
-        <div class="field">
-          <label for="outVariety">Potato variety</label>
-          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety">＋</button></div>
+        <button class="save" id="saveLoad" disabled>Add load</button>
+        <div class="status" id="outStatus" aria-live="polite"></div>
+      </div>
+      <div class="panel">
+        <div class="needs-head"><div class="title" id="needsTitle">Loads remaining</div><div class="total-needs" id="totalNeeds" aria-label="Total loads remaining"><b>0</b><span>total left</span></div></div>
+        <div class="note">Plant needs minus outgoing loads recorded for this day. Change the date to look back at previous days.</div>
+        <div class="plan-actions">
+          <button class="nav-btn" id="prevDay" aria-label="Previous day">‹</button>
+          <input id="planDate" type="date" class="plan-date">
+          <button class="nav-btn" id="nextDay" aria-label="Next day">›</button>
+          <button class="small secondary" id="jumpToday" style="margin:0;height:44px">Today</button>
         </div>
-        <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
+        <div id="locationNeeds" class="needs-list"></div>
+        <button class="small secondary" id="setPlan">Set plant needs for this day</button>
+        <div class="status" id="planStatus" aria-live="polite"></div>
       </div>
-      <button class="save" id="saveLoad" disabled>Add load</button>
-      <div class="status" id="outStatus" aria-live="polite"></div>
-    </div>
-    <div class="panel">
-      <div class="needs-head"><div class="title" id="needsTitle">Loads remaining</div><div class="total-needs" id="totalNeeds" aria-label="Total loads remaining"><b>0</b><span>total left</span></div></div>
-      <div class="note">Plant needs minus outgoing loads recorded for this day. Change the date to look back at previous days.</div>
-      <div class="plan-actions">
-        <button class="nav-btn" id="prevDay" aria-label="Previous day">‹</button>
-        <input id="planDate" type="date" class="plan-date">
-        <button class="nav-btn" id="nextDay" aria-label="Next day">›</button>
-        <button class="small secondary" id="jumpToday" style="margin:0;height:44px">Today</button>
+      <div class="panel">
+        <div class="title" id="totalsTitle">Loads by location</div>
+        <div id="loadsByLocation" class="location-totals"></div>
       </div>
-      <div id="locationNeeds" class="needs-list"></div>
-      <button class="small secondary" id="setPlan">Set plant needs for this day</button>
-      <div class="status" id="planStatus" aria-live="polite"></div>
-    </div>
-    <div class="panel">
-      <div class="title" id="totalsTitle">Loads by location</div>
-      <div id="loadsByLocation" class="location-totals"></div>
-    </div>
-    <div class="panel">
-      <div class="title" id="listTitle">Loads for this day</div>
-      <div class="list" id="loadList"></div>
-    </div>
-    <div class="panel">
-      <div class="title">Loads from each field</div>
-      <div class="chart-controls">
-        <button class="range-btn" data-range="7">7 days</button>
-        <button class="range-btn active" data-range="30">30 days</button>
-        <button class="range-btn" data-range="60">60 days</button>
+      <div class="panel">
+        <div class="title" id="listTitle">Loads for this day</div>
+        <div class="list" id="loadList"></div>
+        <button class="small secondary" id="expandLoadsBtn" style="display:none;margin-top:10px">Show all loads</button>
       </div>
-      <div id="fieldChart" class="field-chart"></div>
-    </div>
-  </section>
-  <section id="incomingView" class="hidden">
-    <div class="panel">
-      <div class="title">Incoming drivers</div>
-      <div class="note">Each entry is visible to everyone using this log.</div>
-      <div class="fields">
-        <div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div>
-        <div class="field">
-          <label for="fieldNumber">Field number</label>
-          <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div>
-          <div class="hint">Example 6-4. Tap − to insert the dash.</div>
+      <div class="panel">
+        <div class="title">Loads from each field</div>
+        <div class="chart-controls">
+          <button class="range-btn" data-range="7">7 days</button>
+          <button class="range-btn active" data-range="30">30 days</button>
+          <button class="range-btn" data-range="60">60 days</button>
         </div>
-        <div class="field span2"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div>
+        <div id="fieldChart" class="field-chart"></div>
       </div>
-      <button class="small" id="addIncoming">Add driver</button>
-      <div class="status" id="inStatus" aria-live="polite"></div>
-      <div class="quick-section">
-        <div class="quick-title">Shared quick-driver buttons</div>
-        <div class="quick-list" id="quickList"></div>
+    </section>
+    <section id="incomingView" class="hidden">
+      <div class="panel">
+        <div class="title">Incoming drivers</div>
+        <div class="note">Each entry is visible to everyone using this log.</div>
+        <div class="fields">
+          <div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div>
+          <div class="field">
+            <label for="fieldNumber">Field number</label>
+            <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div>
+            <div class="hint">Example 6-4. Tap − to insert the dash.</div>
+          </div>
+          <div class="field span2"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div>
+        </div>
+        <button class="small" id="addIncoming">Add driver</button>
+        <div class="status" id="inStatus" aria-live="polite"></div>
+        <div class="quick-section">
+          <div class="quick-title">Shared quick-driver buttons</div>
+          <div class="quick-list" id="quickList"></div>
+        </div>
       </div>
-    </div>
-    <div class="panel">
-      <div class="title">Incoming activity today</div>
-      <div class="summary">
-        <div class="stat"><div class="num" id="inCount">0</div><div class="lbl">Entries</div></div>
-        <div class="stat"><div class="num" id="driverCount">0</div><div class="lbl">Drivers</div></div>
-        <div class="stat"><div class="num" id="inFieldCount">0</div><div class="lbl">Fields</div></div>
+      <div class="panel">
+        <div class="title">Incoming activity today</div>
+        <div class="summary">
+          <div class="stat"><div class="num" id="inCount">0</div><div class="lbl">Entries</div></div>
+          <div class="stat"><div class="num" id="driverCount">0</div><div class="lbl">Drivers</div></div>
+          <div class="stat"><div class="num" id="inFieldCount">0</div><div class="lbl">Fields</div></div>
+        </div>
       </div>
-    </div>
-    <div class="panel">
-      <div class="title">Incoming driver log</div>
-      <div class="list" id="incomingList"></div>
-    </div>
-    <div class="panel">
-      <div class="title">Loads from each field</div>
-      <div class="note">Running total so you can watch a field over the 2–4 days it takes to finish.</div>
-      <div class="chart-controls" id="inRangeBtns">
-        <button class="range-btn" data-in-range="3">3 days</button>
-        <button class="range-btn active" data-in-range="7">7 days</button>
-        <button class="range-btn" data-in-range="14">14 days</button>
-        <button class="range-btn" data-in-range="30">30 days</button>
+      <div class="panel">
+        <div class="title">Incoming driver log</div>
+        <div class="list" id="incomingList"></div>
       </div>
-      <div id="inFieldChart" class="field-chart"></div>
-    </div>
-  </section>
-  </div></div>
+      <div class="panel">
+        <div class="title">Loads from each field</div>
+        <div class="note">Running total so you can watch a field over the 2–4 days it takes to finish.</div>
+        <div class="chart-controls" id="inRangeBtns">
+          <button class="range-btn" data-in-range="3">3 days</button>
+          <button class="range-btn active" data-in-range="7">7 days</button>
+          <button class="range-btn" data-in-range="14">14 days</button>
+          <button class="range-btn" data-in-range="30">30 days</button>
+        </div>
+        <div id="inFieldChart" class="field-chart"></div>
+      </div>
+    </section>
+  </div>
 </main>
 <div class="modal" id="planModal" role="dialog" aria-modal="true">
   <div class="modal-card">
@@ -189,15 +194,15 @@
     const [yy, mm, dd] = date.split("-").map(Number);
     return localDateString(new Date(yy, mm - 1, dd + days));
   };
-  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => {
-    if (ch === "&") return "&" + "amp;";
-    if (ch === "<") return "&" + "lt;";
-    if (ch === ">") return "&" + "gt;";
-    if (ch === '"') return "&" + "quot;";
+  const esc = (value) => String(value ?? "").replace(/[&<>\"']/g, (ch) => {
+    if (ch === "&") return "&amp;";
+    if (ch === "<") return "&lt;";
+    if (ch === ">") return "&gt;";
+    if (ch === '"') return "&quot;";
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "" };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false };
   const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
   function restoreStickyInputs() {
     $("outField").value = localStorage.getItem(stickyKey("out_field")) || "";
@@ -210,7 +215,6 @@
     if (value) localStorage.setItem(key, value);
     else localStorage.removeItem(key);
   }
-
   function message(id, text, ok = false) {
     const el = $(id);
     el.textContent = text;
@@ -225,11 +229,7 @@
     if (!$("planDate").value) $("planDate").value = localDateString();
   }
   function errText(error) { return error?.message || error?.error_description || (typeof error === "string" ? error : "Unknown error"); }
-
   async function bustOldCache() {
-    // Home Screen apps can retain an old document even after the website updates.
-    // On launch, remove any legacy worker/cache and navigate once to a versioned URL
-    // so iOS requests the current document instead of reusing the old launch URL.
     const refreshParam = "tl_refresh";
     if (new URL(location.href).searchParams.get(refreshParam) === APP_VERSION) return;
     try {
@@ -249,7 +249,6 @@
     location.replace(url.toString());
     await new Promise(() => {});
   }
-
   function renderVarieties() {
     const outValue = $("outVariety").value;
     const editValue = $("editVariety").value;
@@ -271,10 +270,9 @@
     }).sort((a, b) => b.remaining - a.remaining || b.expected - a.expected);
     $("needsTitle").textContent = "Loads remaining · " + friendlyDay(date);
     const totalExpected = rows.reduce((sum, r) => sum + r.expected, 0);
-    const totalLoaded = rows.reduce((sum, r) => sum + r.loaded, 0);
     const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
     $("totalNeeds").innerHTML = "<b>" + totalRemaining + "</b><span>of " + totalExpected + " left</span>";
-    $("locationNeeds").innerHTML = rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""}"><div><div class="need-name">${r.l}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("");
+    $("locationNeeds").innerHTML = rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""}"><div><div class="need-name">${r.l}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("");
   }
   function renderLocationTotals() {
     const date = $("planDate").value || state.planDate;
@@ -292,7 +290,6 @@
     $(target).innerHTML = entries.map(([field, n]) => {
       const expanded = state.expandedField === field && target === "fieldChart";
       const fieldRows = source.filter((x) => String(x.field) === field && x.occurred_at);
-      const start = fieldRows.length ? fieldRows.reduce((earliest, x) => x.occurred_at < earliest ? x.occurred_at : earliest, fieldRows[0].occurred_at) : null;
       const byDay = {};
       fieldRows.forEach((x) => {
         const day = localDateString(x.occurred_at);
@@ -303,9 +300,9 @@
         const trucks = [...new Set(rows.map((x) => x.truck).filter(Boolean))];
         const trailers = [...new Set(rows.map((x) => x.trailer).filter(Boolean))];
         const varieties = [...new Set(rows.map((x) => x.variety).filter(Boolean))];
-        return `<div class="field-day"><div class="field-day-head"><b>${esc(friendlyDay(day))}</b><b>${rows.length} load${rows.length === 1 ? "" : "s"}</b></div><div class="meta">Truck numbers: ${trucks.length ? trucks.map(esc).join(", ") : "Not recorded"}${trailers.length ? " · Trailers: " + trailers.map(esc).join(", ") : ""}${varieties.length ? " · Variety: " + varieties.map(esc).join(", ") : ""}</div></div>`;
+        return `<div class="field-day"><div class="field-day-head"><b>${esc(friendlyDay(day))}</b><b>${rows.length} load${rows.length === 1 ? "" : "s"}</b></div><div class="meta">Truck numbers: ${trucks.length ? trucks.map(esc).join(", ") : "Not recorded"}${trailers.length ? ` · Trailers: ${trailers.map(esc).join(", ")}` : ""}${varieties.length ? ` · Variety: ${varieties.map(esc).join(", ")}` : ""}</div></div>`;
       }).join("");
-      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>Field ${esc(field)}</b><div class="bar-wrap"><div class="bar" style="width:${Math.round(n / max * 100)}%"></div></div><b>${n} <span class="expand-mark">${expanded ? "−" : "+"}</span></b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>Field ${esc(field)} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
+      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>Field ${esc(field)}</b><div class="bar-wrap"><div class="bar" style="width:${Math.max((n / max) * 100, 6)}%"></div></div><span>${n}</span></button>${expanded ? `<div class="field-detail">${detail}</div>` : ""}</div>`;
     }).join("");
     $(target).querySelectorAll("[data-field-expand]").forEach((button) => {
       button.onclick = () => {
@@ -325,9 +322,18 @@
     $("listTitle").textContent = "Loads for " + friendlyDay(date);
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
-    $("loadList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    const displayRecords = state.loadsExpanded ? records : records.slice(0, 3);
+    const hasMore = records.length > 3;
+    $("loadList").innerHTML = displayRecords.length ? displayRecords.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field)}</b> · <b>${esc(x.variety || "Unknown")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
+    const expandBtn = $("expandLoadsBtn");
+    if (hasMore) {
+      expandBtn.style.display = "block";
+      expandBtn.textContent = state.loadsExpanded ? "Show fewer" : "Show all loads";
+    } else {
+      expandBtn.style.display = "none";
+    }
   }
   function renderIncoming() {
     const today = localDateString();
@@ -337,7 +343,7 @@
     $("driverCount").textContent = new Set(todayRows.map((x) => x.driver.toLowerCase())).size;
     $("inFieldCount").textContent = new Set(todayRows.map((x) => x.field)).size;
     renderChart("inFieldChart", state.sharedFieldIncoming, state.inRange, "No incoming field loads in this period.");
-    $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Field <b>${esc(x.field || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
+    $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Field <b>${esc(x.field)}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
     $("incomingList").querySelectorAll("[data-edit-in]").forEach((b) => { b.onclick = () => openEdit("incoming", b.dataset.editIn); });
     $("incomingList").querySelectorAll("[data-delete-in]").forEach((b) => { b.onclick = () => remove("incoming_entries", b.dataset.deleteIn, "inStatus"); });
   }
@@ -368,7 +374,6 @@
       button.onclick = () => { if (!held) quickAdd(button.dataset.quick); held = false; };
     });
   }
-
   async function loadData() {
     const [loads, incoming, quick, varieties, plans] = await Promise.all([
       db.from("outgoing_entries").select("*").eq("site_id", state.site).order("occurred_at", { ascending: false }),
@@ -377,7 +382,10 @@
       db.from("potato_varieties").select("*").eq("site_id", state.site).eq("active", true).order("name"),
       db.from("arrival_plans").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }),
     ]);
-    const [allLoads, allIncoming] = await Promise.all([db.from("outgoing_entries").select("field,occurred_at,truck,trailer,location,variety"), db.from("incoming_entries").select("field,occurred_at")]);
+    const [allLoads, allIncoming] = await Promise.all([
+      db.from("outgoing_entries").select("field,occurred_at,truck,trailer,location,variety"),
+      db.from("incoming_entries").select("field,occurred_at")
+    ]);
     const error = loads.error || incoming.error || quick.error || varieties.error || plans.error || allLoads.error || allIncoming.error;
     if (error) throw error;
     state.loads = loads.data || [];
@@ -393,17 +401,15 @@
     renderVarieties();
     renderNeeds();
   }
-
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData(); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
     $("saveLoad").disabled = false;
   }
-
   async function addLoad() {
     try {
       if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
@@ -419,11 +425,8 @@
       renderNeeds();
       await loadData();
       $("outTruck").value = ""; $("outTrailer").value = "";
-      // Keep field and variety selected so consecutive loads from the same field and variety are faster.
-      // They remain editable at any time before the next load is added.
       state.selected = "";
       renderLocations("locations", "", selectLocation);
-      renderSiteTabs();
       setDefaultDates();
       message("outStatus", "Load added.", true);
       clearMessage("outStatus");
@@ -431,14 +434,13 @@
       message("outStatus", "Could not add load: " + errText(error));
     }
   }
-
   async function addIncoming(values) {
     const field = (values?.field || $("fieldNumber").value).trim();
     const driver = (values?.driver || $("driver").value).trim();
     const occurredAt = values?.occurred_at || new Date($("inDate").value).toISOString();
     if (!field || !driver) return message("inStatus", "Enter driver name and field number.");
     const truck = driverKey(driver);
-    const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
+    const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
     const { error } = await db.from("incoming_entries").insert(entry);
     if (error) return message("inStatus", errText(error));
     const { error: quickError } = await db.from("quick_drivers").upsert({ site_id: state.site, truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "site_id,truck" });
@@ -449,7 +451,6 @@
     message("inStatus", "Incoming driver added.", true);
     clearMessage("inStatus");
   }
-
   async function removeQuick(quick) {
     if (!confirm("Remove the quick button for " + quick.driver + "? This will not delete any incoming load records.")) return;
     try {
@@ -463,7 +464,6 @@
       message("inStatus", "Could not remove quick button: " + errText(error));
     }
   }
-
   async function quickAdd(id) {
     const quick = state.quick.find((x) => x.id === id);
     if (!quick) return;
@@ -471,7 +471,6 @@
     if ($("fieldNumber").value.trim()) await addIncoming({ field: $("fieldNumber").value.trim(), driver: quick.driver, occurred_at: new Date().toISOString() });
     else message("inStatus", "Enter the field number, then tap the driver again.");
   }
-
   async function remove(table, id, status) {
     if (!confirm("Delete this entry for everyone?")) return;
     const direct = await db.from(table).delete().eq("id", id).eq("site_id", state.site);
@@ -488,7 +487,6 @@
     message(status, "Entry deleted.", true);
     clearMessage(status);
   }
-
   function openEdit(kind, id) {
     const record = (kind === "load" ? state.loads : state.incoming).find((x) => x.id === id);
     if (!record) return;
@@ -513,7 +511,6 @@
     $("editModal").classList.add("open");
   }
   function closeEdit() { $("editModal").classList.remove("open"); state.editing = null; }
-
   async function updateEntry() {
     if (!state.editing) return;
     const second = $("editSecond").value.trim(), occurredAt = $("editDate").value, field = $("editField").value.trim();
@@ -529,7 +526,6 @@
     closeEdit();
     await loadData();
   }
-
   function openPlan() {
     const p = planFor($("planDate").value);
     $("planPasco").value = p.pasco || 0;
@@ -579,23 +575,12 @@
   }
   async function updateUserActivity() {
     if (!state.user) return;
-
     try {
-        await db
-            .from("user_activity")
-            .upsert({
-                user_id: state.user.id,
-                display_name: state.name,
-                device_name: state.deviceName,
-                site_id: state.site,
-                app_version: APP_VERSION,
-                last_seen: new Date().toISOString()
-            });
+      await db.from("user_activity").upsert({ user_id: state.user.id, display_name: state.name, device_name: state.deviceName, site_id: state.site, app_version: APP_VERSION, last_seen: new Date().toISOString() });
     } catch (error) {
-        console.warn("User activity update failed", error);
+      console.warn("User activity update failed", error);
     }
-}
-
+  }
   function showSetupError(error) {
     const hint = errText(error);
     message("outStatus", "Unable to load shared data: " + hint);
@@ -621,20 +606,11 @@
       state.user = user;
       state.name = localStorage.getItem("tl_operator_name") || "";
       let deviceName = localStorage.getItem("tl_device_name");
-
-if (!deviceName) {
-    deviceName = prompt(
-        "Name this device (example: Matt's iPhone)",
-        ""
-    ) || "";
-    
-    if (deviceName.trim()) {
-        localStorage.setItem("tl_device_name", deviceName.trim());
-    }
-}
-
-state.deviceName = deviceName || "Unknown Device";
-
+      if (!deviceName) {
+        deviceName = prompt("Name this device (example: Matt's iPhone)", "") || "";
+        if (deviceName.trim()) localStorage.setItem("tl_device_name", deviceName.trim());
+      }
+      state.deviceName = deviceName || "Unknown Device";
       if (!state.name) {
         state.name = "Operator " + user.id.slice(0, 6);
         localStorage.setItem("tl_operator_name", state.name);
@@ -646,7 +622,6 @@ state.deviceName = deviceName || "Unknown Device";
       await loadData();
       restoreStickyInputs();
       await updateUserActivity();
-
       subscribe();
     } catch (error) {
       showSetupError(error);
@@ -654,7 +629,6 @@ state.deviceName = deviceName || "Unknown Device";
       $("saveLoad").disabled = true;
     }
   }
-
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.onclick = () => {
       const incoming = button.dataset.tab === "incoming";
@@ -666,9 +640,6 @@ state.deviceName = deviceName || "Unknown Device";
   document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });
   $("siteMenuButton").onclick = openSiteMenu;
   $("siteMenuBackdrop").onclick = closeSiteMenu;
-  let edgeStartX = null, edgeStartY = null;
-  document.addEventListener("touchstart", (e) => { if (e.touches.length !== 1) return; edgeStartX = e.touches[0].clientX; edgeStartY = e.touches[0].clientY; }, { passive: true });
-  document.addEventListener("touchend", (e) => { if (edgeStartX === null || !e.changedTouches.length) return; const dx = e.changedTouches[0].clientX - edgeStartX, dy = e.changedTouches[0].clientY - edgeStartY; if (Math.abs(dy) < 65 && dx > 65 && edgeStartX < 24) openSiteMenu(); else if (Math.abs(dy) < 65 && dx < -65 && $("siteTabs").classList.contains("open")) closeSiteMenu(); edgeStartX = edgeStartY = null; }, { passive: true });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSiteMenu(); });
   renderSiteTabs();
   $("saveLoad").onclick = addLoad;
@@ -677,10 +648,10 @@ state.deviceName = deviceName || "Unknown Device";
   $("cancelPlan").onclick = closePlan;
   $("savePlan").onclick = savePlan;
   $("planModal").onclick = (e) => { if (e.target === $("planModal")) closePlan(); };
-  $("planDate").onchange = () => { state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
-  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
-  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
-  $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; renderNeeds(); renderLoads(); };
+  $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
+  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
+  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
+  $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
   $("addVariety").onclick = addVariety;
   $("outField").addEventListener("input", () => saveStickyInput("out_field", $("outField").value));
   $("fieldNumber").addEventListener("input", () => saveStickyInput("in_field", $("fieldNumber").value));
@@ -706,14 +677,16 @@ state.deviceName = deviceName || "Unknown Device";
   $("cancelEdit").onclick = closeEdit;
   $("editModal").onclick = (e) => { if (e.target === $("editModal")) closeEdit(); };
   $("updateEntry").onclick = updateEntry;
+  $("expandLoadsBtn").onclick = () => {
+    state.loadsExpanded = !state.loadsExpanded;
+    renderLoads();
+  };
   start();
   const refreshSharedData = async () => {
     if (!state.user) return;
-
     await loadData().catch(showSetupError);
     await updateUserActivity();
-};
-
+  };
   window.addEventListener("pageshow", refreshSharedData);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshSharedData(); });
 })();

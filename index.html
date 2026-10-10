@@ -46,6 +46,42 @@ button:active{transform:scale(.985)}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
 @media(max-width:600px){.app{padding-left:10px;padding-right:10px}.top{align-items:flex-start}.panel{border-radius:17px;margin-bottom:11px}}
 
+
+/* Compact visual polish only */
+.panel{padding:12px;margin-bottom:9px;border-radius:16px;box-shadow:0 3px 14px #26332607}
+.title{font-size:14px;margin-bottom:5px}
+.list,.needs-list,.field-chart{gap:6px}
+.row{padding:6px 8px;border-radius:10px}
+.rowtop{gap:7px;font-size:13px}
+.meta{margin-top:2px;font-size:11px;line-height:1.3}
+.entered{margin-top:3px}
+.row-actions{margin-top:5px;gap:5px}
+.edit-btn,.delete-btn{height:32px;padding:0 9px;border-radius:8px;font-size:12px}
+.need-row{padding:6px 8px;gap:7px;border-radius:10px}
+.need-number{font-size:18px}
+.location-totals{gap:5px}
+.location-total{padding:6px 5px;border-radius:10px}
+.location-total b{font-size:18px}
+.locations{gap:4px}
+.loc{min-height:42px;border-radius:9px}
+.fields{gap:6px}
+.field input,.field select,.plan-date{height:40px;border-radius:10px}
+.save,.small{height:40px;border-radius:10px;font-size:14px;margin-top:6px}
+.tab{min-height:36px}
+.tabs{margin-bottom:7px}
+.summary{gap:5px}
+.stat{padding:6px;border-radius:9px}
+.num{font-size:20px}
+.quick-section{margin-top:10px;padding-top:9px}
+.quick-list{gap:6px}
+.quick{min-height:42px;padding:6px 8px;border-radius:10px;font-size:13px}
+.plan-actions{gap:5px;margin-top:5px}
+.nav-btn{height:40px;border-radius:10px}
+.range-btn{height:29px;padding:0 8px}
+.field-chart-item{border-radius:9px}
+.chart-expand{padding:6px}
+@media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-top))}}
+
 </style>
 </head>
 <body>
@@ -64,19 +100,17 @@ button:active{transform:scale(.985)}
   </nav>
   <section id="outgoingView">
     <div class="panel">
-      <div class="title">1. Select location</div>
-      <div class="note">Choose where this outgoing load is headed.</div>
+      <div class="title">Destination</div>
       <div class="locations" id="locations"></div>
     </div>
     <div class="panel">
-      <div class="title">2. Outgoing load</div>
+      <div class="title">Load details</div>
       <div class="fields">
         <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
         <div class="field">
           <label for="outField">Field number</label>
           <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField">−</button></div>
-          <div class="hint">Example 6-4. Tap − to insert the dash.</div>
         </div>
         <div class="field">
           <label for="outVariety">Potato variety</label>
@@ -89,7 +123,6 @@ button:active{transform:scale(.985)}
     </div>
     <div class="panel">
       <div class="needs-head"><div class="title" id="needsTitle">Loads remaining</div><div class="total-needs" id="totalNeeds" aria-label="Total loads remaining"><b>0</b><span>total left</span></div></div>
-      <div class="note">Plant needs minus outgoing loads recorded for this day. Change the date to look back at previous days.</div>
       <div class="plan-actions">
         <button class="nav-btn" id="prevDay" aria-label="Previous day">‹</button>
         <input id="planDate" type="date" class="plan-date">
@@ -122,20 +155,18 @@ button:active{transform:scale(.985)}
   <section id="incomingView" class="hidden">
     <div class="panel">
       <div class="title">Incoming drivers</div>
-      <div class="note">Each entry is visible to everyone using this log.</div>
       <div class="fields">
         <div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div>
         <div class="field">
           <label for="fieldNumber">Field number</label>
           <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div>
-          <div class="hint">Example 6-4. Tap − to insert the dash.</div>
         </div>
         <div class="field span2"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div>
       </div>
       <button class="small" id="addIncoming">Add driver</button>
       <div class="status" id="inStatus" aria-live="polite"></div>
       <div class="quick-section">
-        <div class="quick-title">Shared quick-driver buttons</div>
+        <div class="quick-title">Quick drivers</div>
         <div class="quick-list" id="quickList"></div>
       </div>
     </div>
@@ -153,7 +184,6 @@ button:active{transform:scale(.985)}
     </div>
     <div class="panel">
       <div class="title">Loads from each field</div>
-      <div class="note">Running total so you can watch a field over the 2–4 days it takes to finish.</div>
       <div class="chart-controls" id="inRangeBtns">
         <button class="range-btn" data-in-range="3">3 days</button>
         <button class="range-btn active" data-in-range="7">7 days</button>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111713">
+<title>Transload — Every load, in view.</title>
+<style>
+:root{color-scheme:dark;--bg:#101512;--ink:#f4f4ee;--muted:#a7b0a7;--sage:#b8d0b5;--line:#ffffff20;--panel:#1a211c;--pad:clamp(22px,5vw,76px);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}a{color:inherit}.nav{position:fixed;inset:0 0 auto;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:calc(18px + env(safe-area-inset-top)) var(--pad) 18px;border-bottom:1px solid #ffffff12;background:#101512c9;backdrop-filter:blur(18px)}.wordmark{font-size:15px;font-weight:750;letter-spacing:-.3px}.wordmark span{color:var(--sage)}.nav a,.cta{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 17px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:700}.nav a{border:1px solid #ffffff35}.intro{min-height:100svh;padding:150px var(--pad) 70px;display:flex;flex-direction:column;justify-content:center;max-width:1450px;margin:auto}.eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);font-weight:750}.intro h1{font-size:clamp(56px,10.5vw,150px);line-height:.91;letter-spacing:-.085em;max-width:1000px;margin:25px 0 27px;font-weight:650}.intro h1 em{font-style:normal;color:var(--sage)}.intro p{max-width:560px;font-size:clamp(16px,2vw,21px);line-height:1.55;color:var(--muted);margin:0 0 30px}.cta{background:var(--sage);color:#172019;min-height:49px;padding:0 22px}.hint{margin-top:50px;color:#7d897e;font-size:11px;letter-spacing:.12em;text-transform:uppercase}.stage{position:relative;min-height:130svh;padding:0 var(--pad)}.card{position:sticky;top:0;height:100svh;min-height:620px;display:grid;align-content:center;grid-template-columns:minmax(0,1fr) minmax(270px,.9fr);gap:clamp(28px,7vw,110px);max-width:1450px;margin:auto;padding:110px 0 70px;transform-origin:center center}.copy{align-self:center}.number{color:var(--sage);font-size:12px;letter-spacing:.18em;font-weight:750}.card h2{font-size:clamp(42px,6.7vw,90px);line-height:.98;letter-spacing:-.065em;font-weight:620;margin:22px 0}.card p{max-width:470px;color:var(--muted);font-size:clamp(15px,1.6vw,19px);line-height:1.65}.visual{align-self:center;min-height:min(56vw,550px);aspect-ratio: .92;max-height:570px;border:1px solid #ffffff22;border-radius:28px;background:linear-gradient(145deg,#28362b,#171e19 70%);padding:clamp(14px,2.5vw,30px);display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 35px 100px #0005;overflow:hidden;position:relative}.visual:before{content:"";position:absolute;width:340px;height:340px;border-radius:50%;background:#b8d0b510;filter:blur(18px);right:-120px;top:-130px}.mock-top{display:flex;justify-content:space-between;align-items:center;color:#c9d6c8;font-size:11px;letter-spacing:.08em;text-transform:uppercase;position:relative}.mock-title{font-size:clamp(24px,3vw,40px);letter-spacing:-.055em;font-weight:650;margin:22px 0 5px;position:relative}.mock-sub{font-size:12px;color:#a9b4aa;position:relative}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:28px;position:relative}.tile{border:1px solid #ffffff18;border-radius:15px;background:#0e140f80;padding:15px;min-height:100px}.tile small{display:block;color:#a5b0a5;font-size:10px;margin-bottom:12px}.tile strong{font-size:clamp(23px,3vw,38px);letter-spacing:-.06em}.tile em{font-size:10px;color:var(--sage);font-style:normal}.loadlist{display:grid;gap:9px;margin-top:20px;position:relative}.load{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;border:1px solid #ffffff1a;border-radius:12px;background:#0e140f80;font-size:12px}.pill{border-radius:99px;padding:5px 8px;background:#b8d0b51a;color:var(--sage);font-size:10px}.barline{height:7px;border-radius:8px;background:#ffffff13;margin-top:11px;overflow:hidden}.barline i{display:block;height:100%;border-radius:8px;background:var(--sage)}.field-bars{display:grid;gap:17px;margin-top:35px;position:relative}.field-row{display:grid;grid-template-columns:50px 1fr 30px;gap:10px;align-items:center;font-size:11px;color:#cbd4ca}.field-row .barline{margin:0}.field-row strong{text-align:right}.bottom{padding:100px var(--pad) 90px;border-top:1px solid var(--line);max-width:1450px;margin:auto;display:flex;justify-content:space-between;gap:30px;align-items:end}.bottom h2{font-size:clamp(40px,6vw,78px);letter-spacing:-.07em;line-height:.95;margin:20px 0;max-width:720px}.bottom p{color:var(--muted);max-width:440px;line-height:1.6}.foot{padding:20px var(--pad) calc(24px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--line);font-size:11px;color:#879187}.foot a{color:#c9d6c8}.stage:nth-of-type(even) .visual{background:linear-gradient(145deg,#26323b,#171d21 70%)}.stage:nth-of-type(odd) .visual{background:linear-gradient(145deg,#31332a,#1c1e18 70%)}
+@supports (animation-timeline:view()){
+ .card{animation:card-recede linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+ .stage:not(:first-of-type) .card{animation-name:card-arrive,card-recede;animation-duration:1s,1s;animation-timing-function:linear,linear;animation-fill-mode:both,both;animation-timeline:view(),view();animation-range:entry 0% entry 100%,exit 0% exit 100%}
+ @keyframes card-recede{to{opacity:0;transform:translateY(-40px) scale(.92);filter:blur(8px)}}
+ @keyframes card-arrive{from{opacity:0;transform:translateY(40px) scale(.98);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+}
+@media(max-width:760px){.stage{min-height:120svh;padding:0 20px}.card{min-height:100svh;grid-template-columns:1fr;grid-template-rows:auto auto;gap:18px;padding:100px 0 42px;align-content:center}.card h2{font-size:clamp(39px,10vw,62px);margin:14px 0}.card p{font-size:14px;margin:0}.visual{min-height:290px;max-height:36svh;aspect-ratio:auto;border-radius:21px;padding:16px}.mock-title{font-size:27px;margin:13px 0 3px}.tiles{gap:7px;margin-top:14px}.tile{min-height:65px;padding:10px}.tile small{margin-bottom:7px}.tile strong{font-size:26px}.loadlist{gap:6px;margin-top:12px}.load{padding:9px}.field-bars{gap:12px;margin-top:20px}.intro{padding-top:135px}.intro h1{font-size:clamp(55px,15vw,100px)}.bottom{padding-top:70px;display:block}.bottom .cta{margin-top:15px}.foot{flex-direction:column}}@media(max-height:700px) and (min-width:761px){.card{min-height:560px;padding-top:85px}.visual{min-height:400px;max-height:430px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{animation:none!important;filter:none!important;transform:none!important;opacity:1!important}}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wordmark">TRANSLOAD <span>LOG</span></div><a href="https://masstahl.github.io/Transload-/" aria-label="Open the live Transload Log app">Open the app ↗</a></header>
+<main>
+<section class="intro">
+<div class="eyebrow">A clearer view of the day</div>
+<h1>Every load.<br><em>In view.</em></h1>
+<p>Transload Log brings outgoing loads, plant needs, incoming drivers, and field activity into one calm, shared workspace—built for the pace of the yard.</p>
+<a class="cta" href="https://masstahl.github.io/Transload-/" style="align-self:flex-start">Open Transload Log ↗</a>
+<div class="hint">Scroll to explore &nbsp; ↓</div>
+</section>
+<section class="stage"><article class="card">
+<div class="copy"><div class="number">01 / DAILY PICTURE</div><h2>Know what’s<br>left to move.</h2><p>Plant needs and completed outgoing loads sit side by side. See what remains by destination, with the day’s total always easy to scan.</p></div>
+<div class="visual"><div class="mock-top"><span>Transload Log</span><span>Today · Live view</span></div><div><div class="mock-title">Loads remaining</div><div class="mock-sub">Plant needs · less loads recorded</div><div class="tiles"><div class="tile"><small>QUINCY</small><strong>12</strong><em> loads left</em></div><div class="tile"><small>PASCO</small><strong>08</strong><em> loads left</em></div><div class="tile"><small>WARDEN</small><strong>05</strong><em> loads left</em></div><div class="tile"><small>TOTAL LEFT</small><strong>25</strong><em> across locations</em></div></div></div><div class="mock-top"><span>Daily plan</span><span>One shared view</span></div></div>
+</article></section>
+<section class="stage"><article class="card">
+<div class="copy"><div class="number">02 / FAST ENTRY</div><h2>Less tapping.<br>More moving.</h2><p>Keep the essentials close: destination, truck, trailer, field, variety, and time. A focused entry flow helps operators log a load and get straight back to work.</p></div>
+<div class="visual"><div class="mock-top"><span>New outgoing load</span><span class="pill">Ready to save</span></div><div><div class="mock-title">Add a load</div><div class="mock-sub">Choose a destination, then enter the details.</div><div class="tiles"><div class="tile"><small>DESTINATION</small><strong style="font-size:23px">Pasco</strong></div><div class="tile"><small>TRUCK / TRAILER</small><strong style="font-size:23px">24 / 608</strong></div><div class="tile"><small>FIELD</small><strong style="font-size:23px">6-4</strong></div><div class="tile"><small>VARIETY</small><strong style="font-size:20px">Russet</strong></div></div></div><div class="load"><span>All details in place</span><span class="pill">Add load&nbsp; →</span></div></div>
+</article></section>
+<section class="stage"><article class="card">
+<div class="copy"><div class="number">03 / SHARED OPERATIONS</div><h2>One log.<br>Every operator.</h2><p>Keep the crew aligned with a shared record of incoming drivers and field activity. Quick-driver entries reduce repetitive typing when the yard gets busy.</p></div>
+<div class="visual"><div class="mock-top"><span>Incoming drivers</span><span>Shared log</span></div><div><div class="mock-title">On the move</div><div class="mock-sub">Recent incoming activity</div><div class="loadlist"><div class="load"><span><strong>Driver A</strong><br><small style="color:#a7b0a7">Field 6-4 · 9:42 AM</small></span><span class="pill">Incoming</span></div><div class="load"><span><strong>Driver B</strong><br><small style="color:#a7b0a7">Field 4-2 · 9:36 AM</small></span><span class="pill">Incoming</span></div><div class="load"><span><strong>Driver C</strong><br><small style="color:#a7b0a7">Field 6-4 · 9:28 AM</small></span><span class="pill">Incoming</span></div></div></div><div class="mock-top"><span>Quick-driver buttons</span><span>Less retyping</span></div></div>
+</article></section>
+<section class="stage"><article class="card">
+<div class="copy"><div class="number">04 / FIELD VISIBILITY</div><h2>Follow the field<br>through the finish.</h2><p>Field totals make progress easier to understand across days. Scan the trend, then open a field’s detail to see its daily activity.</p></div>
+<div class="visual"><div class="mock-top"><span>Field activity</span><span>Last 30 days</span></div><div><div class="mock-title">Loads by field</div><div class="mock-sub">Illustrative chart · tap into detail in the app</div><div class="field-bars"><div class="field-row"><span>6-4</span><div><div class="barline"><i style="width:88%"></i></div></div><strong>180</strong></div><div class="field-row"><span>4-2</span><div><div class="barline"><i style="width:73%"></i></div></div><strong>150</strong></div><div class="field-row"><span>7-3</span><div><div class="barline"><i style="width:51%"></i></div></div><strong>104</strong></div><div class="field-row"><span>2-1</span><div><div class="barline"><i style="width:32%"></i></div></div><strong>65</strong></div></div></div><div class="mock-top"><span>Field totals</span><span>History at a glance</span></div></div>
+</article></section>
+<section class="bottom"><div><div class="eyebrow">Made for the workday</div><h2>Clear information.<br>Fewer distractions.</h2><p>A quieter interface for a fast-moving operation. Open the live log to record loads, update plant needs, and keep everyone working from the same picture.</p></div><a class="cta" href="https://masstahl.github.io/Transload-/">Go to Transload Log ↗</a></section>
+</main>
+<footer class="foot"><span>TRANSLOAD LOG · OPERATIONS, MADE CLEAR.</span><a href="https://masstahl.github.io/Transload-/">Open live app ↗</a></footer>
+<script>
+(() => {
+  const stages = [...document.querySelectorAll('.stage')];
+  if (!('animationTimeline' in document.documentElement.style) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const update = () => {
+      const vh = window.innerHeight || 1;
+      stages.forEach((stage, index) => {
+        const card = stage.querySelector('.card');
+        const rect = stage.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, (vh - rect.top) / (rect.height - vh)));
+        const enter = index === 0 ? 1 : Math.min(1, progress * 3);
+        const leave = Math.max(0, 1 - progress * 1.7);
+        card.style.opacity = String(Math.min(enter, leave));
+        card.style.transform = 'translateY(' + ((1 - enter) * 40 - (1 - leave) * 40) + 'px) scale(' + (1 - (1 - leave) * .08) + ')';
+        card.style.filter = 'blur(' + ((1 - leave) * 8) + 'px)';
+      });
+    };
+    let queued = false;
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(() => { update(); queued = false; }); } }, {passive:true});
+    addEventListener('resize', update);
+    update();
+  }
+})();
+</script>
+</body>
+</html>

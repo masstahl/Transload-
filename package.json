@@ -7,7 +7,7 @@
     "lint:ui": "lintapple https://masstahl.github.io/Transload-/"
   },
   "devDependencies": {
-    "lintapple": "0.1.21"
+    "lintapple": "github:gholtzap/lintapple#90ddc736af6f2712903d53dd9a463445e109f586"
   },
   "engines": {
     "node": ">=22"

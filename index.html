@@ -82,13 +82,25 @@ button:active{transform:scale(.985)}
 .chart-expand{padding:6px}
 @media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-top))}}
 
+
+/* Lintapple accessibility refinements: preserve the visual palette while improving readability */
+:root{--slate:#4f5e54}
+.sub,.note,.meta,.hint,.lbl,.entered,.need-detail,.empty,.field label{color:#4f5e54}
+.tab{color:#4d5b51}
+.plan-actions{column-gap:7px}
+.save:disabled{opacity:.72}
+button[data-ui-tooltip]{position:relative}
+button[data-ui-tooltip]::after{content:attr(data-ui-tooltip);position:absolute;left:50%;bottom:calc(100% + 7px);z-index:100;transform:translateX(-50%);padding:6px 8px;border-radius:7px;background:#26352b;color:#fff;font-size:11px;font-weight:650;line-height:1.25;white-space:nowrap;box-shadow:0 2px 8px #0002;opacity:0;pointer-events:none;transition:opacity .12s ease}
+button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::after{opacity:1}
+@media(prefers-reduced-motion:reduce){button[data-ui-tooltip]::after{transition:none}}
+
 </style>
 </head>
 <body>
 <main class="app">
   <header class="top">
     <div>
-      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="☰ Choose transload site" title="Choose transload site" aria-expanded="false">☰</button><div class="brand">Transload Log</div></div>
+      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="Choose transload site" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">☰</button><div class="brand">Transload Log</div></div>
       <div class="sub">Shared live load tracking</div>
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
@@ -110,11 +122,11 @@ button:active{transform:scale(.985)}
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
         <div class="field">
           <label for="outField">Field number</label>
-          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="− Insert dash in field number" title="Insert dash in field number">−</button></div>
+          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
         </div>
         <div class="field">
           <label for="outVariety">Potato variety</label>
-          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add potato variety" title="Add potato variety">＋</button></div>
+          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="Add potato variety" title="Add potato variety" data-ui-tooltip="Add potato variety">＋</button></div>
         </div>
         <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
       </div>
@@ -159,7 +171,7 @@ button:active{transform:scale(.985)}
         <div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div>
         <div class="field">
           <label for="fieldNumber">Field number</label>
-          <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber">−</button></div>
+          <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
         </div>
         <div class="field span2"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div>
       </div>
@@ -215,7 +227,7 @@ button:active{transform:scale(.985)}
     <div id="editLocationWrap"><div class="title">Location</div><div class="locations" id="editLocations"></div></div>
     <div class="fields">
       <div class="field" id="editTruckWrap"><label for="editFirst">Truck number</label><input id="editFirst"></div>
-      <div class="field" id="editFieldWrap"><label for="editField">Field number</label><div class="field-entry"><input id="editField" inputmode="numeric"><button type="button" class="dash-btn" data-dash="editField">−</button></div></div>
+      <div class="field" id="editFieldWrap"><label for="editField">Field number</label><div class="field-entry"><input id="editField" inputmode="numeric"><button type="button" class="dash-btn" data-dash="editField" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div></div>
       <div class="field" id="editVarietyWrap"><label for="editVariety">Potato variety</label><select id="editVariety"><option value="">Select variety</option></select></div>
       <div class="field" id="editSecondWrap"><label id="editSecondLabel" for="editSecond">Trailer number</label><input id="editSecond"></div>
       <div class="field span2"><label for="editDate">Date and time</label><input id="editDate" type="datetime-local"></div>

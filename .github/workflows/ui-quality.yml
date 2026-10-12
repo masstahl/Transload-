@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   lintapple:
-    name: Audit live Transload Log UI
+    name: Audit checked-out Transload Log UI
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -31,5 +31,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run lintapple against production
-        run: npm run lint:ui
+      - name: Audit this commit at mobile and desktop sizes
+        env:
+          UI_AUDIT_URL: http://127.0.0.1:4173/
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/transload-ui-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+              break
+            fi
+            sleep 0.5
+          done
+          curl --fail --silent http://127.0.0.1:4173/ >/dev/null
+          npm run lint:ui

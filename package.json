@@ -1,0 +1,15 @@
+{
+  "name": "transload-log",
+  "private": true,
+  "version": "1.0.0",
+  "description": "UI quality checks for the Transload Log GitHub Pages app",
+  "scripts": {
+    "lint:ui": "lintapple https://masstahl.github.io/Transload-/"
+  },
+  "devDependencies": {
+    "lintapple": "0.1.21"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

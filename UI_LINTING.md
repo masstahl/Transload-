@@ -14,7 +14,7 @@ npm install
 npm run lint:ui
 ```
 
-The audit checks the app at mobile (390×844) and desktop (1440×900) sizes. Rules are in `ui-policy.json`; they reflect the app's system-font stack and existing type scale. Adjust those rules deliberately when the design system changes.
+The audit checks the app at mobile (390×844) and desktop (1440×900) sizes. Rules are in `ui-policy.json`; they reflect the app's system-font stack, existing type scale, and compact 5px minimum spacing for adjacent controls. The app uses several intentionally small utility buttons, so the button type rule accepts its established sizes; this is not an exemption from contrast or accessible-name checks. Adjust those rules deliberately when the design system changes.
 
 To audit another URL or get machine-readable output:
 
@@ -22,4 +22,4 @@ To audit another URL or get machine-readable output:
 npx lintapple https://masstahl.github.io/Transload-/ --json
 ```
 
-Exit codes: `0` means passed, `1` means findings were reported, and `2` means the audit could not complete. The audit itself is read-only; it does not modify the app or its database.
+Exit codes: `0` means passed, `1` means findings were reported, and `2` means the audit could not complete. The audit itself is read-only; it does not modify the app or its database. Accessibility fixes should be made in a pull request and reviewed before merging to production.

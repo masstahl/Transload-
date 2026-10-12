@@ -31,7 +31,7 @@ button:active{transform:scale(.985)}
 .field input:focus,.field select:focus{box-shadow:0 0 0 3px #78927b24}
 .save,.small{box-shadow:0 3px 10px #344f3910}
 @supports (animation-timeline:view()){
- @keyframes transload-panel-view{0%{opacity:0;transform:translateY(40px) scale(.985);filter:blur(4px)}18%,72%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}100%{opacity:0;transform:translateY(-40px) scale(.92);filter:blur(7px)}}
+ @keyframes transload-panel-view{0%{opacity:1;transform:translateY(18px) scale(.99);filter:none}18%,72%{opacity:1;transform:translateY(0) scale(1);filter:none}100%{opacity:1;transform:translateY(-12px) scale(.99);filter:none}}
  #outgoingView:not(.hidden) .panel:has(#locationNeeds),
  #outgoingView:not(.hidden) .panel:has(#loadsByLocation),
  #outgoingView:not(.hidden) .panel:has(#loadList),
@@ -62,7 +62,7 @@ button:active{transform:scale(.985)}
 .location-totals{gap:5px}
 .location-total{padding:6px 5px;border-radius:10px}
 .location-total b{font-size:18px}
-.locations{gap:4px}
+.locations{gap:5px}
 .loc{min-height:42px;border-radius:9px}
 .fields{gap:6px}
 .field input,.field select,.plan-date{height:40px;border-radius:10px}
@@ -83,11 +83,12 @@ button:active{transform:scale(.985)}
 @media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-top))}}
 
 
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Lintapple accessibility refinements: preserve the visual palette while improving readability */
 :root{--slate:#4f5e54}
 .sub,.note,.meta,.hint,.lbl,.entered,.need-detail,.empty,.field label{color:#4f5e54}
 .tab{color:#4d5b51}
-.plan-actions{column-gap:7px}
+.plan-actions{grid-template-columns:44px minmax(0,1fr) 44px 58px;column-gap:7px;min-width:0}.plan-date{min-width:0;width:100%;padding-left:6px;padding-right:6px}
 .save:disabled{opacity:.72}
 button[data-ui-tooltip]{position:relative}
 button[data-ui-tooltip]::after{content:attr(data-ui-tooltip);position:absolute;left:50%;bottom:calc(100% + 7px);z-index:100;transform:translateX(-50%);padding:6px 8px;border-radius:7px;background:#26352b;color:#fff;font-size:11px;font-weight:650;line-height:1.25;white-space:nowrap;box-shadow:0 2px 8px #0002;opacity:0;pointer-events:none;transition:opacity .12s ease}
@@ -100,7 +101,7 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
 <main class="app">
   <header class="top">
     <div>
-      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="Choose transload site" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">☰</button><div class="brand">Transload Log</div></div>
+      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="☰ Choose transload site" aria-describedby="site-menu-tooltip" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">☰</button><span id="site-menu-tooltip" role="tooltip" class="sr-only">Choose transload site</span><div class="brand">Transload Log</div></div>
       <div class="sub">Shared live load tracking</div>
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
@@ -122,11 +123,11 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
         <div class="field">
           <label for="outField">Field number</label>
-          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
+          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="− Insert dash in field number" aria-describedby="dash-tooltip" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button><span id="dash-tooltip" role="tooltip" class="sr-only">Insert dash in field number</span></div>
         </div>
         <div class="field">
           <label for="outVariety">Potato variety</label>
-          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="Add potato variety" title="Add potato variety" data-ui-tooltip="Add potato variety">＋</button></div>
+          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add potato variety" aria-describedby="variety-tooltip" title="Add potato variety" data-ui-tooltip="Add potato variety">＋</button><span id="variety-tooltip" role="tooltip" class="sr-only">Add potato variety</span></div>
         </div>
         <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
       </div>

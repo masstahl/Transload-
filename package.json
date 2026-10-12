@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "UI quality checks for the Transload Log GitHub Pages app",
   "scripts": {
-    "lint:ui": "lintapple 'https://masstahl.github.io/Transload-/?tl_refresh=2026-10-09-pastel-locations-v20'"
+    "lint:ui": "lintapple \"\u0024{UI_AUDIT_URL:-https://masstahl.github.io/Transload-/}\""
   },
   "devDependencies": {
     "lintapple": "github:gholtzap/lintapple#90ddc736af6f2712903d53dd9a463445e109f586"

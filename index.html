@@ -101,7 +101,7 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
 <main class="app">
   <header class="top">
     <div>
-      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="☰ Choose transload site" aria-describedby="site-menu-tooltip" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">☰</button><span id="site-menu-tooltip" role="tooltip" class="sr-only">Choose transload site</span><div class="brand">Transload Log</div></div>
+      <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="☰ Choose transload site" aria-describedby="site-menu-tooltip" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">☰</button><div class="brand">Transload Log</div></div>
       <div class="sub">Shared live load tracking</div>
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
@@ -123,11 +123,11 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
         <div class="field">
           <label for="outField">Field number</label>
-          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="− Insert dash in field number" aria-describedby="dash-tooltip" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button><span id="dash-tooltip" role="tooltip" class="sr-only">Insert dash in field number</span></div>
+          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="− Insert dash in field number" aria-describedby="out-field-dash-tooltip" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
         </div>
         <div class="field">
           <label for="outVariety">Potato variety</label>
-          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add potato variety" aria-describedby="variety-tooltip" title="Add potato variety" data-ui-tooltip="Add potato variety">＋</button><span id="variety-tooltip" role="tooltip" class="sr-only">Add potato variety</span></div>
+          <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add potato variety" aria-describedby="variety-tooltip" title="Add potato variety" data-ui-tooltip="Add potato variety">＋</button></div>
         </div>
         <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
       </div>
@@ -172,7 +172,7 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
         <div class="field"><label for="driver">Driver name</label><input id="driver" autocomplete="name" placeholder="Driver name"></div>
         <div class="field">
           <label for="fieldNumber">Field number</label>
-          <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
+          <div class="field-entry"><input id="fieldNumber" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="fieldNumber" aria-label="− Insert dash in field number" aria-describedby="incoming-field-dash-tooltip" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div>
         </div>
         <div class="field span2"><label for="inDate">Date and time</label><input id="inDate" type="datetime-local"></div>
       </div>
@@ -228,7 +228,7 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
     <div id="editLocationWrap"><div class="title">Location</div><div class="locations" id="editLocations"></div></div>
     <div class="fields">
       <div class="field" id="editTruckWrap"><label for="editFirst">Truck number</label><input id="editFirst"></div>
-      <div class="field" id="editFieldWrap"><label for="editField">Field number</label><div class="field-entry"><input id="editField" inputmode="numeric"><button type="button" class="dash-btn" data-dash="editField" aria-label="Insert dash in field number" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div></div>
+      <div class="field" id="editFieldWrap"><label for="editField">Field number</label><div class="field-entry"><input id="editField" inputmode="numeric"><button type="button" class="dash-btn" data-dash="editField" aria-label="− Insert dash in field number" aria-describedby="edit-field-dash-tooltip" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">−</button></div></div>
       <div class="field" id="editVarietyWrap"><label for="editVariety">Potato variety</label><select id="editVariety"><option value="">Select variety</option></select></div>
       <div class="field" id="editSecondWrap"><label id="editSecondLabel" for="editSecond">Trailer number</label><input id="editSecond"></div>
       <div class="field span2"><label for="editDate">Date and time</label><input id="editDate" type="datetime-local"></div>
@@ -237,6 +237,7 @@ button[data-ui-tooltip]:hover::after,button[data-ui-tooltip]:focus-visible::afte
     <div class="modal-actions"><button class="cancel" id="cancelEdit">Cancel</button><button class="update" id="updateEntry">Save changes</button></div>
   </div>
 </div>
+<div class="sr-only" aria-hidden="false"><span id="site-menu-tooltip" role="tooltip">Choose transload site</span><span id="out-field-dash-tooltip" role="tooltip">Insert dash in field number</span><span id="incoming-field-dash-tooltip" role="tooltip">Insert dash in field number</span><span id="edit-field-dash-tooltip" role="tooltip">Insert dash in field number</span><span id="variety-tooltip" role="tooltip">Add potato variety</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {

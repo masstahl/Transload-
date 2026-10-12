@@ -1,0 +1,122 @@
+{
+  "fonts": [
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "SF Pro Text",
+    "Arial",
+    "sans-serif"
+  ],
+  "fontSizes": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    22,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    40,
+    48,
+    64
+  ],
+  "typeRules": [
+    {
+      "selector": "h1",
+      "sizes": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        40,
+        48,
+        64
+      ]
+    },
+    {
+      "selector": "h2",
+      "sizes": [
+        18,
+        19,
+        20,
+        22,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        34
+      ]
+    },
+    {
+      "selector": "h3",
+      "sizes": [
+        16,
+        18,
+        19,
+        20,
+        22,
+        24
+      ]
+    },
+    {
+      "selector": "button, [role=button]",
+      "sizes": [
+        14,
+        15,
+        16
+      ]
+    }
+  ],
+  "minControlSize": 15,
+  "controlSizeRules": [],
+  "minControlGap": 8,
+  "minControlInset": 8,
+  "controlContainers": [
+    "[data-ui-container]"
+  ],
+  "minLayoutGap": 8,
+  "bannedCopy": [
+    "unlock your potential",
+    "seamlessly",
+    "game-changing"
+  ],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 1440,
+      "height": 900
+    }
+  ],
+  "colorSchemes": [
+    "light"
+  ],
+  "exceptions": []
+}

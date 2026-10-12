@@ -33,7 +33,7 @@ jobs:
 
       - name: Audit this commit at mobile and desktop sizes
         env:
-          UI_AUDIT_URL: http://127.0.0.1:4173/
+          UI_AUDIT_URL: "http://127.0.0.1:4173/?tl_refresh=2026-10-09-pastel-locations-v20"
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/transload-ui-server.log 2>&1 &
           server_pid=$!

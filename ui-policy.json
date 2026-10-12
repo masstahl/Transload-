@@ -86,15 +86,24 @@
     {
       "selector": "button, [role=button]",
       "sizes": [
+        10,
+        11,
+        12,
+        13,
         14,
         15,
-        16
+        16,
+        18,
+        19,
+        20,
+        22,
+        24
       ]
     }
   ],
   "minControlSize": 15,
   "controlSizeRules": [],
-  "minControlGap": 8,
+  "minControlGap": 5,
   "minControlInset": 8,
   "controlContainers": [
     "[data-ui-container]"

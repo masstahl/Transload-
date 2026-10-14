@@ -82,7 +82,6 @@ button:active{transform:scale(.985)}
 .chart-expand{padding:6px}
 @media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-.load-now{position:absolute;top:10px;right:12px;font-size:10px;color:var(--slate);text-align:right;pointer-events:none;letter-spacing:.02em}
 
-.load-now{position:absolute;top:10px;right:12px;font-size:10px;color:var(--slate);text-align:right;pointer-events:none;letter-spacing:.02em}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Lintapple accessibility refinements: preserve the visual palette while improving readability */
 :root{--slate:#4f5e54}
@@ -121,8 +120,7 @@ button[data-ui-tooltip]{position:relative}
       <div class="locations" id="locations"></div>
     </div>
     <div class="panel">
-     <div class="load-now" id="outNow"></div>
-<div class="title">Load details</div>
+    <div class="needs-head"><div class="title">Load details</div><div id="outNow" class="meta" style="margin:0;white-space:nowrap;font-variant-numeric:tabular-nums"></div></div>
       <div class="fields">
         <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>

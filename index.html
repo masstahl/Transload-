@@ -100,6 +100,8 @@ button[data-ui-tooltip]{position:relative}
 
 /* Keep the compact text labels inside their fixed grid columns. */
 .field-entry .dash-btn{font-size:11px;min-width:0;padding:0 2px;line-height:1}.select-add .add-variety{font-size:10px;min-width:0;padding:0 2px;line-height:1}
+  .total-loads{flex:0 0 auto;color:var(--slate);font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums}
+  #outNow{font-size:11px;font-weight:600;color:var(--slate)}
 </style>
 </head>
 <body>
@@ -134,7 +136,6 @@ button[data-ui-tooltip]{position:relative}
           <label for="outVariety">Potato variety</label>
           <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add" title="Add potato variety" data-ui-tooltip="Add potato variety">＋ Add</button></div>
         </div>
-        <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
       </div>
       <button class="save" id="saveLoad" disabled>Add load</button>
       <div class="status" id="outStatus" aria-live="polite"></div>
@@ -152,8 +153,8 @@ button[data-ui-tooltip]{position:relative}
       <div class="status" id="planStatus" aria-live="polite"></div>
     </div>
     <div class="panel">
-      <div class="title" id="totalsTitle">Loads by location</div>
-      <div id="loadsByLocation" class="location-totals"></div>
+      <div class="needs-head"><div class="title" id="totalsTitle">Loads by location</div><div class="total-loads" id="totalLoadsToday" aria-live="polite">0 total</div></div>
+       <div id="loadsByLocation" class="location-totals"></div>
     </div>
     <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
@@ -303,9 +304,11 @@ button[data-ui-tooltip]{position:relative}
   function clearMessage(id) { setTimeout(() => { $(id).textContent = ""; }, 2200); }
   function identity() { $("identityName").textContent = state.name || "Unnamed operator"; }
   function setDefaultDates() {
-    $("outDate").value = localDateTime();
     $("inDate").value = localDateTime();
     if (!$("planDate").value) $("planDate").value = localDateString();
+  }
+  function updateLiveClock() {
+    $("outNow").textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
   }
   function errText(error) { return error?.message || error?.error_description || (typeof error === "string" ? error : "Unknown error"); }
 
@@ -363,6 +366,8 @@ button[data-ui-tooltip]{position:relative}
     const date = $("planDate").value || state.planDate;
     const counts = Object.fromEntries(locations.map((l) => [l, state.loads.filter((x) => x.location === l && sameLocalDate(x.occurred_at, date)).length]));
     $("totalsTitle").textContent = "Loads by location · " + friendlyDay(date);
+    const totalLoads = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    $("totalLoadsToday").textContent = totalLoads + " total";
     $("loadsByLocation").innerHTML = locations.map((l) => `<div class="location-total loc-card-${l.toLowerCase()}"><div class="lbl">${l}</div><b>${counts[l]}</b><div class="lbl">loads</div></div>`).join("");
   }
   function renderChart(target, source, range, empty) {
@@ -494,13 +499,9 @@ button[data-ui-tooltip]{position:relative}
       if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
       const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
       if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
-      const occurredValue = $("outDate").value;
-      if (!occurredValue) return message("outStatus", "Enter a date and time.");const occurredMs = new Date(occurredValue).getTime();
-if (occurredMs > Date.now() + 2 * 60000) {
-  return message("outStatus", "That time is in the future. Check the time and try again.");
-}
-
-      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: new Date(occurredValue).toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
+      // Capture the timestamp at the moment the operator presses Add load.
+      const occurredAt = new Date();
+      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
       const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
       if (error) throw error;
       if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];
@@ -761,6 +762,8 @@ state.deviceName = deviceName || "Unknown Device";
   document.addEventListener("touchend", (e) => { if (edgeStartX === null || !e.changedTouches.length) return; const dx = e.changedTouches[0].clientX - edgeStartX, dy = e.changedTouches[0].clientY - edgeStartY; if (Math.abs(dy) < 65 && dx > 65 && edgeStartX < 24) openSiteMenu(); else if (Math.abs(dy) < 65 && dx < -65 && $("siteTabs").classList.contains("open")) closeSiteMenu(); edgeStartX = edgeStartY = null; }, { passive: true });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSiteMenu(); });
   renderSiteTabs();
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;
   $("closePlan").onclick = closePlan;

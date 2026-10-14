@@ -80,7 +80,8 @@ button:active{transform:scale(.985)}
 .range-btn{height:29px;padding:0 8px}
 .field-chart-item{border-radius:9px}
 .chart-expand{padding:6px}
-@media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-.load-now{position:absolute;top:10px;right:12px;font-size:10px;color:var(--slate);text-align:right;pointer-events:none;letter-spacing:.02em}
+@media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-top))}}
+
 
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Lintapple accessibility refinements: preserve the visual palette while improving readability */
@@ -120,7 +121,7 @@ button[data-ui-tooltip]{position:relative}
       <div class="locations" id="locations"></div>
     </div>
     <div class="panel">
-    <div class="needs-head"><div class="title">Load details</div><div id="outNow" class="meta" style="margin:0;white-space:nowrap;font-variant-numeric:tabular-nums"></div></div>
+      <div class="title">Load details</div>
       <div class="fields">
         <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
         <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
@@ -131,7 +132,8 @@ button[data-ui-tooltip]{position:relative}
         <div class="field">
           <label for="outVariety">Potato variety</label>
           <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add" title="Add potato variety" data-ui-tooltip="Add potato variety">＋ Add</button></div>
-        </div
+        </div>
+        <div class="field span2"><label for="outDate">Date and time</label><input id="outDate" type="datetime-local"></div>
       </div>
       <button class="save" id="saveLoad" disabled>Add load</button>
       <div class="status" id="outStatus" aria-live="polite"></div>
@@ -242,7 +244,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-14-load-time-v21";
+  const APP_VERSION = "2026-10-09-pastel-locations-v20";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -299,13 +301,8 @@ button[data-ui-tooltip]{position:relative}
   }
   function clearMessage(id) { setTimeout(() => { $(id).textContent = ""; }, 2200); }
   function identity() { $("identityName").textContent = state.name || "Unnamed operator"; }
-  function updateOutNow() {
-  const el = $("outNow");
-  if (el) el.textContent = "Time " + new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date());
-}
-setInterval(updateOutNow, 1000);
-function setDefaultDates() {
-    updateOutNow();
+  function setDefaultDates() {
+    $("outDate").value = localDateTime();
     $("inDate").value = localDateTime();
     if (!$("planDate").value) $("planDate").value = localDateString();
   }
@@ -496,12 +493,13 @@ function setDefaultDates() {
       if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
       const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
       if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
-      if (occurredMs > Date.now() + 2 * 60000) {
+      const occurredValue = $("outDate").value;
+      if (!occurredValue) return message("outStatus", "Enter a date and time.");const occurredMs = new Date(occurredValue).getTime();
+if (occurredMs > Date.now() + 2 * 60000) {
   return message("outStatus", "That time is in the future. Check the time and try again.");
 }
 
-      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: new Date().toISOString(),
-created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
+      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: new Date(occurredValue).toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
       const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
       if (error) throw error;
       if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];

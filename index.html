@@ -494,7 +494,11 @@ button[data-ui-tooltip]{position:relative}
       const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
       if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
       const occurredValue = $("outDate").value;
-      if (!occurredValue) return message("outStatus", "Enter a date and time.");
+      if (!occurredValue) return message("outStatus", "Enter a date and time.");const occurredMs = new Date(occurredValue).getTime();
+if (occurredMs > Date.now() + 2 * 60000) {
+  return message("outStatus", "That time is in the future. Check the time and try again.");
+}
+
       const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: new Date(occurredValue).toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
       const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
       if (error) throw error;

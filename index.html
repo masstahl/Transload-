@@ -83,7 +83,7 @@ button:active{transform:scale(.985)}
 @media(max-width:600px){.panel{padding:11px;margin-bottom:8px;border-radius:15px}.app{padding-top:calc(6px + env(safe-area-inset-top))}}
 
 .field-entry .dash-btn{height:44px;width:100%;padding:0;font-size:11px;line-height:1}
-.select-add .add-variety{height:44px;width:100%;padding:0;font-size:22px;line-height:1
+.select-add .add-variety{height:44px;width:100%;padding:0;font-size:22px;line-height:1}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* Lintapple accessibility refinements: preserve the visual palette while improving readability */
 :root{--slate:#4f5e54}
@@ -102,6 +102,9 @@ button[data-ui-tooltip]{position:relative}
 .field-entry .dash-btn{font-size:11px;min-width:0;padding:0 2px;line-height:1}.select-add .add-variety{font-size:10px;min-width:0;padding:0 2px;line-height:1}
   .total-loads{flex:0 0 auto;color:var(--slate);font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums}
   #outNow{font-size:11px;font-weight:600;color:var(--slate)}
+  /* Keep utility text readable and controls visually unambiguous at every audited viewport. */
+  .sub,.note,.meta,.hint,.lbl,.entered,.need-detail,.empty,.field label,.tab{color:#3f4b43!important}
+  .select-add .add-variety{background:#e5f0e6!important;color:#3f5c47!important;border:1px solid #c8d9ca}
 </style>
 </head>
 <body>

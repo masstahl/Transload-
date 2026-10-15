@@ -259,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v2";
+  const APP_VERSION = "2026-10-15-pace-graph-v3";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -508,7 +508,7 @@ button[data-ui-tooltip]{position:relative}
   /* ---- Plant pace graph + timer pill (2026-10-15) ---- */
   const PACE_COLORS = { Quincy: "#4e7d52", Pasco: "#2f7fd0", Warden: "#dd8a26", Richland: "#b95d7e" };
   const PACE_WINDOW_MIN = 720; // 6a-6p operating window
-  const PACE_YLO = 0.4, PACE_YHI = 2.2;
+  const PACE_YLO = 0.4, PACE_YHI = 1.5;
   let paceChart = null, paceToken = 0, echartsLoading = null;
 
   function loadECharts() {
@@ -638,11 +638,12 @@ button[data-ui-tooltip]{position:relative}
         });
         const avgTurn = gaps.reduce((s2, g) => s2 + g, 0) / gaps.length;
         const lastT = sm[sm.length - 1][0];
-        const pace = Math.min(sm[sm.length - 1][1], PACE_YHI);
+        const paceTrue = sm[sm.length - 1][1];
+        const pace = Math.min(paceTrue, PACE_YHI);
         const remaining = Math.max(need - done, 0);
         const etaT = remaining > 0 && avgTurn > 0 ? lastT + remaining * avgTurn * 60000 : 0;
         const drivers = inferDrivers(rows.map((r) => r.truck));
-        plants.push({ loc, color, sm, done, need, avgTurn, pace, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
+        plants.push({ loc, color, sm, done, need, avgTurn, pace, paceTrue, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
       });
       // De-collide end labels: shift them apart (min 46px) in pace units.
       plants.sort((a, b) => a.pace - b.pace);
@@ -685,8 +686,8 @@ button[data-ui-tooltip]{position:relative}
         const hasEta = pl.etaT > 0 && pl.etaT <= xMax + 3600 * 1000;
         const endX = hasEta ? pl.etaT : pl.sm[pl.sm.length - 1][0];
         const labelText = hasEta
-          ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${pl.pace.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`
-          : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${pl.pace.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`;
+          ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`
+          : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`;
         series.push({
           name: pl.loc + " label", type: "line", silent: true,
           data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.pace], [pl.etaT, pl.pace]] : [[endX, pl.pace]],

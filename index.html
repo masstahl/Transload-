@@ -287,7 +287,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v15";
+  const APP_VERSION = "2026-10-15-pace-graph-v16";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -621,16 +621,19 @@ button[data-ui-tooltip]{position:relative}
   function timerPillHtml(x, isToday) {
     if (!isToday) return "";
     const s = x.load_started_at, f = x.load_finished_at;
-    if (s && f) return ""; // finished time shows on the variety line instead
+    if (s && f) {
+      const totalSec = Math.max(1, Math.round((new Date(f) - new Date(s)) / 1000));
+      const txt = Math.floor(totalSec / 60) + "m " + (totalSec % 60) + "s";
+      return `<button type="button" class="timer-pill done" data-edit-time="${x.id}" title="Loading took ${txt} — tap to edit">${txt}</button>`;
+    }
     if (s) return `<button type="button" class="timer-pill live" data-timer="${x.id}" data-timer-live="${s}" title="Loading — tap to time out">● --:--.-</button>`;
     return `<button type="button" class="timer-pill" data-timer="${x.id}" title="Tap when the truck starts loading">○ time in</button>`;
   }
   function timedMetaHtml(x) {
     const s = x.load_started_at, f = x.load_finished_at;
     if (!(s && f)) return "";
-    const totalSec = Math.max(1, Math.round((new Date(f) - new Date(s)) / 1000));
-    const txt = Math.floor(totalSec / 60) + "m " + (totalSec % 60) + "s";
-    return `<button type="button" class="timed-mins" data-edit-time="${x.id}" title="Loading took ${txt} — tap to edit">${txt}</button>`;
+    const txt = fmtClock(new Date(f).getTime());
+    return `<button type="button" class="timed-mins" data-edit-time="${x.id}" title="Finished loading at ${txt} — tap to edit">${txt}</button>`;
   }
   async function toggleTimer(id) {
     const x = state.loads.find((l) => l.id === id);

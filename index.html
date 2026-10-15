@@ -259,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v4";
+  const APP_VERSION = "2026-10-15-pace-graph-v5";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -508,7 +508,6 @@ button[data-ui-tooltip]{position:relative}
   /* ---- Plant pace graph + timer pill (2026-10-15) ---- */
   const PACE_COLORS = { Quincy: "#4e7d52", Pasco: "#2f7fd0", Warden: "#dd8a26", Richland: "#b95d7e" };
   const PACE_WINDOW_MIN = 600; // 10-hour operating day (6a-4p)
-  const PACE_YLO = 0.4, PACE_YHI = 1.5;
   let paceChart = null, paceToken = 0, echartsLoading = null;
 
   function loadECharts() {
@@ -528,7 +527,7 @@ button[data-ui-tooltip]{position:relative}
     return (state.planRevisions || []).filter((r) => r.plan_date === date).sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
   }
   // Plan in effect at time t: latest revision at or before t, else the current plan row.
-  function targetAt(revisions, plan, loc, t) {
+  function planLoadsAt(revisions, plan, loc, t) {
     const key = loc.toLowerCase();
     let loads = null;
     for (const r of revisions) {
@@ -536,7 +535,18 @@ button[data-ui-tooltip]{position:relative}
       else break;
     }
     if (loads === null) loads = Number(plan[key] || 0);
-    return loads > 0 ? PACE_WINDOW_MIN / loads : 0;
+    return loads;
+  }
+  // Loads the plant should have completed by time t (piecewise across plan changes).
+  function expectedBy(revisions, plan, loc, t, dayStart) {
+    const cuts = [dayStart];
+    revisions.forEach((r) => { const rt = new Date(r.changed_at).getTime(); if (rt > dayStart && rt < t) cuts.push(rt); });
+    cuts.push(t);
+    let exp = 0;
+    for (let i = 0; i < cuts.length - 1; i++) {
+      exp += planLoadsAt(revisions, plan, loc, cuts[i]) * (cuts[i + 1] - cuts[i]) / 60000 / PACE_WINDOW_MIN;
+    }
+    return exp;
   }
   // Infer driver count: walk the day's truck order; each repeat's gap is one
   // full rotation. Median resists one-off doubles. e.g. 731,_,_,_,_,731 -> 5.
@@ -623,37 +633,43 @@ button[data-ui-tooltip]{position:relative}
         const rows = state.loads.filter((x) => x.location === loc && sameLocalDate(x.occurred_at, date)).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
         const need = Number(plan[loc.toLowerCase()] || 0);
         const done = rows.length;
-        if (rows.length < 2) { notes.push(`${loc}: ${done}/${need} · not enough loads yet`); return; }
-        const gaps = [], pts = [];
+        if (!rows.length) { notes.push(`${loc}: 0/${need} · no loads yet`); return; }
+        const gaps = [];
         for (let i = 1; i < rows.length; i++) {
-          const t = new Date(rows[i].occurred_at).getTime();
-          const gapMin = (t - new Date(rows[i - 1].occurred_at).getTime()) / 60000;
-          const tgt = targetAt(revs, plan, loc, t);
-          if (tgt > 0 && gapMin >= 0) { gaps.push(gapMin); pts.push([t, gapMin / tgt]); }
+          const g = (new Date(rows[i].occurred_at) - new Date(rows[i - 1].occurred_at)) / 60000;
+          if (g >= 0) gaps.push(g);
         }
-        if (!pts.length) { notes.push(`${loc}: ${done}/${need} · no pace yet`); return; }
+        // Loads ahead of (+) / behind (-) plan at each load. Zero = exactly on plan.
+        const pts = rows.map((r, i) => {
+          const t = new Date(r.occurred_at).getTime();
+          return [t, (i + 1) - expectedBy(revs, plan, loc, t, dayStart)];
+        });
         const sm = pts.map((p, i) => {
           const w = pts.slice(Math.max(0, i - 2), i + 1);
           return [p[0], w.reduce((s2, q) => s2 + q[1], 0) / w.length];
         });
-        const avgTurn = gaps.reduce((s2, g) => s2 + g, 0) / gaps.length;
+        const avgTurn = gaps.length ? gaps.reduce((s2, g) => s2 + g, 0) / gaps.length : 0;
         const lastT = sm[sm.length - 1][0];
-        const paceTrue = sm[sm.length - 1][1];
-        const pace = Math.min(paceTrue, PACE_YHI);
+        const ahead = sm[sm.length - 1][1];
         const remaining = Math.max(need - done, 0);
         const etaT = remaining > 0 && avgTurn > 0 ? lastT + remaining * avgTurn * 60000 : 0;
         const drivers = inferDrivers(rows.map((r) => r.truck));
-        plants.push({ loc, color, sm, done, need, avgTurn, pace, paceTrue, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
+        plants.push({ loc, color, sm, done, need, avgTurn, ahead, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
       });
-      // De-collide end labels: shift them apart (min 46px) in pace units.
-      plants.sort((a, b) => a.pace - b.pace);
-      const pxPerUnit = 266 / (PACE_YHI - PACE_YLO);
+      // Dynamic ±loads range with breathing room.
+      let ylo = -2, yhi = 2;
+      plants.forEach((pl) => pl.sm.forEach((p) => { ylo = Math.min(ylo, p[1]); yhi = Math.max(yhi, p[1]); }));
+      ylo = Math.floor(ylo - 0.4); yhi = Math.ceil(yhi + 0.4);
+      // De-collide end labels: shift them apart (min 46px).
+      plants.sort((a, b) => a.ahead - b.ahead);
+      const pxPerUnit = 266 / (yhi - ylo);
       let lastPlaced = -Infinity;
       plants.forEach((pl) => {
-        const target = Math.min(Math.max(pl.pace, lastPlaced + 46 / pxPerUnit), PACE_YHI);
-        pl.labelDy = (pl.pace - target) * pxPerUnit;
+        const target = Math.min(Math.max(pl.ahead, lastPlaced + 46 / pxPerUnit), yhi);
+        pl.labelDy = (pl.ahead - target) * pxPerUnit;
         lastPlaced = target;
       });
+      const aheadWord = (a) => a >= 0 ? `+${a.toFixed(1)} ahead` : `${a.toFixed(1)} behind`;
       const series = [];
       plants.forEach((pl, idx) => {
         const s = {
@@ -664,11 +680,11 @@ button[data-ui-tooltip]{position:relative}
           s.markArea = {
             silent: true,
             data: [
-              [{ yAxis: PACE_YLO, xAxis: xMin, itemStyle: { color: "rgba(70,140,90,0.07)" } }, { yAxis: 1, xAxis: xMax }],
-              [{ yAxis: 1, xAxis: xMin, itemStyle: { color: "rgba(200,70,60,0.06)" } }, { yAxis: PACE_YHI, xAxis: xMax }],
+              [{ yAxis: 0, xAxis: xMin, itemStyle: { color: "rgba(70,140,90,0.08)" } }, { yAxis: yhi, xAxis: xMax }],
+              [{ yAxis: ylo, xAxis: xMin, itemStyle: { color: "rgba(200,70,60,0.07)" } }, { yAxis: 0, xAxis: xMax }],
             ],
           };
-          const ml = [{ yAxis: 1, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed" }, label: { formatter: "1.0× on plan", position: "insideEndTop", fontSize: 10, color: "#8a938c" } }];
+          const ml = [{ yAxis: 0, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed" }, label: { show: false } }];
           if (nowTs >= xMin && nowTs <= xMax) ml.push({ xAxis: nowTs, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed", opacity: 0.7 }, label: { formatter: "now", position: "insideStartTop", fontSize: 10, color: "#8a938c" } });
           s.markLine = { silent: true, symbol: "none", data: ml };
         }
@@ -678,19 +694,21 @@ button[data-ui-tooltip]{position:relative}
             data: pl.revs.map((r) => {
               const rt = new Date(r.changed_at).getTime();
               const at = pl.pts.find((p) => p[0] >= rt) || pl.pts[pl.pts.length - 1];
-              return { coord: [rt, Math.min(at[1], PACE_YHI)], symbol: "diamond", symbolSize: 9, itemStyle: { color: pl.color }, label: { show: false } };
+              return { coord: [rt, Math.max(ylo, Math.min(at[1], yhi))], symbol: "diamond", symbolSize: 9, itemStyle: { color: pl.color }, label: { show: false } };
             }),
           };
         }
         series.push(s);
         const hasEta = pl.etaT > 0;
         const endX = hasEta ? Math.min(pl.etaT, xMax) : pl.sm[pl.sm.length - 1][0];
+        const turnBit = pl.avgTurn > 0 ? `${Math.round(pl.avgTurn)}m turn · ` : "";
+        const cycBit = pl.drivers > 0 && pl.avgTurn > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—";
         const labelText = hasEta
-          ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`
-          : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`;
+          ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${aheadWord(pl.ahead)}}\n{s|${turnBit}${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${cycBit} cycle}`
+          : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${aheadWord(pl.ahead)}}\n{s|${turnBit}${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${cycBit} cycle}`;
         series.push({
           name: pl.loc + " label", type: "line", silent: true,
-          data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.pace], [endX, pl.pace]] : [[endX, pl.pace]],
+          data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.ahead], [endX, pl.ahead]] : [[endX, pl.ahead]],
           symbol: "none", z: 2,
           lineStyle: hasEta ? { width: 2, type: [4, 5], color: pl.color, opacity: 0.55 } : { opacity: 0 },
           endLabel: {
@@ -708,7 +726,7 @@ button[data-ui-tooltip]{position:relative}
         animationDuration: 900,
         grid: { left: 40, right: 118, top: 26, bottom: 28 },
         xAxis: { type: "time", min: xMin, max: xMax, axisLabel: { formatter: (v) => fmtHourTick(v), fontSize: 10, color: "#8a938c" }, splitLine: { show: false }, axisLine: { lineStyle: { color: "#dcded6" } } },
-        yAxis: { type: "value", min: PACE_YLO, max: PACE_YHI, interval: 0.5, axisLabel: { formatter: "{value}×", fontSize: 10, color: "#8a938c" }, splitLine: { lineStyle: { color: "#eef0ea" } } },
+        yAxis: { type: "value", min: ylo, max: yhi, interval: 1, axisLabel: { formatter: (v) => (v > 0 ? "+" : "") + v, fontSize: 10, color: "#8a938c" }, splitLine: { lineStyle: { color: "#eef0ea" } } },
         series,
       };
       if (!paceChart) { el.innerHTML = ""; paceChart = window.echarts.init(el); }

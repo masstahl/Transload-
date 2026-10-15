@@ -287,7 +287,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v14";
+  const APP_VERSION = "2026-10-15-pace-graph-v15";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1217,7 +1217,34 @@ state.deviceName = deviceName || "Unknown Device";
 };
 
   window.addEventListener("pageshow", refreshSharedData);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshSharedData(); });
+  // When returning after a minute away, pull the newest version automatically —
+  // iOS resumes the frozen page without re-running the launch-time version check.
+  let appHiddenAt = Date.now();
+  function anyModalOpen() {
+    return ["editModal", "planModal", "timeModal"].some((id) => $(id) && $(id).classList.contains("open"))
+      || ($("paceFocusWrap") && !$("paceFocusWrap").classList.contains("hidden"));
+  }
+  async function checkForAppUpdate() {
+    try {
+      const base = location.href.split("?")[0];
+      const res = await fetch(base + "?tl_vcheck=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      const m = (await res.text()).match(/APP_VERSION = "([^"]+)"/);
+      if (m && m[1] && m[1] !== APP_VERSION) {
+        const url = new URL(location.href);
+        url.searchParams.set("tl_refresh", m[1]);
+        location.replace(url.toString());
+      }
+    } catch (e) { /* offline: stay on the current version */ }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshSharedData();
+      if (Date.now() - appHiddenAt > 60000 && !anyModalOpen()) checkForAppUpdate();
+    } else {
+      appHiddenAt = Date.now();
+    }
+  });
 })();
 </script>
 </body>

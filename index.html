@@ -287,7 +287,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v13";
+  const APP_VERSION = "2026-10-15-pace-graph-v14";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -715,17 +715,19 @@ button[data-ui-tooltip]{position:relative}
       if (my !== paceToken || !window.echarts) return;
       const revs = planRevisionsFor(date);
       const dayStart = new Date(date + "T06:00:00").getTime();
-      const xMax = dayStart + 10 * 3600 * 1000; // 6a-4p: the 10-hour day
+      const dayLoads = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
+      // Right edge: end of the 10-hour day, always at least an hour ahead of now/loads
+      // so late-day pills never fall off the edge.
+      let xMax = dayStart + 10 * 3600 * 1000;
+      if (dayLoads.length) xMax = Math.max(xMax, Math.max(...dayLoads.map((x) => new Date(x.occurred_at).getTime())) + 3600000);
+      if (date === localDateString()) xMax = Math.max(xMax, Date.now() + 3600000);
       // Chart starts at the first load actually entered (early site vs afternoon site).
       let xMin = dayStart;
-      {
-        const dayLoads = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
-        if (dayLoads.length) {
-          const first = Math.min(...dayLoads.map((x) => new Date(x.occurred_at).getTime()));
-          xMin = Math.floor(first / 3600000) * 3600000;
-          if (xMin > xMax - 2 * 3600000) xMin = xMax - 2 * 3600000;
-          if (xMin < dayStart - 4 * 3600000) xMin = dayStart - 4 * 3600000;
-        }
+      if (dayLoads.length) {
+        const first = Math.min(...dayLoads.map((x) => new Date(x.occurred_at).getTime()));
+        xMin = Math.floor(first / 3600000) * 3600000;
+        if (xMin > xMax - 2 * 3600000) xMin = xMax - 2 * 3600000;
+        if (xMin < dayStart - 4 * 3600000) xMin = dayStart - 4 * 3600000;
       }
       const nowTs = Date.now();
       const plants = [];

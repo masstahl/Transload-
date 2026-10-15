@@ -120,6 +120,7 @@ button[data-ui-tooltip]{position:relative}
   .timer-pill{height:42px;padding:0 16px;border:1px dashed var(--border);border-radius:10px;background:var(--soft);color:var(--slate);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
   .meta-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .timed-mins{flex:0 0 auto;border:1px solid var(--border);background:var(--soft);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800;color:var(--sage-dark);font-variant-numeric:tabular-nums}
+  .row-actions .timer-pill{margin-left:auto}
   .timer-pill.live{background:#c0362c;border:1px solid #c0362c;color:#fff;box-shadow:0 0 9px #c0362c66}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
 </style>
@@ -286,7 +287,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v10";
+  const APP_VERSION = "2026-10-15-pace-graph-v11";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -456,7 +457,7 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop">${timerPillHtml(x, isToday)}<span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });

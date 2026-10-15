@@ -117,7 +117,9 @@ button[data-ui-tooltip]{position:relative}
 .pf-sub{font-size:13px;color:#6b7a70}
 .pf-row{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 0;border-top:1px solid #e9e7dc;color:#5d6b61}
 .pf-row b{color:#28352e}
-  .timer-pill{height:32px;padding:0 10px;border:1px dashed var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-weight:800;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .timer-pill{height:42px;padding:0 16px;border:1px dashed var(--border);border-radius:10px;background:var(--soft);color:var(--slate);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .meta-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .timed-mins{flex:0 0 auto;border:1px solid var(--border);background:var(--soft);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800;color:var(--sage-dark);font-variant-numeric:tabular-nums}
   .timer-pill.live{background:#c0362c;border:1px solid #c0362c;color:#fff;box-shadow:0 0 9px #c0362c66}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
 </style>
@@ -273,10 +275,18 @@ button[data-ui-tooltip]{position:relative}
     <div class="modal-actions"><button class="cancel" id="cancelEdit">Cancel</button><button class="update" id="updateEntry">Save changes</button></div>
   </div>
 </div>
+<div class="modal" id="timeModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Loading time</div><button class="close" id="closeTime" aria-label="Close">×</button></div>
+    <div class="field"><label for="timeMins">Minutes to load this truck</label><input id="timeMins" type="number" inputmode="numeric" min="1" max="600"></div>
+    <div class="status" id="timeStatus"></div>
+    <div class="modal-actions"><button class="cancel" id="cancelTime">Cancel</button><button class="update" id="saveTime">Save</button></div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v9";
+  const APP_VERSION = "2026-10-15-pace-graph-v10";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -446,9 +456,10 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions">${timerPillHtml(x, isToday)}<button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop">${timerPillHtml(x, isToday)}<span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
+    $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
   }
@@ -608,12 +619,15 @@ button[data-ui-tooltip]{position:relative}
   function timerPillHtml(x, isToday) {
     if (!isToday) return "";
     const s = x.load_started_at, f = x.load_finished_at;
-    if (s && f) {
-      const mins = Math.max(1, Math.round((new Date(f) - new Date(s)) / 60000));
-      return `<button type="button" class="timer-pill done" data-timer="${x.id}" title="Loaded in ${mins} min">✓ ${mins}m</button>`;
-    }
+    if (s && f) return ""; // finished time shows on the variety line instead
     if (s) return `<button type="button" class="timer-pill live" data-timer="${x.id}" data-timer-live="${s}" title="Loading — tap to time out">● --:--</button>`;
     return `<button type="button" class="timer-pill" data-timer="${x.id}" title="Tap when the truck starts loading">○ time in</button>`;
+  }
+  function timedMetaHtml(x) {
+    const s = x.load_started_at, f = x.load_finished_at;
+    if (!(s && f)) return "";
+    const mins = Math.max(1, Math.round((new Date(f) - new Date(s)) / 60000));
+    return `<button type="button" class="timed-mins" data-edit-time="${x.id}" title="Tap to edit loading time">${mins}m</button>`;
   }
   async function toggleTimer(id) {
     const x = state.loads.find((l) => l.id === id);
@@ -642,6 +656,40 @@ button[data-ui-tooltip]{position:relative}
       el.textContent = "● " + Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
     });
   }
+  function openTimeEdit(id) {
+    const x = state.loads.find((l) => l.id === id);
+    if (!x) return;
+    state.editingTime = id;
+    const s = x.load_started_at, f = x.load_finished_at;
+    $("timeMins").value = s && f ? Math.max(1, Math.round((new Date(f) - new Date(s)) / 60000)) : "";
+    $("timeStatus").textContent = "";
+    $("timeModal").classList.add("open");
+    setTimeout(() => $("timeMins").focus(), 60);
+  }
+  function closeTimeEdit() { $("timeModal").classList.remove("open"); state.editingTime = null; }
+  async function saveTimeEdit() {
+    const id = state.editingTime;
+    const x = state.loads.find((l) => l.id === id);
+    const mins = Math.round(Number($("timeMins").value) || 0);
+    if (!x || !state.user) { closeTimeEdit(); return; }
+    if (!(mins >= 1 && mins <= 600)) { $("timeStatus").textContent = "Enter 1–600 minutes."; return; }
+    const startIso = x.load_started_at || new Date(Date.now() - mins * 60000).toISOString();
+    const patch = {
+      load_started_at: startIso,
+      load_finished_at: new Date(new Date(startIso).getTime() + mins * 60000).toISOString(),
+      updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString(),
+    };
+    const { error } = await db.from("outgoing_entries").update(patch).eq("id", id).eq("site_id", state.site);
+    if (error) {
+      const hint = errText(error);
+      if (/load_started_at|load_finished_at|column/i.test(hint)) $("timeStatus").textContent = "Timing needs the database update — ask Matthew to run the new supabase.sql.";
+      else $("timeStatus").textContent = "Could not save time: " + hint;
+      return;
+    }
+    Object.assign(x, patch);
+    closeTimeEdit();
+    renderLoads(); renderPace();
+  }
 
   async function renderPace() {
     const my = ++paceToken;
@@ -664,7 +712,18 @@ button[data-ui-tooltip]{position:relative}
       if (my !== paceToken || !window.echarts) return;
       const revs = planRevisionsFor(date);
       const dayStart = new Date(date + "T06:00:00").getTime();
-      const xMin = dayStart, xMax = dayStart + 10 * 3600 * 1000; // 6a-4p: the 10-hour day
+      const xMax = dayStart + 10 * 3600 * 1000; // 6a-4p: the 10-hour day
+      // Chart starts at the first load actually entered (early site vs afternoon site).
+      let xMin = dayStart;
+      {
+        const dayLoads = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
+        if (dayLoads.length) {
+          const first = Math.min(...dayLoads.map((x) => new Date(x.occurred_at).getTime()));
+          xMin = Math.floor(first / 3600000) * 3600000;
+          if (xMin > xMax - 2 * 3600000) xMin = xMax - 2 * 3600000;
+          if (xMin < dayStart - 4 * 3600000) xMin = dayStart - 4 * 3600000;
+        }
+      }
       const nowTs = Date.now();
       const plants = [];
       const notes = [];
@@ -712,6 +771,12 @@ button[data-ui-tooltip]{position:relative}
       if (!plants.length) { ylo = 0; yhi = 60; }
       ylo = Math.max(0, Math.floor((ylo - 3) / 5) * 5); yhi = Math.ceil((yhi + 3) / 5) * 5;
       if (yhi - ylo < 10) { ylo = Math.max(0, ylo - 5); yhi += 5; }
+      // Seat the lowest target baseline ~1/5 up from the bottom.
+      if (plants.length) {
+        const minTgt = Math.min(...plants.map((pl) => PACE_WINDOW_MIN / Math.max(pl.need, 1)));
+        const yloWant = Math.floor((minTgt - (yhi - minTgt) / 4) / 5) * 5;
+        if (yloWant < ylo) ylo = Math.max(0, yloWant);
+      }
       // De-collide end labels: shift them apart (min 46px).
       plants.sort((a, b) => a.turn - b.turn);
       const pxPerUnit = 266 / (yhi - ylo);
@@ -1103,6 +1168,10 @@ state.deviceName = deviceName || "Unknown Device";
   $("planModal").onclick = (e) => { if (e.target === $("planModal")) closePlan(); };
   $("paceFocusClose").onclick = closePaceFocus;
   $("paceFocusBackdrop").onclick = closePaceFocus;
+  $("closeTime").onclick = closeTimeEdit;
+  $("cancelTime").onclick = closeTimeEdit;
+  $("saveTime").onclick = saveTimeEdit;
+  $("timeModal").onclick = (e) => { if (e.target === $("timeModal")) closeTimeEdit(); };
   $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };

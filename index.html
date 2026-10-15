@@ -259,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v5";
+  const APP_VERSION = "2026-10-15-pace-graph-v6";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -645,7 +645,7 @@ button[data-ui-tooltip]{position:relative}
           return [t, (i + 1) - expectedBy(revs, plan, loc, t, dayStart)];
         });
         const sm = pts.map((p, i) => {
-          const w = pts.slice(Math.max(0, i - 2), i + 1);
+          const w = pts.slice(Math.max(0, i - 4), i + 1);
           return [p[0], w.reduce((s2, q) => s2 + q[1], 0) / w.length];
         });
         const avgTurn = gaps.length ? gaps.reduce((s2, g) => s2 + g, 0) / gaps.length : 0;
@@ -673,7 +673,7 @@ button[data-ui-tooltip]{position:relative}
       const series = [];
       plants.forEach((pl, idx) => {
         const s = {
-          name: pl.loc, type: "line", data: pl.sm, smooth: true, symbol: "none", silent: true,
+          name: pl.loc, type: "line", data: pl.sm, smooth: 0.85, smoothMonotone: "x", symbol: "none", silent: true,
           lineStyle: { width: 2, color: pl.color }, itemStyle: { color: pl.color }, z: 3,
         };
         if (idx === 0) {

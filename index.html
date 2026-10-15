@@ -644,16 +644,14 @@ button[data-ui-tooltip]{position:relative}
         const drivers = inferDrivers(rows.map((r) => r.truck));
         plants.push({ loc, color, sm, done, need, avgTurn, pace, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
       });
-      // De-collide end labels: min 46px apart in pace units.
+      // De-collide end labels: shift them apart (min 46px) in pace units.
       plants.sort((a, b) => a.pace - b.pace);
-      const pxPerUnit = 262 / (PACE_YHI - PACE_YLO);
-      plants.forEach((pl, i) => {
-        pl.labelDy = 0;
-        if (i > 0) {
-          const prev = plants[i - 1];
-          const need = 46 / pxPerUnit - (pl.pace - prev.pace);
-          if (need > 0) pl.labelDy = (prev.labelDy || 0) + need * pxPerUnit;
-        }
+      const pxPerUnit = 266 / (PACE_YHI - PACE_YLO);
+      let lastPlaced = -Infinity;
+      plants.forEach((pl) => {
+        const target = Math.min(Math.max(pl.pace, lastPlaced + 46 / pxPerUnit), PACE_YHI);
+        pl.labelDy = (pl.pace - target) * pxPerUnit;
+        lastPlaced = target;
       });
       const series = [];
       plants.forEach((pl, idx) => {
@@ -712,7 +710,7 @@ button[data-ui-tooltip]{position:relative}
         yAxis: { type: "value", min: PACE_YLO, max: PACE_YHI, interval: 0.5, axisLabel: { formatter: "{value}×", fontSize: 10, color: "#8a938c" }, splitLine: { lineStyle: { color: "#eef0ea" } } },
         series,
       };
-      if (!paceChart) paceChart = window.echarts.init(el);
+      if (!paceChart) { el.innerHTML = ""; paceChart = window.echarts.init(el); }
       paceChart.setOption(option, { notMerge: true });
       $("paceNote").textContent = notes.join(" · ");
       $("paceLive").textContent = "live";

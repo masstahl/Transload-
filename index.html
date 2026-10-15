@@ -259,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v3";
+  const APP_VERSION = "2026-10-15-pace-graph-v4";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -507,7 +507,7 @@ button[data-ui-tooltip]{position:relative}
 
   /* ---- Plant pace graph + timer pill (2026-10-15) ---- */
   const PACE_COLORS = { Quincy: "#4e7d52", Pasco: "#2f7fd0", Warden: "#dd8a26", Richland: "#b95d7e" };
-  const PACE_WINDOW_MIN = 720; // 6a-6p operating window
+  const PACE_WINDOW_MIN = 600; // 10-hour operating day (6a-4p)
   const PACE_YLO = 0.4, PACE_YHI = 1.5;
   let paceChart = null, paceToken = 0, echartsLoading = null;
 
@@ -614,7 +614,7 @@ button[data-ui-tooltip]{position:relative}
       if (my !== paceToken || !window.echarts) return;
       const revs = planRevisionsFor(date);
       const dayStart = new Date(date + "T06:00:00").getTime();
-      const xMin = dayStart, xMax = dayStart + 14 * 3600 * 1000;
+      const xMin = dayStart, xMax = dayStart + 10 * 3600 * 1000; // 6a-4p: the 10-hour day
       const nowTs = Date.now();
       const plants = [];
       const notes = [];
@@ -683,14 +683,14 @@ button[data-ui-tooltip]{position:relative}
           };
         }
         series.push(s);
-        const hasEta = pl.etaT > 0 && pl.etaT <= xMax + 3600 * 1000;
-        const endX = hasEta ? pl.etaT : pl.sm[pl.sm.length - 1][0];
+        const hasEta = pl.etaT > 0;
+        const endX = hasEta ? Math.min(pl.etaT, xMax) : pl.sm[pl.sm.length - 1][0];
         const labelText = hasEta
           ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`
           : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${pl.paceTrue.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`;
         series.push({
           name: pl.loc + " label", type: "line", silent: true,
-          data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.pace], [pl.etaT, pl.pace]] : [[endX, pl.pace]],
+          data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.pace], [endX, pl.pace]] : [[endX, pl.pace]],
           symbol: "none", z: 2,
           lineStyle: hasEta ? { width: 2, type: [4, 5], color: pl.color, opacity: 0.55 } : { opacity: 0 },
           endLabel: {

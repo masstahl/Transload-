@@ -105,6 +105,11 @@ button[data-ui-tooltip]{position:relative}
   /* Keep utility text readable and controls visually unambiguous at every audited viewport. */
   .sub,.note,.meta,.hint,.lbl,.entered,.need-detail,.empty,.field label,.tab{color:#3f4b43!important}
   .select-add .add-variety{background:#e5f0e6!important;color:#3f5c47!important;border:1px solid #c8d9ca}
+  /* Plant pace graph + timer pill (2026-10-15) */
+  #paceChart{width:100%;height:320px}
+  .timer-pill{height:32px;padding:0 10px;border:1px dashed var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-weight:800;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .timer-pill.live{background:#c0362c;border:1px solid #c0362c;color:#fff;box-shadow:0 0 9px #c0362c66}
+  .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
 </style>
 </head>
 <body>
@@ -158,6 +163,11 @@ button[data-ui-tooltip]{position:relative}
     <div class="panel">
       <div class="needs-head"><div class="title" id="totalsTitle">Loads by location</div><div class="total-loads" id="totalLoadsToday" aria-live="polite">0 total</div></div>
        <div id="loadsByLocation" class="location-totals"></div>
+    </div>
+    <div class="panel">
+      <div class="needs-head"><div class="title" id="paceTitle">Plant pace</div><div class="total-loads" id="paceLive" aria-live="polite"></div></div>
+      <div id="paceChart"></div>
+      <div class="note" id="paceNote" style="margin-top:6px"></div>
     </div>
     <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
@@ -249,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-09-pastel-locations-v20";
+  const APP_VERSION = "2026-10-15-pace-graph-v1";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -284,7 +294,7 @@ button[data-ui-tooltip]{position:relative}
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false };
   const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
   function restoreStickyInputs() {
     $("outField").value = localStorage.getItem(stickyKey("out_field")) || "";
@@ -312,6 +322,7 @@ button[data-ui-tooltip]{position:relative}
   }
   function updateLiveClock() {
     $("outNow").textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
+    tickTimerPills();
   }
   function errText(error) { return error?.message || error?.error_description || (typeof error === "string" ? error : "Unknown error"); }
 
@@ -412,13 +423,15 @@ button[data-ui-tooltip]{position:relative}
   }
   function renderLoads() {
     const date = $("planDate").value || state.planDate;
+    const isToday = date === localDateString();
     const records = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
     $("listTitle").textContent = "Loads for " + friendlyDay(date);
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions">${timerPillHtml(x, isToday)}<button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
+    $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
   }
@@ -480,11 +493,230 @@ button[data-ui-tooltip]{position:relative}
     state.quick = quick.data || [];
     state.varieties = varieties.data || [];
     state.plans = plans.data || [];
+    try {
+      const rev = await db.from("plan_revisions").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }).limit(500);
+      state.planRevisions = rev.error ? [] : (rev.data || []);
+    } catch (e) { state.planRevisions = []; }
     renderLoads();
     renderIncoming();
     renderQuick();
     renderVarieties();
     renderNeeds();
+    renderPace();
+  }
+
+  /* ---- Plant pace graph + timer pill (2026-10-15) ---- */
+  const PACE_COLORS = { Quincy: "#4e7d52", Pasco: "#2f7fd0", Warden: "#dd8a26", Richland: "#b95d7e" };
+  const PACE_WINDOW_MIN = 720; // 6a-6p operating window
+  const PACE_YLO = 0.4, PACE_YHI = 2.2;
+  let paceChart = null, paceToken = 0, echartsLoading = null;
+
+  function loadECharts() {
+    if (window.echarts) return Promise.resolve();
+    if (!echartsLoading) {
+      echartsLoading = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js";
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error("chart load failed"));
+        document.head.appendChild(s);
+      });
+    }
+    return echartsLoading;
+  }
+  function planRevisionsFor(date) {
+    return (state.planRevisions || []).filter((r) => r.plan_date === date).sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
+  }
+  // Plan in effect at time t: latest revision at or before t, else the current plan row.
+  function targetAt(revisions, plan, loc, t) {
+    const key = loc.toLowerCase();
+    let loads = null;
+    for (const r of revisions) {
+      if (new Date(r.changed_at).getTime() <= t) loads = Number(r[key] || 0);
+      else break;
+    }
+    if (loads === null) loads = Number(plan[key] || 0);
+    return loads > 0 ? PACE_WINDOW_MIN / loads : 0;
+  }
+  // Infer driver count: walk the day's truck order; each repeat's gap is one
+  // full rotation. Median resists one-off doubles. e.g. 731,_,_,_,_,731 -> 5.
+  function inferDrivers(trucks) {
+    const last = Object.create(null), gaps = [];
+    trucks.forEach((t, i) => {
+      const k = String(t == null ? "" : t).trim().toLowerCase();
+      if (!k) return;
+      if (k in last) gaps.push(i - last[k]);
+      last[k] = i;
+    });
+    if (!gaps.length) return 0;
+    gaps.sort((a, b) => a - b);
+    return gaps[Math.floor(gaps.length / 2)];
+  }
+  const fmtHourTick = (ts) => { const h = new Date(ts).getHours(); if (h === 0) return "12a"; if (h < 12) return h + "a"; if (h === 12) return "12p"; return (h - 12) + "p"; };
+  const fmtClock = (ts) => { const d = new Date(ts); let h = d.getHours(); const ap = h >= 12 ? "p" : "a"; h = h % 12 || 12; return h + ":" + String(d.getMinutes()).padStart(2, "0") + ap; };
+  const fmtDur = (m) => m >= 60 ? Math.floor(m / 60) + "h" + String(Math.round(m % 60)).padStart(2, "0") + "m" : Math.round(m) + "m";
+
+  function timerPillHtml(x, isToday) {
+    if (!isToday) return "";
+    const s = x.load_started_at, f = x.load_finished_at;
+    if (s && f) {
+      const mins = Math.max(1, Math.round((new Date(f) - new Date(s)) / 60000));
+      return `<button type="button" class="timer-pill done" data-timer="${x.id}" title="Loaded in ${mins} min">✓ ${mins}m</button>`;
+    }
+    if (s) return `<button type="button" class="timer-pill live" data-timer="${x.id}" data-timer-live="${s}" title="Loading — tap to time out">● --:--</button>`;
+    return `<button type="button" class="timer-pill" data-timer="${x.id}" title="Tap when the truck starts loading">○ time in</button>`;
+  }
+  async function toggleTimer(id) {
+    const x = state.loads.find((l) => l.id === id);
+    if (!x || !state.user) return;
+    const now = new Date().toISOString();
+    let patch = null;
+    if (!x.load_started_at) patch = { load_started_at: now };
+    else if (!x.load_finished_at) patch = { load_finished_at: now };
+    else return;
+    patch.updated_by = state.user.id;
+    patch.updated_by_name = state.name;
+    patch.updated_at = now;
+    const { error } = await db.from("outgoing_entries").update(patch).eq("id", id).eq("site_id", state.site);
+    if (error) {
+      const hint = errText(error);
+      if (/load_started_at|load_finished_at|column/i.test(hint)) message("outStatus", "Timing needs the database update — ask Matthew to run the new supabase.sql.");
+      else message("outStatus", "Could not save time: " + hint);
+      return;
+    }
+    Object.assign(x, patch);
+    renderLoads();
+  }
+  function tickTimerPills() {
+    document.querySelectorAll("[data-timer-live]").forEach((el) => {
+      const s = Math.max(0, (Date.now() - new Date(el.dataset.timerLive).getTime()) / 1000);
+      el.textContent = "● " + Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+    });
+  }
+
+  async function renderPace() {
+    const my = ++paceToken;
+    try {
+      const date = $("planDate").value || state.planDate;
+      const plan = planFor(date);
+      const el = $("paceChart");
+      if (!el) return;
+      const needy = locations.filter((l) => Number(plan[l.toLowerCase()] || 0) > 0);
+      $("paceTitle").textContent = "Plant pace · " + friendlyDay(date);
+      if (!needy.length) {
+        if (paceChart) { paceChart.dispose(); paceChart = null; }
+        el.innerHTML = '<div class="empty-chart">No plant needs set for this day.</div>';
+        $("paceNote").textContent = "";
+        $("paceLive").textContent = "";
+        return;
+      }
+      await loadECharts();
+      if (my !== paceToken || !window.echarts) return;
+      const revs = planRevisionsFor(date);
+      const dayStart = new Date(date + "T06:00:00").getTime();
+      const xMin = dayStart, xMax = dayStart + 14 * 3600 * 1000;
+      const nowTs = Date.now();
+      const plants = [];
+      const notes = [];
+      needy.forEach((loc) => {
+        const color = PACE_COLORS[loc];
+        const rows = state.loads.filter((x) => x.location === loc && sameLocalDate(x.occurred_at, date)).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
+        const need = Number(plan[loc.toLowerCase()] || 0);
+        const done = rows.length;
+        if (rows.length < 2) { notes.push(`${loc}: ${done}/${need} · not enough loads yet`); return; }
+        const gaps = [], pts = [];
+        for (let i = 1; i < rows.length; i++) {
+          const t = new Date(rows[i].occurred_at).getTime();
+          const gapMin = (t - new Date(rows[i - 1].occurred_at).getTime()) / 60000;
+          const tgt = targetAt(revs, plan, loc, t);
+          if (tgt > 0 && gapMin >= 0) { gaps.push(gapMin); pts.push([t, gapMin / tgt]); }
+        }
+        if (!pts.length) { notes.push(`${loc}: ${done}/${need} · no pace yet`); return; }
+        const sm = pts.map((p, i) => {
+          const w = pts.slice(Math.max(0, i - 2), i + 1);
+          return [p[0], w.reduce((s2, q) => s2 + q[1], 0) / w.length];
+        });
+        const avgTurn = gaps.reduce((s2, g) => s2 + g, 0) / gaps.length;
+        const lastT = sm[sm.length - 1][0];
+        const pace = Math.min(sm[sm.length - 1][1], PACE_YHI);
+        const remaining = Math.max(need - done, 0);
+        const etaT = remaining > 0 && avgTurn > 0 ? lastT + remaining * avgTurn * 60000 : 0;
+        const drivers = inferDrivers(rows.map((r) => r.truck));
+        plants.push({ loc, color, sm, done, need, avgTurn, pace, etaT, drivers, revs: revs.filter((r) => { const rt = new Date(r.changed_at).getTime(); return rt >= xMin && rt <= xMax; }), pts });
+      });
+      // De-collide end labels: min 46px apart in pace units.
+      plants.sort((a, b) => a.pace - b.pace);
+      const pxPerUnit = 262 / (PACE_YHI - PACE_YLO);
+      plants.forEach((pl, i) => {
+        pl.labelDy = 0;
+        if (i > 0) {
+          const prev = plants[i - 1];
+          const need = 46 / pxPerUnit - (pl.pace - prev.pace);
+          if (need > 0) pl.labelDy = (prev.labelDy || 0) + need * pxPerUnit;
+        }
+      });
+      const series = [];
+      plants.forEach((pl, idx) => {
+        const s = {
+          name: pl.loc, type: "line", data: pl.sm, smooth: true, symbol: "none", silent: true,
+          lineStyle: { width: 2, color: pl.color }, itemStyle: { color: pl.color }, z: 3,
+        };
+        if (idx === 0) {
+          s.markArea = {
+            silent: true,
+            data: [
+              [{ yAxis: PACE_YLO, xAxis: xMin, itemStyle: { color: "rgba(70,140,90,0.07)" } }, { yAxis: 1, xAxis: xMax }],
+              [{ yAxis: 1, xAxis: xMin, itemStyle: { color: "rgba(200,70,60,0.06)" } }, { yAxis: PACE_YHI, xAxis: xMax }],
+            ],
+          };
+          const ml = [{ yAxis: 1, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed" }, label: { formatter: "1.0× on plan", position: "insideEndTop", fontSize: 10, color: "#8a938c" } }];
+          if (nowTs >= xMin && nowTs <= xMax) ml.push({ xAxis: nowTs, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed", opacity: 0.7 }, label: { formatter: "now", position: "insideStartTop", fontSize: 10, color: "#8a938c" } });
+          s.markLine = { silent: true, symbol: "none", data: ml };
+        }
+        if (pl.revs.length) {
+          s.markPoint = {
+            silent: true,
+            data: pl.revs.map((r) => {
+              const rt = new Date(r.changed_at).getTime();
+              const at = pl.pts.find((p) => p[0] >= rt) || pl.pts[pl.pts.length - 1];
+              return { coord: [rt, Math.min(at[1], PACE_YHI)], symbol: "diamond", symbolSize: 9, itemStyle: { color: pl.color }, label: { show: false } };
+            }),
+          };
+        }
+        series.push(s);
+        const hasEta = pl.etaT > 0 && pl.etaT <= xMax + 3600 * 1000;
+        const endX = hasEta ? pl.etaT : pl.sm[pl.sm.length - 1][0];
+        const labelText = hasEta
+          ? `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ~${fmtClock(pl.etaT)} · ${pl.pace.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`
+          : `{b|${pl.loc}}\n{m|${pl.done}/${pl.need} · ${pl.pace.toFixed(2)}×}\n{s|${Math.round(pl.avgTurn)}m turn · ${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${pl.drivers > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—"} cycle}`;
+        series.push({
+          name: pl.loc + " label", type: "line", silent: true,
+          data: hasEta ? [[pl.sm[pl.sm.length - 1][0], pl.pace], [pl.etaT, pl.pace]] : [[endX, pl.pace]],
+          symbol: "none", z: 2,
+          lineStyle: hasEta ? { width: 2, type: [4, 5], color: pl.color, opacity: 0.55 } : { opacity: 0 },
+          endLabel: {
+            show: true, distance: 8, offset: [0, pl.labelDy || 0], color: "#3f4b43",
+            formatter: () => labelText,
+            rich: {
+              b: { color: pl.color, fontWeight: 800, fontSize: 11, lineHeight: 14 },
+              m: { fontSize: 10, color: "#3f4b43", lineHeight: 13 },
+              s: { fontSize: 9, color: "#6b7a70", lineHeight: 12 },
+            },
+          },
+        });
+      });
+      const option = {
+        animationDuration: 900,
+        grid: { left: 40, right: 118, top: 26, bottom: 28 },
+        xAxis: { type: "time", min: xMin, max: xMax, axisLabel: { formatter: (v) => fmtHourTick(v), fontSize: 10, color: "#8a938c" }, splitLine: { show: false }, axisLine: { lineStyle: { color: "#dcded6" } } },
+        yAxis: { type: "value", min: PACE_YLO, max: PACE_YHI, interval: 0.5, axisLabel: { formatter: "{value}×", fontSize: 10, color: "#8a938c" }, splitLine: { lineStyle: { color: "#eef0ea" } } },
+        series,
+      };
+      if (!paceChart) paceChart = window.echarts.init(el);
+      paceChart.setOption(option, { notMerge: true });
+      $("paceNote").textContent = notes.join(" · ");
+      $("paceLive").textContent = "live";
+    } catch (e) { console.warn("pace render failed", e); }
   }
 
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
@@ -637,8 +869,27 @@ button[data-ui-tooltip]{position:relative}
     const date = $("planDate").value;
     const vals = { pasco: Number($("planPasco").value || 0), warden: Number($("planWarden").value || 0), quincy: Number($("planQuincy").value || 0), richland: Number($("planRichland").value || 0) };
     if (Object.values(vals).some((n) => !Number.isInteger(n) || n < 0)) return message("planModalStatus", "Enter whole numbers 0 or greater.");
+    const oldPlan = planFor(date);
+    const oldRow = state.plans.find((p) => p.plan_date === date);
+    const changed = ["pasco", "warden", "quincy", "richland"].some((k) => Number(oldPlan[k] || 0) !== vals[k]);
     const { error } = await db.from("arrival_plans").upsert({ site_id: state.site, plan_date: date, ...vals, updated_at: new Date().toISOString(), updated_by: state.user.id, updated_by_name: state.name }, { onConflict: "site_id,plan_date" });
     if (error) return message("planModalStatus", errText(error));
+    if (changed) {
+      // Log the revision so the pace chart scores each load against the plan
+      // that was in effect when it happened. First change also seeds the
+      // previous plan (from the plan row's own updated_at).
+      try {
+        const nowIso = new Date().toISOString();
+        const have = await db.from("plan_revisions").select("id").eq("site_id", state.site).eq("plan_date", date).limit(1);
+        const rows = [];
+        if (!have.error && !(have.data && have.data.length) && oldRow) {
+          rows.push({ site_id: state.site, plan_date: date, pasco: Number(oldPlan.pasco || 0), warden: Number(oldPlan.warden || 0), quincy: Number(oldPlan.quincy || 0), richland: Number(oldPlan.richland || 0), changed_at: oldRow.updated_at || nowIso, changed_by: oldRow.updated_by || state.user.id, changed_by_name: oldRow.updated_by_name || state.name });
+        }
+        rows.push({ site_id: state.site, plan_date: date, ...vals, changed_at: nowIso, changed_by: state.user.id, changed_by_name: state.name });
+        const ins = await db.from("plan_revisions").insert(rows);
+        if (ins.error) throw ins.error;
+      } catch (e) { /* revisions table not yet created — chart falls back to the current plan */ }
+    }
     await loadData();
     closePlan();
     message("planStatus", "Plant needs saved.", true);
@@ -696,7 +947,7 @@ button[data-ui-tooltip]{position:relative}
     message("inStatus", "Unable to load shared data: " + hint);
   }
   function subscribe() {
-    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans"].forEach((table) => {
+    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions"].forEach((table) => {
       db.channel("live-" + table).on("postgres_changes", { event: "*", schema: "public", table }, () => loadData().catch(showSetupError)).subscribe();
     });
   }
@@ -767,16 +1018,17 @@ state.deviceName = deviceName || "Unknown Device";
   renderSiteTabs();
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
+  window.addEventListener("resize", () => { if (paceChart) paceChart.resize(); });
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;
   $("closePlan").onclick = closePlan;
   $("cancelPlan").onclick = closePlan;
   $("savePlan").onclick = savePlan;
   $("planModal").onclick = (e) => { if (e.target === $("planModal")) closePlan(); };
-  $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
-  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
-  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
-  $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); };
+  $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("addVariety").onclick = addVariety;
   $("expandLoadsBtn").onclick = () => { state.loadsExpanded = !state.loadsExpanded; renderLoads(); };
   $("outField").addEventListener("input", () => saveStickyInput("out_field", $("outField").value));

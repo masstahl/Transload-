@@ -165,11 +165,6 @@ button[data-ui-tooltip]{position:relative}
        <div id="loadsByLocation" class="location-totals"></div>
     </div>
     <div class="panel">
-      <div class="needs-head"><div class="title" id="paceTitle">Plant pace</div><div class="total-loads" id="paceLive" aria-live="polite"></div></div>
-      <div id="paceChart"></div>
-      <div class="note" id="paceNote" style="margin-top:6px"></div>
-    </div>
-    <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
       <div class="list" id="loadList"></div>
       <button class="small secondary" id="expandLoadsBtn" style="display:none;margin-top:8px">Show all loads</button>
@@ -182,6 +177,11 @@ button[data-ui-tooltip]{position:relative}
         <button class="range-btn" data-range="60">60 days</button>
       </div>
       <div id="fieldChart" class="field-chart"></div>
+    </div>
+    <div class="panel">
+      <div class="needs-head"><div class="title" id="paceTitle">Plant pace</div><div class="total-loads" id="paceLive" aria-live="polite"></div></div>
+      <div id="paceChart"></div>
+      <div class="note" id="paceNote" style="margin-top:6px"></div>
     </div>
   </section>
   <section id="incomingView" class="hidden">
@@ -259,7 +259,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v1";
+  const APP_VERSION = "2026-10-15-pace-graph-v2";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

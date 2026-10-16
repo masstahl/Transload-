@@ -287,7 +287,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v16";
+  const APP_VERSION = "2026-10-15-pace-graph-v17";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -640,7 +640,9 @@ button[data-ui-tooltip]{position:relative}
     if (!x || !state.user) return;
     const now = new Date().toISOString();
     let patch = null;
-    if (!x.load_started_at) patch = { load_started_at: now };
+    // Time-in press overrides the logged time: the press IS when loading started,
+    // so the card and the chart both move to the true time.
+    if (!x.load_started_at) patch = { load_started_at: now, occurred_at: now };
     else if (!x.load_finished_at) patch = { load_finished_at: now };
     else return;
     patch.updated_by = state.user.id;
@@ -654,7 +656,8 @@ button[data-ui-tooltip]{position:relative}
       return;
     }
     Object.assign(x, patch);
-    renderLoads();
+    state.loads.sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
+    renderLoads(); renderPace();
   }
   function tickTimerPills() {
     document.querySelectorAll("[data-timer-live]").forEach((el) => {

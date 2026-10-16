@@ -122,6 +122,10 @@ button[data-ui-tooltip]{position:relative}
   .timed-mins{flex:0 0 auto;border:1px solid var(--border);background:var(--soft);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800;color:var(--sage-dark);font-variant-numeric:tabular-nums}
   .row-actions .timer-pill{margin-left:auto}
   .timer-pill.live{background:#c0362c;border:1px solid #c0362c;color:#fff;box-shadow:0 0 9px #c0362c66}
+  .timer-pill.live.overdue{background:#b3401e;border-color:#ff7a4d;animation:overduePulse 1.1s infinite}
+  @keyframes overduePulse{0%,100%{box-shadow:0 0 8px #ff5a3688}50%{box-shadow:0 0 20px #ff5a36}}
+  .timer-alert{background:#7a1f1a;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;text-align:center;box-shadow:0 0 12px #c0362c88}
+  .timer-alert b{font-size:16px}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
 </style>
 </head>
@@ -177,6 +181,7 @@ button[data-ui-tooltip]{position:relative}
       <div class="needs-head"><div class="title" id="totalsTitle">Loads by location</div><div class="total-loads" id="totalLoadsToday" aria-live="polite">0 total</div></div>
        <div id="loadsByLocation" class="location-totals"></div>
     </div>
+    <div id="timerAlert" class="timer-alert hidden" aria-live="polite"></div>
     <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
       <div class="list" id="loadList"></div>
@@ -287,7 +292,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v17";
+  const APP_VERSION = "2026-10-15-pace-graph-v18";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -463,6 +468,7 @@ button[data-ui-tooltip]{position:relative}
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
+    updateTimerAlerts();
   }
   function renderIncoming() {
     const today = localDateString();
@@ -537,6 +543,8 @@ button[data-ui-tooltip]{position:relative}
   /* ---- Plant pace graph + timer pill (2026-10-15) ---- */
   const PACE_COLORS = { Quincy: "#4e7d52", Pasco: "#2f7fd0", Warden: "#dd8a26", Richland: "#b95d7e" };
   const PACE_WINDOW_MIN = 600; // 10-hour operating day (6a-4p)
+  const TIMER_OVERDUE_MIN = 12; // timers running longer than this get flagged
+  const OVERDUE_MS = TIMER_OVERDUE_MIN * 60000;
   let paceChart = null, paceToken = 0, echartsLoading = null;
 
   function loadECharts() {
@@ -659,11 +667,32 @@ button[data-ui-tooltip]{position:relative}
     state.loads.sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
     renderLoads(); renderPace();
   }
+  let lastAlertCheck = 0;
   function tickTimerPills() {
     document.querySelectorAll("[data-timer-live]").forEach((el) => {
-      const s = Math.max(0, (Date.now() - new Date(el.dataset.timerLive).getTime()) / 1000);
-      el.textContent = "● " + Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") + "." + Math.floor((s % 1) * 10);
+      const ms = Math.max(0, Date.now() - new Date(el.dataset.timerLive).getTime());
+      const s = ms / 1000;
+      const overdue = ms > OVERDUE_MS;
+      el.classList.toggle("overdue", overdue);
+      el.textContent = (overdue ? "⚠ " : "● ") + Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") + "." + Math.floor((s % 1) * 10);
     });
+    if (Date.now() - lastAlertCheck > 5000) { lastAlertCheck = Date.now(); updateTimerAlerts(); }
+  }
+  function overdueTimers() {
+    const now = Date.now();
+    return state.loads.filter((x) => x.load_started_at && !x.load_finished_at && (now - new Date(x.load_started_at).getTime()) > OVERDUE_MS);
+  }
+  function updateTimerAlerts() {
+    const n = overdueTimers().length;
+    const banner = $("timerAlert");
+    if (banner) {
+      banner.classList.toggle("hidden", n === 0);
+      if (n > 0) banner.innerHTML = `⚠ <b>${n}</b> timer${n === 1 ? " is" : "s are"} running over ${TIMER_OVERDUE_MIN} min — tap a load to time it out`;
+    }
+    if ("setAppBadge" in navigator) {
+      if (n > 0) navigator.setAppBadge(n).catch(() => {});
+      else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+    }
   }
   function openTimeEdit(id) {
     const x = state.loads.find((l) => l.id === id);

@@ -126,7 +126,8 @@ button[data-ui-tooltip]{position:relative}
   @keyframes overduePulse{0%,100%{box-shadow:0 0 8px #ff5a3688}50%{box-shadow:0 0 20px #ff5a36}}
   .timer-alert{background:#7a1f1a;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;text-align:center;box-shadow:0 0 12px #c0362c88}
   .timer-alert b{font-size:16px}
-  .tabs{grid-template-columns:1fr 1fr 1fr}
+  .menu-divider{height:1px;background:var(--border);margin:2px}
+  .menu-link{min-height:52px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:850;color:var(--sage-dark);font-size:15px}
   .exp-label{font-size:12px;font-weight:850;color:var(--slate);margin:10px 0 6px}
   .exp-hint{font-weight:400}
   .exp-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;margin-top:4px;max-width:100%}
@@ -146,11 +147,10 @@ button[data-ui-tooltip]{position:relative}
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
-  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button></nav><div class="site-content">
+  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
   <nav class="tabs">
-    <button class="tab active" data-tab="outgoing">Outgoing</button>
-    <button class="tab" data-tab="incoming">Incoming</button>
-    <button class="tab" data-tab="export">Export</button>
+    <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
+    <button class="tab" data-tab="incoming">Incoming Drivers</button>
   </nav>
   <section id="outgoingView">
     <div class="panel">
@@ -328,7 +328,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-export-csv-v19";
+  const APP_VERSION = "2026-10-16-export-menu-v20";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -397,10 +397,10 @@ button[data-ui-tooltip]{position:relative}
 
   async function bustOldCache() {
     // Home Screen apps can retain an old document even after the website updates.
-    // On launch, remove any legacy worker/cache and navigate once to a versioned URL
-    // so iOS requests the current document instead of reusing the old launch URL.
-    const refreshParam = "tl_refresh";
-    if (new URL(location.href).searchParams.get(refreshParam) === APP_VERSION) return;
+    // Never trust the URL param or cached bytes for the version decision: ask the
+    // network (cache bypassed) what the live version is. If we aren't running it,
+    // navigate to a versioned URL so iOS fetches the current document instead of
+    // a stale cached copy whose baked-in version would otherwise match its param.
     try {
       if ("serviceWorker" in navigator) {
         const regs = await navigator.serviceWorker.getRegistrations();
@@ -413,10 +413,18 @@ button[data-ui-tooltip]{position:relative}
     } catch (error) {
       console.warn("Could not clear an old app cache:", error);
     }
-    const url = new URL(location.href);
-    url.searchParams.set(refreshParam, APP_VERSION);
-    location.replace(url.toString());
-    await new Promise(() => {});
+    try {
+      const base = location.href.split("?")[0];
+      const res = await fetch(base + "?tl_vcheck=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      const m = (await res.text()).match(/APP_VERSION = "([^"]+)"/);
+      if (m && m[1] && m[1] !== APP_VERSION) {
+        const url = new URL(location.href);
+        url.searchParams.set("tl_refresh", m[1]);
+        location.replace(url.toString());
+        await new Promise(() => {});
+      }
+    } catch (e) { /* offline: run the cached version */ }
   }
 
   function renderVarieties() {
@@ -1336,10 +1344,18 @@ state.deviceName = deviceName || "Unknown Device";
       document.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("active", x === button));
       $("outgoingView").classList.toggle("hidden", tabName !== "outgoing");
       $("incomingView").classList.toggle("hidden", tabName !== "incoming");
-      $("exportView").classList.toggle("hidden", tabName !== "export");
-      if (tabName === "export") refreshExport();
+      $("exportView").classList.add("hidden");
     };
   });
+  function showExportView() {
+    closeSiteMenu();
+    document.querySelectorAll("[data-tab]").forEach((x) => x.classList.remove("active"));
+    $("outgoingView").classList.add("hidden");
+    $("incomingView").classList.add("hidden");
+    $("exportView").classList.remove("hidden");
+    refreshExport();
+  }
+  $("menuExportBtn").onclick = showExportView;
   document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });
   $("siteMenuButton").onclick = openSiteMenu;
   $("siteMenuBackdrop").onclick = closeSiteMenu;

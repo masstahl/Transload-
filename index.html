@@ -126,6 +126,14 @@ button[data-ui-tooltip]{position:relative}
   @keyframes overduePulse{0%,100%{box-shadow:0 0 8px #ff5a3688}50%{box-shadow:0 0 20px #ff5a36}}
   .timer-alert{background:#7a1f1a;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;text-align:center;box-shadow:0 0 12px #c0362c88}
   .timer-alert b{font-size:16px}
+  .tabs{grid-template-columns:1fr 1fr 1fr}
+  .exp-label{font-size:12px;font-weight:850;color:var(--slate);margin:10px 0 6px}
+  .exp-hint{font-weight:400}
+  .exp-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;margin-top:4px;max-width:100%}
+  .exp-table{border-collapse:collapse;width:100%;font-size:12px}
+  .exp-table th,.exp-table td{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left;white-space:nowrap}
+  .exp-table th{background:var(--soft);font-weight:800}
+  .exp-table tr:last-child td{border-bottom:0}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
 </style>
 </head>
@@ -140,8 +148,9 @@ button[data-ui-tooltip]{position:relative}
   </header>
   <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button></nav><div class="site-content">
   <nav class="tabs">
-    <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
-    <button class="tab" data-tab="incoming">Incoming Drivers</button>
+    <button class="tab active" data-tab="outgoing">Outgoing</button>
+    <button class="tab" data-tab="incoming">Incoming</button>
+    <button class="tab" data-tab="export">Export</button>
   </nav>
   <section id="outgoingView">
     <div class="panel">
@@ -250,6 +259,33 @@ button[data-ui-tooltip]{position:relative}
       <div id="inFieldChart" class="field-chart"></div>
     </div>
   </section>
+  <section id="exportView" class="hidden">
+    <div class="panel">
+      <div class="title">Export CSV</div>
+      <div class="exp-label">What to export</div>
+      <div class="chart-controls" id="expKindBtns">
+        <button type="button" class="range-btn active" data-exp-kind="outgoing">Outgoing loads</button>
+        <button type="button" class="range-btn" data-exp-kind="incoming">Incoming drivers</button>
+      </div>
+      <div class="exp-label">Site</div>
+      <div class="chart-controls" id="expSiteBtns">
+        <button type="button" class="range-btn" data-exp-site="1">Site 1</button>
+        <button type="button" class="range-btn" data-exp-site="2">Site 2</button>
+        <button type="button" class="range-btn" data-exp-site="both">Both</button>
+      </div>
+      <div class="exp-label">Date range</div>
+      <div class="fields">
+        <div class="field"><label for="expFrom">From</label><input id="expFrom" type="date"></div>
+        <div class="field"><label for="expTo">To</label><input id="expTo" type="date"></div>
+      </div>
+      <div class="exp-label">Columns <span class="exp-hint">— tap to include or remove</span></div>
+      <div class="chart-controls" id="expCols"></div>
+      <div class="exp-label">Preview <span class="exp-hint" id="expCount"></span></div>
+      <div class="exp-table-wrap"><table class="exp-table" id="expPreview"></table></div>
+      <button class="save" id="expDownload">Download CSV</button>
+      <div class="status" id="expStatus" aria-live="polite"></div>
+    </div>
+  </section>
   </div></div>
 </main>
 <div class="modal" id="planModal" role="dialog" aria-modal="true">
@@ -292,7 +328,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-15-pace-graph-v18";
+  const APP_VERSION = "2026-10-16-export-csv-v19";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1181,12 +1217,127 @@ state.deviceName = deviceName || "Unknown Device";
     }
   }
 
+  // ── CSV export ──
+  function fmtDurHMS(s, f) {
+    const sec = Math.max(0, Math.round((new Date(f) - new Date(s)) / 1000));
+    return Math.floor(sec / 60) + "m " + (sec % 60) + "s";
+  }
+  const EXPORT_COLS = {
+    outgoing: [
+      { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
+      { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
+      { key: "site", label: "Site", get: (x) => (x.site_id || "") },
+      { key: "location", label: "Location", get: (x) => (x.location || "") },
+      { key: "truck", label: "Truck", get: (x) => (x.truck || "") },
+      { key: "trailer", label: "Trailer", get: (x) => (x.trailer || "") },
+      { key: "field", label: "Field", get: (x) => (x.field || "") },
+      { key: "variety", label: "Variety", get: (x) => (x.variety || "") },
+      { key: "timein", label: "Time in", get: (x) => (x.load_started_at ? fmtClock(new Date(x.load_started_at).getTime()) : "") },
+      { key: "timeout", label: "Time out", get: (x) => (x.load_finished_at ? fmtClock(new Date(x.load_finished_at).getTime()) : "") },
+      { key: "duration", label: "Duration", get: (x) => (x.load_started_at && x.load_finished_at ? fmtDurHMS(x.load_started_at, x.load_finished_at) : "") },
+      { key: "enteredby", label: "Entered by", get: (x) => (x.created_by_name || "") },
+      { key: "editedby", label: "Last edited by", get: (x) => (x.updated_by_name || x.created_by_name || "") },
+    ],
+    incoming: [
+      { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
+      { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
+      { key: "site", label: "Site", get: (x) => (x.site_id || "") },
+      { key: "driver", label: "Driver", get: (x) => (x.driver || "") },
+      { key: "field", label: "Field", get: (x) => (x.field || "") },
+      { key: "enteredby", label: "Entered by", get: (x) => (x.created_by_name || "") },
+      { key: "editedby", label: "Last edited by", get: (x) => (x.updated_by_name || x.created_by_name || "") },
+    ],
+  };
+  const exportState = { kind: "outgoing", site: null, from: "", to: "", cols: {}, rows: [] };
+  let exportInit = false;
+  function selectedExportCols() { return EXPORT_COLS[exportState.kind].filter((c) => exportState.cols[c.key]); }
+  function resetExportCols() {
+    exportState.cols = {};
+    EXPORT_COLS[exportState.kind].forEach((c) => { exportState.cols[c.key] = true; });
+  }
+  function initExport() {
+    if (exportInit) return;
+    exportInit = true;
+    exportState.site = String(state.site);
+    const d = $("planDate").value || localDateString();
+    exportState.from = d; exportState.to = d;
+    $("expFrom").value = d; $("expTo").value = d;
+    resetExportCols();
+    $("expKindBtns").querySelectorAll("[data-exp-kind]").forEach((b) => {
+      b.onclick = () => { exportState.kind = b.dataset.expKind; resetExportCols(); refreshExport(); };
+    });
+    $("expSiteBtns").querySelectorAll("[data-exp-site]").forEach((b) => {
+      b.onclick = () => { exportState.site = b.dataset.expSite; refreshExport(); };
+    });
+    $("expFrom").onchange = () => { exportState.from = $("expFrom").value; refreshExport(); };
+    $("expTo").onchange = () => { exportState.to = $("expTo").value; refreshExport(); };
+    $("expDownload").onclick = downloadExport;
+  }
+  async function refreshExport() {
+    initExport();
+    message("expStatus", "");
+    let rows = [];
+    try {
+      const table = exportState.kind === "outgoing" ? "outgoing_entries" : "incoming_entries";
+      let q = db.from(table).select("*").order("occurred_at", { ascending: true });
+      if (exportState.site !== "both") q = q.eq("site_id", exportState.site);
+      if (exportState.from) q = q.gte("occurred_at", new Date(exportState.from + "T00:00:00").toISOString());
+      if (exportState.to) q = q.lte("occurred_at", new Date(exportState.to + "T23:59:59").toISOString());
+      const res = await q;
+      if (res.error) throw res.error;
+      rows = res.data || [];
+    } catch (e) {
+      message("expStatus", "Could not load rows: " + errText(e));
+    }
+    exportState.rows = rows;
+    renderExportChrome();
+  }
+  function renderExportChrome() {
+    $("expKindBtns").querySelectorAll("[data-exp-kind]").forEach((b) => b.classList.toggle("active", b.dataset.expKind === exportState.kind));
+    $("expSiteBtns").querySelectorAll("[data-exp-site]").forEach((b) => b.classList.toggle("active", b.dataset.expSite === exportState.site));
+    $("expCols").innerHTML = EXPORT_COLS[exportState.kind].map((c) => `<button type="button" class="range-btn${exportState.cols[c.key] ? " active" : ""}" data-exp-col="${c.key}">${c.label}</button>`).join("");
+    $("expCols").querySelectorAll("[data-exp-col]").forEach((b) => {
+      b.onclick = () => { exportState.cols[b.dataset.expCol] = !exportState.cols[b.dataset.expCol]; renderExportChrome(); };
+    });
+    const cols = selectedExportCols();
+    const rows = exportState.rows;
+    const shown = rows.slice(0, 6);
+    let html = "<thead><tr>" + cols.map((c) => `<th>${esc(c.label)}</th>`).join("") + "</tr></thead><tbody>";
+    html += shown.map((r) => "<tr>" + cols.map((c) => `<td>${esc(String(c.get(r)))}</td>`).join("") + "</tr>").join("");
+    html += "</tbody>";
+    $("expPreview").innerHTML = cols.length ? html : "<tbody><tr><td>Select at least one column.</td></tr></tbody>";
+    $("expCount").textContent = rows.length ? `— ${rows.length} row${rows.length === 1 ? "" : "s"}, showing ${Math.min(6, rows.length)}` : "— no rows in this range";
+    $("expDownload").disabled = !(rows.length && cols.length);
+  }
+  function toCsv(rows, cols) {
+    const cell = (v) => { v = String(v ?? ""); return (/[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v); };
+    const lines = [cols.map((c) => cell(c.label)).join(",")];
+    rows.forEach((r) => lines.push(cols.map((c) => cell(c.get(r))).join(",")));
+    return lines.join("\r\n");
+  }
+  function downloadExport() {
+    const cols = selectedExportCols();
+    if (!cols.length || !exportState.rows.length) return;
+    const range = exportState.from === exportState.to ? exportState.from : exportState.from + "_to_" + exportState.to;
+    const sitePart = exportState.site === "both" ? "both-sites" : "site" + exportState.site;
+    const blob = new Blob(["﻿" + toCsv(exportState.rows, cols)], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `transload-${exportState.kind}-${sitePart}-${range || "all"}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    message("expStatus", `Downloaded ${exportState.rows.length} rows.`, true);
+  }
+
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.onclick = () => {
-      const incoming = button.dataset.tab === "incoming";
+      const tabName = button.dataset.tab;
       document.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("active", x === button));
-      $("outgoingView").classList.toggle("hidden", incoming);
-      $("incomingView").classList.toggle("hidden", !incoming);
+      $("outgoingView").classList.toggle("hidden", tabName !== "outgoing");
+      $("incomingView").classList.toggle("hidden", tabName !== "incoming");
+      $("exportView").classList.toggle("hidden", tabName !== "export");
+      if (tabName === "export") refreshExport();
     };
   });
   document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });

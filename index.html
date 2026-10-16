@@ -126,6 +126,7 @@ button[data-ui-tooltip]{position:relative}
   @keyframes overduePulse{0%,100%{box-shadow:0 0 8px #ff5a3688}50%{box-shadow:0 0 20px #ff5a36}}
   .timer-alert{background:#7a1f1a;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;text-align:center;box-shadow:0 0 12px #c0362c88}
   .timer-alert b{font-size:16px}
+  .chart-expand{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .menu-divider{height:1px;background:var(--border);margin:2px}
   .menu-link{min-height:52px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:850;color:var(--sage-dark);font-size:15px}
   .exp-label{font-size:12px;font-weight:850;color:var(--slate);margin:10px 0 6px}
@@ -147,7 +148,7 @@ button[data-ui-tooltip]{position:relative}
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
-  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
+  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuSiteNamesBtn" type="button">Site names</button><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
   <nav class="tabs">
     <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
     <button class="tab" data-tab="incoming">Incoming Drivers</button>
@@ -325,10 +326,30 @@ button[data-ui-tooltip]{position:relative}
     <div class="modal-actions"><button class="cancel" id="cancelTime">Cancel</button><button class="update" id="saveTime">Save</button></div>
   </div>
 </div>
+<div class="modal" id="siteNameModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Site names</div><button class="close" id="closeSiteNames" aria-label="× Close" title="Close">×</button></div>
+    <div class="fields">
+      <div class="field"><label for="siteName1">Site 1</label><input id="siteName1" maxlength="40" placeholder="Site 1" autocomplete="off"></div>
+      <div class="field"><label for="siteName2">Site 2</label><input id="siteName2" maxlength="40" placeholder="Site 2" autocomplete="off"></div>
+    </div>
+    <div class="modal-actions"><button class="cancel" id="cancelSiteNames">Cancel</button><button class="update" id="saveSiteNames">Save names</button></div>
+    <div class="status" id="siteNameStatus" aria-live="polite"></div>
+  </div>
+</div>
+<div class="modal" id="fieldNameModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Rename field</div><button class="close" id="closeFieldName" aria-label="× Close" title="Close">×</button></div>
+    <div class="note" id="fieldNameNote"></div>
+    <div class="field"><label for="fieldAliasInput">Display name</label><input id="fieldAliasInput" maxlength="60" autocomplete="off"></div>
+    <div class="modal-actions"><button class="cancel" id="cancelFieldName">Cancel</button><button class="update" id="saveFieldName">Save name</button></div>
+    <div class="status" id="fieldNameStatus" aria-live="polite"></div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-export-menu-v20";
+  const APP_VERSION = "2026-10-16-names-fields-v21";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -363,7 +384,9 @@ button[data-ui-tooltip]{position:relative}
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false, siteNames: {}, fieldAliases: {}, renamingField: "" };
+  const siteName = (id) => state.siteNames[String(id)] || ("Site " + id);
+  const fieldLabel = (f) => (state.fieldAliases[f] || ("Field " + f));
   const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
   function restoreStickyInputs() {
     $("outField").value = localStorage.getItem(stickyKey("out_field")) || "";
@@ -484,14 +507,23 @@ button[data-ui-tooltip]{position:relative}
         const varieties = [...new Set(rows.map((x) => x.variety).filter(Boolean))];
         return `<div class="field-day"><div class="field-day-head"><b>${esc(friendlyDay(day))}</b><b>${rows.length} load${rows.length === 1 ? "" : "s"}</b></div><div class="meta">Truck numbers: ${trucks.length ? trucks.map(esc).join(", ") : "Not recorded"}${trailers.length ? " · Trailers: " + trailers.map(esc).join(", ") : ""}${varieties.length ? " · Variety: " + varieties.map(esc).join(", ") : ""}</div></div>`;
       }).join("");
-      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>Field ${esc(field)}</b><div class="bar-wrap"><div class="bar" style="width:${Math.round(n / max * 100)}%"></div></div><b>${n} <span class="expand-mark">${expanded ? "−" : "+"}</span></b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>Field ${esc(field)} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
+      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>${esc(fieldLabel(field))}</b><div class="bar-wrap"><div class="bar" style="width:${Math.round(n / max * 100)}%"></div></div><b>${n} <span class="expand-mark">${expanded ? "−" : "+"}</span></b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>${esc(fieldLabel(field))} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
     }).join("");
     $(target).querySelectorAll("[data-field-expand]").forEach((button) => {
-      button.onclick = () => {
+      let holdTimer = null, held = false;
+      const cancelHold = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
+      button.addEventListener("pointerdown", () => {
+        held = false; cancelHold();
+        holdTimer = setTimeout(() => { held = true; openFieldRename(button.dataset.fieldExpand); }, 700);
+      });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => button.addEventListener(ev, cancelHold));
+      button.addEventListener("contextmenu", (ev) => ev.preventDefault());
+      button.addEventListener("click", () => {
+        if (held) { held = false; return; }
         const field = button.dataset.fieldExpand;
         state.expandedField = state.expandedField === field ? "" : field;
         renderChart(target, source, range, empty);
-      };
+      });
     });
   }
   function renderLocations(container, selected, click) {
@@ -506,7 +538,7 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · Field <b>${esc(x.field || "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
@@ -522,7 +554,7 @@ button[data-ui-tooltip]{position:relative}
     $("driverCount").textContent = new Set(todayRows.map((x) => x.driver.toLowerCase())).size;
     $("inFieldCount").textContent = new Set(todayRows.map((x) => x.field)).size;
     renderChart("inFieldChart", state.sharedFieldIncoming, state.inRange, "No incoming field loads in this period.");
-    $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta">Field <b>${esc(x.field || "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
+    $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta"><b>${esc(x.field ? fieldLabel(x.field) : "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
     $("incomingList").querySelectorAll("[data-edit-in]").forEach((b) => { b.onclick = () => openEdit("incoming", b.dataset.editIn); });
     $("incomingList").querySelectorAll("[data-delete-in]").forEach((b) => { b.onclick = () => remove("incoming_entries", b.dataset.deleteIn, "inStatus"); });
   }
@@ -576,6 +608,15 @@ button[data-ui-tooltip]{position:relative}
       const rev = await db.from("plan_revisions").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }).limit(500);
       state.planRevisions = rev.error ? [] : (rev.data || []);
     } catch (e) { state.planRevisions = []; }
+    try {
+      const [sn, fa] = await Promise.all([
+        db.from("site_names").select("site_id,name"),
+        db.from("field_aliases").select("field,alias"),
+      ]);
+      if (!sn.error) { state.siteNames = {}; (sn.data || []).forEach((r) => { state.siteNames[String(r.site_id)] = r.name; }); }
+      if (!fa.error) { state.fieldAliases = {}; (fa.data || []).forEach((r) => { state.fieldAliases[r.field] = r.alias; }); }
+    } catch (e) { /* tables not migrated yet: fall back to defaults */ }
+    renderSiteTabs();
     renderLoads();
     renderIncoming();
     renderQuick();
@@ -944,7 +985,7 @@ button[data-ui-tooltip]{position:relative}
     } catch (e) { console.warn("pace render failed", e); }
   }
 
-  function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => b.classList.toggle("active", Number(b.dataset.site) === state.site)); }
+  function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => { b.classList.toggle("active", Number(b.dataset.site) === state.site); b.textContent = siteName(b.dataset.site); }); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
   async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
@@ -1172,7 +1213,7 @@ button[data-ui-tooltip]{position:relative}
     message("inStatus", "Unable to load shared data: " + hint);
   }
   function subscribe() {
-    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions"].forEach((table) => {
+    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions", "site_names", "field_aliases"].forEach((table) => {
       db.channel("live-" + table).on("postgres_changes", { event: "*", schema: "public", table }, () => loadData().catch(showSetupError)).subscribe();
     });
   }
@@ -1234,11 +1275,11 @@ state.deviceName = deviceName || "Unknown Device";
     outgoing: [
       { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
       { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
-      { key: "site", label: "Site", get: (x) => (x.site_id || "") },
+      { key: "site", label: "Site", get: (x) => siteName(x.site_id) },
       { key: "location", label: "Location", get: (x) => (x.location || "") },
       { key: "truck", label: "Truck", get: (x) => (x.truck || "") },
       { key: "trailer", label: "Trailer", get: (x) => (x.trailer || "") },
-      { key: "field", label: "Field", get: (x) => (x.field || "") },
+      { key: "field", label: "Field", get: (x) => (x.field ? (state.fieldAliases[x.field] || x.field) : "") },
       { key: "variety", label: "Variety", get: (x) => (x.variety || "") },
       { key: "timein", label: "Time in", get: (x) => (x.load_started_at ? fmtClock(new Date(x.load_started_at).getTime()) : "") },
       { key: "timeout", label: "Time out", get: (x) => (x.load_finished_at ? fmtClock(new Date(x.load_finished_at).getTime()) : "") },
@@ -1249,9 +1290,9 @@ state.deviceName = deviceName || "Unknown Device";
     incoming: [
       { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
       { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
-      { key: "site", label: "Site", get: (x) => (x.site_id || "") },
+      { key: "site", label: "Site", get: (x) => siteName(x.site_id) },
       { key: "driver", label: "Driver", get: (x) => (x.driver || "") },
-      { key: "field", label: "Field", get: (x) => (x.field || "") },
+      { key: "field", label: "Field", get: (x) => (x.field ? (state.fieldAliases[x.field] || x.field) : "") },
       { key: "enteredby", label: "Entered by", get: (x) => (x.created_by_name || "") },
       { key: "editedby", label: "Last edited by", get: (x) => (x.updated_by_name || x.created_by_name || "") },
     ],
@@ -1302,7 +1343,10 @@ state.deviceName = deviceName || "Unknown Device";
   }
   function renderExportChrome() {
     $("expKindBtns").querySelectorAll("[data-exp-kind]").forEach((b) => b.classList.toggle("active", b.dataset.expKind === exportState.kind));
-    $("expSiteBtns").querySelectorAll("[data-exp-site]").forEach((b) => b.classList.toggle("active", b.dataset.expSite === exportState.site));
+    $("expSiteBtns").querySelectorAll("[data-exp-site]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.expSite === exportState.site);
+      if (b.dataset.expSite !== "both") b.textContent = siteName(b.dataset.expSite);
+    });
     $("expCols").innerHTML = EXPORT_COLS[exportState.kind].map((c) => `<button type="button" class="range-btn${exportState.cols[c.key] ? " active" : ""}" data-exp-col="${c.key}">${c.label}</button>`).join("");
     $("expCols").querySelectorAll("[data-exp-col]").forEach((b) => {
       b.onclick = () => { exportState.cols[b.dataset.expCol] = !exportState.cols[b.dataset.expCol]; renderExportChrome(); };
@@ -1318,7 +1362,13 @@ state.deviceName = deviceName || "Unknown Device";
     $("expDownload").disabled = !(rows.length && cols.length);
   }
   function toCsv(rows, cols) {
-    const cell = (v) => { v = String(v ?? ""); return (/[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v); };
+    const cell = (v) => {
+      v = String(v ?? "");
+      // Stop Excel/Sheets from coercing values like 7-1 into dates (July 1):
+      // ="7-1" is evaluated as the text 7-1.
+      if (/^\d{1,2}[-/]\d{1,2}([-/]\d{2,4})?$/.test(v)) v = `="${v}"`;
+      return (/[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+    };
     const lines = [cols.map((c) => cell(c.label)).join(",")];
     rows.forEach((r) => lines.push(cols.map((c) => cell(c.get(r))).join(",")));
     return lines.join("\r\n");
@@ -1376,10 +1426,82 @@ state.deviceName = deviceName || "Unknown Device";
   $("planModal").onclick = (e) => { if (e.target === $("planModal")) closePlan(); };
   $("paceFocusClose").onclick = closePaceFocus;
   $("paceFocusBackdrop").onclick = closePaceFocus;
+  // ── Site + field renaming ──
+  function openSiteNames() {
+    closeSiteMenu();
+    $("siteName1").value = state.siteNames["1"] || "";
+    $("siteName2").value = state.siteNames["2"] || "";
+    message("siteNameStatus", "");
+    $("siteNameModal").classList.add("open");
+  }
+  function closeSiteNames() { $("siteNameModal").classList.remove("open"); }
+  async function saveSiteNames() {
+    const names = { "1": $("siteName1").value.trim(), "2": $("siteName2").value.trim() };
+    message("siteNameStatus", "");
+    try {
+      const rows = Object.entries(names)
+        .filter(([, n]) => n)
+        .map(([id, n]) => ({ site_id: id, name: n, updated_at: new Date().toISOString() }));
+      const gone = Object.entries(names).filter(([, n]) => !n).map(([id]) => id);
+      if (rows.length) {
+        const { error } = await db.from("site_names").upsert(rows);
+        if (error) throw error;
+      }
+      if (gone.length) {
+        const { error } = await db.from("site_names").delete().in("site_id", gone);
+        if (error) throw error;
+      }
+    } catch (e) {
+      const hint = errText(e);
+      if (/site_names|relation|table/i.test(hint)) message("siteNameStatus", "Naming needs the database update — run the new supabase.sql first.");
+      else message("siteNameStatus", "Could not save names: " + hint);
+      return;
+    }
+    closeSiteNames();
+  }
+  function openFieldRename(field) {
+    state.renamingField = field;
+    $("fieldNameNote").textContent = `Field number: ${field} — clear the name to go back to the default.`;
+    $("fieldAliasInput").value = state.fieldAliases[field] || ("Field " + field);
+    message("fieldNameStatus", "");
+    $("fieldNameModal").classList.add("open");
+    setTimeout(() => $("fieldAliasInput").focus(), 60);
+  }
+  function closeFieldRename() { $("fieldNameModal").classList.remove("open"); state.renamingField = ""; }
+  async function saveFieldName() {
+    const field = state.renamingField;
+    if (!field) return closeFieldRename();
+    const alias = $("fieldAliasInput").value.trim();
+    message("fieldNameStatus", "");
+    try {
+      if (!alias || alias === "Field " + field) {
+        const { error } = await db.from("field_aliases").delete().eq("field", field);
+        if (error) throw error;
+      } else {
+        const { error } = await db.from("field_aliases").upsert({ field, alias, updated_at: new Date().toISOString() });
+        if (error) throw error;
+      }
+    } catch (e) {
+      const hint = errText(e);
+      if (/field_aliases|relation|table/i.test(hint)) message("fieldNameStatus", "Renaming needs the database update — run the new supabase.sql first.");
+      else message("fieldNameStatus", "Could not save name: " + hint);
+      return;
+    }
+    closeFieldRename();
+  }
   $("closeTime").onclick = closeTimeEdit;
   $("cancelTime").onclick = closeTimeEdit;
   $("saveTime").onclick = saveTimeEdit;
   $("timeModal").onclick = (e) => { if (e.target === $("timeModal")) closeTimeEdit(); };
+  $("menuSiteNamesBtn").onclick = openSiteNames;
+  $("closeSiteNames").onclick = closeSiteNames;
+  $("cancelSiteNames").onclick = closeSiteNames;
+  $("saveSiteNames").onclick = saveSiteNames;
+  $("siteNameModal").onclick = (e) => { if (e.target === $("siteNameModal")) closeSiteNames(); };
+  $("closeFieldName").onclick = closeFieldRename;
+  $("cancelFieldName").onclick = closeFieldRename;
+  $("saveFieldName").onclick = saveFieldName;
+  $("fieldNameModal").onclick = (e) => { if (e.target === $("fieldNameModal")) closeFieldRename(); };
   $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
@@ -1423,7 +1545,7 @@ state.deviceName = deviceName || "Unknown Device";
   // iOS resumes the frozen page without re-running the launch-time version check.
   let appHiddenAt = Date.now();
   function anyModalOpen() {
-    return ["editModal", "planModal", "timeModal"].some((id) => $(id) && $(id).classList.contains("open"))
+    return ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal"].some((id) => $(id) && $(id).classList.contains("open"))
       || ($("paceFocusWrap") && !$("paceFocusWrap").classList.contains("hidden"));
   }
   async function checkForAppUpdate() {

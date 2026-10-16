@@ -139,3 +139,35 @@ do $$ begin
   alter publication supabase_realtime add table public.plan_revisions;
 exception when duplicate_object then null;
 end $$;
+
+-- ── 2026-10-16: site names + field aliases ──
+create table if not exists site_names (
+  site_id text primary key,
+  name text not null,
+  updated_at timestamptz default now()
+);
+create table if not exists field_aliases (
+  field text primary key,
+  alias text not null,
+  updated_at timestamptz default now()
+);
+alter table site_names enable row level security;
+alter table field_aliases enable row level security;
+do $$ begin
+  create policy "shared site names" on public.site_names
+    for all to authenticated using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  create policy "shared field aliases" on public.field_aliases
+    for all to authenticated using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.site_names;
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.field_aliases;
+exception when duplicate_object then null;
+end $$;

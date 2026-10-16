@@ -127,6 +127,7 @@ button[data-ui-tooltip]{position:relative}
   .timer-alert{background:#7a1f1a;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;text-align:center;box-shadow:0 0 12px #c0362c88}
   .timer-alert b{font-size:16px}
   .chart-expand{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .site-tab{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .menu-divider{height:1px;background:var(--border);margin:2px}
   .menu-link{min-height:52px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:850;color:var(--sage-dark);font-size:15px}
   .exp-label{font-size:12px;font-weight:850;color:var(--slate);margin:10px 0 6px}
@@ -148,7 +149,7 @@ button[data-ui-tooltip]{position:relative}
     </div>
     <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
-  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuSiteNamesBtn" type="button">Site names</button><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
+  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
   <nav class="tabs">
     <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
     <button class="tab" data-tab="incoming">Incoming Drivers</button>
@@ -328,11 +329,9 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <div class="modal" id="siteNameModal" role="dialog" aria-modal="true">
   <div class="modal-card">
-    <div class="modal-head"><div class="modal-title">Site names</div><button class="close" id="closeSiteNames" aria-label="× Close" title="Close">×</button></div>
-    <div class="fields">
-      <div class="field"><label for="siteName1">Site 1</label><input id="siteName1" maxlength="40" placeholder="Site 1" autocomplete="off"></div>
-      <div class="field"><label for="siteName2">Site 2</label><input id="siteName2" maxlength="40" placeholder="Site 2" autocomplete="off"></div>
-    </div>
+    <div class="modal-head"><div class="modal-title" id="siteNameTitle">Rename site</div><button class="close" id="closeSiteNames" aria-label="× Close" title="Close">×</button></div>
+    <div class="note" id="siteNameNote"></div>
+    <div class="field"><label for="siteNameInput">Site name</label><input id="siteNameInput" maxlength="40" placeholder="Site name" autocomplete="off"></div>
     <div class="modal-actions"><button class="cancel" id="cancelSiteNames">Cancel</button><button class="update" id="saveSiteNames">Save names</button></div>
     <div class="status" id="siteNameStatus" aria-live="polite"></div>
   </div>
@@ -349,7 +348,7 @@ button[data-ui-tooltip]{position:relative}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-names-fields-v21";
+  const APP_VERSION = "2026-10-16-names-hold-v22";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -988,7 +987,7 @@ button[data-ui-tooltip]{position:relative}
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => { b.classList.toggle("active", Number(b.dataset.site) === state.site); b.textContent = siteName(b.dataset.site); }); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
@@ -1406,7 +1405,17 @@ state.deviceName = deviceName || "Unknown Device";
     refreshExport();
   }
   $("menuExportBtn").onclick = showExportView;
-  document.querySelectorAll("[data-site]").forEach((b) => { b.onclick = () => switchSite(Number(b.dataset.site)); });
+  document.querySelectorAll("[data-site]").forEach((b) => {
+    let holdTimer = null, held = false;
+    const cancelHold = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
+    b.addEventListener("pointerdown", () => {
+      held = false; cancelHold();
+      holdTimer = setTimeout(() => { held = true; openSiteRename(Number(b.dataset.site)); }, 1500);
+    });
+    ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => b.addEventListener(ev, cancelHold));
+    b.addEventListener("contextmenu", (ev) => ev.preventDefault());
+    b.addEventListener("click", () => { if (held) { held = false; return; } switchSite(Number(b.dataset.site)); });
+  });
   $("siteMenuButton").onclick = openSiteMenu;
   $("siteMenuBackdrop").onclick = closeSiteMenu;
   let edgeStartX = null, edgeStartY = null;
@@ -1427,34 +1436,33 @@ state.deviceName = deviceName || "Unknown Device";
   $("paceFocusClose").onclick = closePaceFocus;
   $("paceFocusBackdrop").onclick = closePaceFocus;
   // ── Site + field renaming ──
-  function openSiteNames() {
-    closeSiteMenu();
-    $("siteName1").value = state.siteNames["1"] || "";
-    $("siteName2").value = state.siteNames["2"] || "";
+  function openSiteRename(siteId) {
+    state.renamingSite = String(siteId);
+    $("siteNameNote").textContent = `Currently: ${siteName(siteId)} — clear the name to go back to the default.`;
+    $("siteNameInput").value = state.siteNames[String(siteId)] || "";
     message("siteNameStatus", "");
+    closeSiteMenu();
     $("siteNameModal").classList.add("open");
+    setTimeout(() => $("siteNameInput").focus(), 60);
   }
-  function closeSiteNames() { $("siteNameModal").classList.remove("open"); }
+  function closeSiteNames() { $("siteNameModal").classList.remove("open"); state.renamingSite = ""; }
   async function saveSiteNames() {
-    const names = { "1": $("siteName1").value.trim(), "2": $("siteName2").value.trim() };
+    const id = state.renamingSite;
+    if (!id) return closeSiteNames();
+    const name = $("siteNameInput").value.trim();
     message("siteNameStatus", "");
     try {
-      const rows = Object.entries(names)
-        .filter(([, n]) => n)
-        .map(([id, n]) => ({ site_id: id, name: n, updated_at: new Date().toISOString() }));
-      const gone = Object.entries(names).filter(([, n]) => !n).map(([id]) => id);
-      if (rows.length) {
-        const { error } = await db.from("site_names").upsert(rows);
+      if (!name) {
+        const { error } = await db.from("site_names").delete().eq("site_id", id);
         if (error) throw error;
-      }
-      if (gone.length) {
-        const { error } = await db.from("site_names").delete().in("site_id", gone);
+      } else {
+        const { error } = await db.from("site_names").upsert({ site_id: id, name, updated_at: new Date().toISOString() });
         if (error) throw error;
       }
     } catch (e) {
       const hint = errText(e);
       if (/site_names|relation|table/i.test(hint)) message("siteNameStatus", "Naming needs the database update — run the new supabase.sql first.");
-      else message("siteNameStatus", "Could not save names: " + hint);
+      else message("siteNameStatus", "Could not save name: " + hint);
       return;
     }
     closeSiteNames();
@@ -1493,7 +1501,6 @@ state.deviceName = deviceName || "Unknown Device";
   $("cancelTime").onclick = closeTimeEdit;
   $("saveTime").onclick = saveTimeEdit;
   $("timeModal").onclick = (e) => { if (e.target === $("timeModal")) closeTimeEdit(); };
-  $("menuSiteNamesBtn").onclick = openSiteNames;
   $("closeSiteNames").onclick = closeSiteNames;
   $("cancelSiteNames").onclick = closeSiteNames;
   $("saveSiteNames").onclick = saveSiteNames;

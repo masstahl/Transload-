@@ -139,6 +139,7 @@ button[data-ui-tooltip]{position:relative}
   #locEditStatus{min-height:0;font-size:12px;font-weight:700;color:#8f4a42;margin-top:6px}
   #locEditStatus:empty{display:none}
   .timer-strip{display:block;width:100%;border:0;background:#7a1f1a;color:#fff;border-radius:10px;padding:11px 12px;margin-bottom:8px;font-size:14px;font-weight:800;text-align:center;box-shadow:0 0 12px #c0362c88;animation:overduePulse 1.2s ease-in-out infinite}
+  [data-strip-slot]:empty{display:none}
   #locAddList{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
   .loc-add-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:800}
   .menu-divider{height:1px;background:var(--border);margin:2px}
@@ -207,7 +208,6 @@ button[data-ui-tooltip]{position:relative}
       <div class="needs-head"><div class="title" id="totalsTitle">Loads by location</div><div class="total-loads" id="totalLoadsToday" aria-live="polite">0 total</div></div>
        <div id="loadsByLocation" class="location-totals"></div>
     </div>
-    <div id="timerAlert" class="timer-alert hidden" aria-live="polite"></div>
     <div class="panel">
       <div class="title" id="listTitle">Loads for this day</div>
       <div class="list" id="loadList"></div>
@@ -377,7 +377,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-timer-strips-v25";
+  const APP_VERSION = "2026-10-16-timer-strips-v26";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -611,14 +611,9 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    // Inline overdue strip above each running-timer card: unmissable at a glance,
-    // toggled visible by updateTimerAlerts (no list re-render needed).
-    const stripFor = (x) => (isToday && x.load_started_at && !x.load_finished_at)
-      ? `<button type="button" class="timer-strip hidden" data-overdue-strip="${x.id}" data-strip-timer="${x.id}">⚠ Truck ${esc(x.truck)} timer over ${TIMER_OVERDUE_MIN} min — tap to time out</button>` : "";
-    $("loadList").innerHTML = records.length ? visible.map((x) => stripFor(x) + `<article class="row ${locClass(x.location)}" style="${locStyle(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}" style="${locStyle(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
-    $("loadList").querySelectorAll("[data-strip-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.stripTimer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
     $("loadList").querySelectorAll("[data-edit-load]").forEach((b) => { b.onclick = () => openEdit("load", b.dataset.editLoad); });
     $("loadList").querySelectorAll("[data-delete-load]").forEach((b) => { b.onclick = () => remove("outgoing_entries", b.dataset.deleteLoad, "outStatus"); });
@@ -855,22 +850,27 @@ button[data-ui-tooltip]{position:relative}
     const now = Date.now();
     return state.loads.filter((x) => x.load_started_at && !x.load_finished_at && (now - new Date(x.load_started_at).getTime()) > OVERDUE_MS);
   }
+  let lastStripN = -1;
   function updateTimerAlerts() {
-    const overdueIds = new Set(overdueTimers().map((x) => x.id));
-    // Inline strips between the cards, one per overdue load.
-    document.querySelectorAll("[data-overdue-strip]").forEach((el) => {
-      el.classList.toggle("hidden", !overdueIds.has(el.dataset.overdueStrip));
-    });
-    const n = overdueIds.size;
-    const banner = $("timerAlert");
-    if (banner) {
-      banner.classList.toggle("hidden", n === 0);
-      if (n > 0) banner.innerHTML = `⚠ <b>${n}</b> timer${n === 1 ? " is" : "s are"} running over ${TIMER_OVERDUE_MIN} min — tap a load to time it out`;
+    const n = overdueTimers().length;
+    // One pulsing strip between every outgoing panel while any timer is overdue.
+    if (n !== lastStripN) {
+      lastStripN = n;
+      const html = n > 0 ? `<button type="button" class="timer-strip" data-strip-scroll="1">⚠ Timer over ${TIMER_OVERDUE_MIN} min — tap to find it</button>` : "";
+      document.querySelectorAll("[data-strip-slot]").forEach((el) => { el.innerHTML = html; });
     }
     if ("setAppBadge" in navigator) {
       if (n > 0) navigator.setAppBadge(n).catch(() => {});
       else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
     }
+  }
+  function scrollToOverdue() {
+    const over = overdueTimers();
+    if (!over.length) return;
+    let pill = document.querySelector('[data-timer="' + over[0].id + '"]');
+    if (!pill) { state.loadsExpanded = true; renderLoads(); pill = document.querySelector('[data-timer="' + over[0].id + '"]'); }
+    const card = pill ? pill.closest("article") : null;
+    (card || $("loadList")).scrollIntoView({ behavior: "smooth", block: "center" });
   }
   function openTimeEdit(id) {
     const x = state.loads.find((l) => l.id === id);
@@ -1755,6 +1755,11 @@ state.deviceName = deviceName || "Unknown Device";
   ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => $("destPanel").addEventListener(ev, cancelLocHold));
   $("destPanel").addEventListener("contextmenu", (ev) => ev.preventDefault());
   $("locDoneBtn").onclick = () => { if (locHoldFresh()) return; exitLocEdit(); };
+  // Overdue-timer strips live between every outgoing panel so the warning is
+  // visible no matter where the operator is looking.
+  [$("destPanel"), $("saveLoad").closest(".panel"), $("locationNeeds").closest(".panel"), $("loadsByLocation").closest(".panel")]
+    .forEach((p) => { if (p) p.insertAdjacentHTML("afterend", "<div data-strip-slot></div>"); });
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-strip-scroll]")) scrollToOverdue(); });
   $("closeLocName").onclick = closeLocRename;
   $("cancelLocName").onclick = closeLocRename;
   $("saveLocName").onclick = saveLocName;

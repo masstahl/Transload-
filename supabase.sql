@@ -171,3 +171,23 @@ do $$ begin
   alter publication supabase_realtime add table public.field_aliases;
 exception when duplicate_object then null;
 end $$;
+
+-- ── 2026-10-16: per-site location slots (rename / hide / add, max 4 visible) ──
+create table if not exists location_prefs (
+  site_id text primary key,
+  slots jsonb not null default '[]',
+  updated_at timestamptz default now()
+);
+alter table location_prefs enable row level security;
+do $$ begin
+  create policy "shared location prefs" on public.location_prefs
+    for all to authenticated using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.location_prefs;
+exception when duplicate_object then null;
+end $$;
+
+-- ── 2026-10-16: allow custom location names (drop the 4-name CHECK) ──
+alter table public.outgoing_entries drop constraint if exists outgoing_entries_location_check;

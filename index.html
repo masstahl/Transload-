@@ -376,7 +376,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-loc-edit-v23";
+  const APP_VERSION = "2026-10-16-loc-colors-v24";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -426,6 +426,20 @@ button[data-ui-tooltip]{position:relative}
   function visibleLocs() { return locSlots().filter((s) => !s.hidden); }
   function locName(key) { const s = locSlots().find((x) => x.key === key); return s ? s.name : String(key ?? ""); }
   function locClass(key) { return "loc-card-" + String(key || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  // Identity-based colors so pills, cards, and totals always match, even when
+  // locations are hidden. Custom locations hash to a spare palette slot.
+  const LOC_PALETTE = [
+    ["#e9f0e5", "#cad9c3"], ["#e5eef5", "#c9dbe9"], ["#f7ebd8", "#e8d5b7"], ["#f3e5eb", "#e4cbd6"],
+    ["#e8e6f3", "#d3cfe8"], ["#e5f2ee", "#c8e0d4"], ["#f3ece0", "#e6d7c2"], ["#e9edf3", "#ccd6e4"],
+  ];
+  const LOC_COLOR_KEY = { quincy: 0, pasco: 1, warden: 2, richland: 3 };
+  function locStyle(key) {
+    const k = String(key || "").toLowerCase();
+    let idx = LOC_COLOR_KEY[k];
+    if (idx == null) { let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0; idx = 4 + (h % (LOC_PALETTE.length - 4)); }
+    const [bg, bd] = LOC_PALETTE[idx];
+    return `background:${bg};border-color:${bd}`;
+  }
   function cloneSlots() { return locSlots().map((s) => ({ key: s.key, name: s.name, hidden: !!s.hidden })); }
   function planSlots() { return locSlots().filter((s) => !s.hidden && PLAN_COLS[s.key.toLowerCase()]); }
   const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
@@ -516,7 +530,7 @@ button[data-ui-tooltip]{position:relative}
     const totalLoaded = rows.reduce((sum, r) => sum + r.loaded, 0);
     const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
     $("totalNeeds").innerHTML = "<b>" + totalRemaining + "</b><span>of " + totalExpected + " left</span>";
-    $("locationNeeds").innerHTML = rows.length ? rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} ${locClass(r.key)}"><div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
+    $("locationNeeds").innerHTML = rows.length ? rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} ${locClass(r.key)}" style="${locStyle(r.key)}"><div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
   }
   function renderLocationTotals() {
     const date = $("planDate").value || state.planDate;
@@ -525,7 +539,7 @@ button[data-ui-tooltip]{position:relative}
     $("totalsTitle").textContent = "Loads by location · " + friendlyDay(date);
     const totalLoads = Object.values(counts).reduce((sum, count) => sum + count, 0);
     $("totalLoadsToday").textContent = totalLoads + " total";
-    $("loadsByLocation").innerHTML = slots.length ? slots.map((s) => `<div class="location-total ${locClass(s.key)}"><div class="lbl">${esc(s.name)}</div><b>${counts[s.key]}</b><div class="lbl">loads</div></div>`).join("") : '<div class="empty-chart">No locations — press and hold the destination box to add one.</div>';
+    $("loadsByLocation").innerHTML = slots.length ? slots.map((s) => `<div class="location-total ${locClass(s.key)}" style="${locStyle(s.key)}"><div class="lbl">${esc(s.name)}</div><b>${counts[s.key]}</b><div class="lbl">loads</div></div>`).join("") : '<div class="empty-chart">No locations — press and hold the destination box to add one.</div>';
   }
   function renderChart(target, source, range, empty) {
     const cutoff = Date.now() - range * 86400000;
@@ -573,7 +587,7 @@ button[data-ui-tooltip]{position:relative}
     const slots = visibleLocs();
     const editing = locEditMode && container === "locations";
     $(container).classList.toggle("editing", editing);
-    let html = slots.map((s) => `<button type="button" class="loc ${s.key === selected ? "selected" : ""}" data-location="${esc(s.key)}">${editing ? `<span class="loc-minus" data-loc-minus="${esc(s.key)}" aria-hidden="true">−</span>` : ""}${esc(s.name)}</button>`).join("");
+    let html = slots.map((s) => `<button type="button" class="loc ${s.key === selected ? "selected" : ""}" data-location="${esc(s.key)}" style="${locStyle(s.key)}">${editing ? `<span class="loc-minus" data-loc-minus="${esc(s.key)}" aria-hidden="true">−</span>` : ""}${esc(s.name)}</button>`).join("");
     if (!slots.length && !editing) html = '<div class="note" style="margin:0">No locations — press and hold here for 3 seconds to add one.</div>';
     if (editing && slots.length < 4) html += `<button type="button" class="loc loc-add" data-loc-add="1" aria-label="Add location">+</button>`;
     $(container).innerHTML = html;
@@ -596,7 +610,7 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}" style="${locStyle(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
@@ -1170,7 +1184,7 @@ button[data-ui-tooltip]{position:relative}
       // If the load's location is currently hidden, show it as a ghost pill so
       // the operator can see what's set instead of an empty picker.
       if (state.editLocation && !visibleLocs().some((s) => s.key === state.editLocation)) {
-        $("editLocations").insertAdjacentHTML("beforeend", `<button type="button" class="loc selected" disabled>${esc(locName(state.editLocation))}</button>`);
+        $("editLocations").insertAdjacentHTML("beforeend", `<button type="button" class="loc selected" disabled style="${locStyle(state.editLocation)}">${esc(locName(state.editLocation))}</button>`);
       }
     }
     $("editStatus").textContent = "";

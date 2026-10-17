@@ -1,0 +1,32 @@
+name: Transload overdue push check
+
+on:
+  # Keep scheduling disabled until real iPhone push delivery is verified.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: transload-overdue-push
+  cancel-in-progress: false
+
+jobs:
+  check-overdue-loads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Invoke secured overdue notification checker
+        env:
+          NOTIFICATION_KEY: ${{ secrets.NOTIFICATION_KEY }}
+        run: |
+          if [ -z "$NOTIFICATION_KEY" ]; then
+            echo "::error::Add the NOTIFICATION_KEY repository secret before scheduled checks can run."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "x-notification-key: $NOTIFICATION_KEY" \
+            --header "content-type: application/json" \
+            --data '{}' \
+            "https://ngoibulnsvdcstnyrjki.supabase.co/functions/v1/notify-overdue"

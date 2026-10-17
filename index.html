@@ -957,7 +957,7 @@ button[data-ui-tooltip]{position:relative}
           gaps.push(g); pts.push([t, g]);
         }
         if (!pts.length) { notes.push(`${loc}: ${done}/${need} · not enough loads yet`); return; }
-        // Glassy-smooth flowing lines: two rolling-mean passes, then 4x densify.
+        // Smooth the latest trend lightly, then densify between points for a flowing curve.
         const meanPass = (arr, w) => arr.map((p, i) => {
           const win = arr.slice(Math.max(0, i - (w - 1)), i + 1);
           return [p[0], win.reduce((s2, q) => s2 + q[1], 0) / win.length];

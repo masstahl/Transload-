@@ -1802,6 +1802,12 @@ state.deviceName = deviceName || "Unknown Device";
   $("cancelEdit").onclick = closeEdit;
   $("editModal").onclick = (e) => { if (e.target === $("editModal")) closeEdit(); };
   $("updateEntry").onclick = updateEntry;
+  // Register the persistent worker needed for iOS Home Screen Web Push.
+  // Registration alone does not request permission or subscribe the operator.
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    navigator.serviceWorker.register("./sw.js")
+      .catch((error) => console.warn("Transload service worker registration failed:", error));
+  }
   start();
   const refreshSharedData = async () => {
     if (!state.user) return;

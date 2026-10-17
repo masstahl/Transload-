@@ -377,7 +377,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-timer-strips-v26";
+  const APP_VERSION = "2026-10-17-wave-chart-push-foundation-v1";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -481,10 +481,7 @@ button[data-ui-tooltip]{position:relative}
     // navigate to a versioned URL so iOS fetches the current document instead of
     // a stale cached copy whose baked-in version would otherwise match its param.
     try {
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((registration) => registration.unregister()));
-      }
+      // Keep the push-capable service worker registered; cache busting below is independent.
       if (window.caches) {
         const keys = await caches.keys();
         await Promise.all(keys.map((key) => caches.delete(key)));
@@ -965,7 +962,7 @@ button[data-ui-tooltip]{position:relative}
           const win = arr.slice(Math.max(0, i - (w - 1)), i + 1);
           return [p[0], win.reduce((s2, q) => s2 + q[1], 0) / win.length];
         });
-        const smd = meanPass(meanPass(pts, 5), 5);
+        const smd = meanPass(pts, 3);
         const dense = [];
         for (let i = 0; i < smd.length; i++) {
           dense.push(smd[i]);
@@ -1008,7 +1005,7 @@ button[data-ui-tooltip]{position:relative}
       plants.forEach((pl, idx) => {
         const s = {
           name: pl.loc, type: "line", data: pl.sm, smooth: 0.95, smoothMonotone: "x", symbol: "none", silent: true,
-          lineStyle: { width: 2, color: pl.color }, itemStyle: { color: pl.color }, z: 3,
+          lineStyle: { width: 3, color: pl.color, cap: "round", join: "round" }, itemStyle: { color: pl.color }, z: 3,
         };
         if (idx === 0 && nowTs >= xMin && nowTs <= xMax) {
           s.markLine = { silent: true, symbol: "none", data: [{ xAxis: nowTs, symbol: "none", lineStyle: { color: "#8a938c", type: "dashed", opacity: 0.7 }, label: { formatter: "now", position: "insideStartTop", fontSize: 10, color: "#8a938c" } }] };

@@ -1420,7 +1420,7 @@ button[data-ui-tooltip]{position:relative}
       if (!user) throw new Error("Could not sign in to the shared log.");
       state.user = user;
       $("pushAlertsBtn").addEventListener("click", togglePushAlerts);
-      await refreshPushButton();
+      refreshPushButton();
       state.name = localStorage.getItem("tl_operator_name") || "";
       let deviceName = localStorage.getItem("tl_device_name");
 

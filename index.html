@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="theme-color" content="#3f5c47">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -128,6 +128,18 @@ button[data-ui-tooltip]{position:relative}
   .timer-alert b{font-size:16px}
   .chart-expand{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .site-tab{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  @keyframes locWiggle{0%{transform:rotate(-1.7deg)}100%{transform:rotate(1.7deg)}}
+  #destPanel{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .loc{position:relative}
+  .locations.editing .loc{animation:locWiggle .26s ease-in-out infinite alternate}
+  .loc-minus{position:absolute;top:-8px;left:-8px;width:23px;height:23px;border-radius:50%;background:#d9534f;color:#fff;font-size:16px;font-weight:900;line-height:23px;text-align:center;box-shadow:0 1px 4px #0005}
+  .loc-minus::before{content:"";position:absolute;inset:-10px}
+  .loc-add{border-style:dashed;background:transparent;color:#7a8a7d}
+  #locDoneBtn{margin-top:7px}
+  #locEditStatus{min-height:0;font-size:12px;font-weight:700;color:#8f4a42;margin-top:6px}
+  #locEditStatus:empty{display:none}
+  #locAddList{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+  .loc-add-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:800}
   .menu-divider{height:1px;background:var(--border);margin:2px}
   .menu-link{min-height:52px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:850;color:var(--sage-dark);font-size:15px}
   .exp-label{font-size:12px;font-weight:850;color:var(--slate);margin:10px 0 6px}
@@ -155,9 +167,11 @@ button[data-ui-tooltip]{position:relative}
     <button class="tab" data-tab="incoming">Incoming Drivers</button>
   </nav>
   <section id="outgoingView">
-    <div class="panel">
+    <div class="panel" id="destPanel">
       <div class="title">Destination</div>
       <div class="locations" id="locations"></div>
+      <div id="locEditStatus" aria-live="polite"></div>
+      <button class="small secondary hidden" id="locDoneBtn" type="button">Done</button>
     </div>
     <div class="panel">
       <div class="needs-head" style="margin-bottom:5px"><div class="title">Load details</div><div class="title" id="outNow" style="margin:0;white-space:nowrap;font-variant-numeric:tabular-nums"></div></div>
@@ -294,12 +308,7 @@ button[data-ui-tooltip]{position:relative}
   <div class="modal-card">
     <div class="modal-head"><div class="modal-title" id="planTitle">Plant needs</div><button class="close" id="closePlan" aria-label="× Close" title="Close">×</button></div>
     <div class="note">Enter how many outgoing loads each plant needs for the selected date.</div>
-    <div class="fields">
-      <div class="field"><label for="planPasco">Pasco</label><input id="planPasco" type="number" min="0" inputmode="numeric"></div>
-      <div class="field"><label for="planWarden">Warden</label><input id="planWarden" type="number" min="0" inputmode="numeric"></div>
-      <div class="field"><label for="planQuincy">Quincy</label><input id="planQuincy" type="number" min="0" inputmode="numeric"></div>
-      <div class="field"><label for="planRichland">Richland</label><input id="planRichland" type="number" min="0" inputmode="numeric"></div>
-    </div>
+    <div class="fields" id="planInputs"></div>
     <div class="modal-actions"><button class="cancel" id="cancelPlan">Cancel</button><button class="update" id="savePlan">Save plant needs</button></div>
     <div class="status" id="planModalStatus"></div>
   </div>
@@ -346,9 +355,28 @@ button[data-ui-tooltip]{position:relative}
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div class="modal" id="locNameModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Rename location</div><button class="close" id="closeLocName" aria-label="× Close" title="Close">×</button></div>
+    <div class="note" id="locNameNote"></div>
+    <div class="field"><label for="locNameInput">Display name</label><input id="locNameInput" maxlength="40" autocomplete="off"></div>
+    <div class="modal-actions"><button class="cancel" id="cancelLocName">Cancel</button><button class="update" id="saveLocName">Save name</button></div>
+    <div class="status" id="locNameStatus" aria-live="polite"></div>
+  </div>
+</div>
+<div class="modal" id="locAddModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Add location</div><button class="close" id="closeLocAdd" aria-label="× Close" title="Close">×</button></div>
+    <div class="note">Re-add a removed location, or type a new one. Four on the row at most.</div>
+    <div id="locAddList"></div>
+    <div class="field"><label for="locNewName">New location name</label><input id="locNewName" maxlength="40" placeholder="e.g. Othello" autocomplete="off"></div>
+    <div class="modal-actions"><button class="cancel" id="cancelLocAdd">Cancel</button><button class="update" id="saveLocAdd">Add new</button></div>
+    <div class="status" id="locAddStatus" aria-live="polite"></div>
+  </div>
+</div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-16-names-hold-v22";
+  const APP_VERSION = "2026-10-16-loc-edit-v23";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -383,9 +411,23 @@ button[data-ui-tooltip]{position:relative}
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false, siteNames: {}, fieldAliases: {}, renamingField: "" };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false, siteNames: {}, fieldAliases: {}, renamingField: "", locPrefs: null, renamingLoc: "" };
   const siteName = (id) => state.siteNames[String(id)] || ("Site " + id);
   const fieldLabel = (f) => (state.fieldAliases[f] || ("Field " + f));
+  // ── Location slots (per site, editable) ──
+  // Each slot: { key, name, hidden }. The key is the stable identifier stored on
+  // loads and matched to plan columns; the name is the display label. The four
+  // defaults keep the original keys so existing data and plans keep matching.
+  const DEFAULT_LOC_SLOTS = locations.map((k) => ({ key: k, name: k, hidden: false }));
+  const PLAN_COLS = { quincy: 1, pasco: 1, warden: 1, richland: 1 };
+  let locEditMode = false, locHoldAt = 0;
+  const locHoldFresh = () => Date.now() - locHoldAt < 800;
+  function locSlots() { const s = state.locPrefs && state.locPrefs.slots; return Array.isArray(s) && s.length ? s : DEFAULT_LOC_SLOTS; }
+  function visibleLocs() { return locSlots().filter((s) => !s.hidden); }
+  function locName(key) { const s = locSlots().find((x) => x.key === key); return s ? s.name : String(key ?? ""); }
+  function locClass(key) { return "loc-card-" + String(key || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  function cloneSlots() { return locSlots().map((s) => ({ key: s.key, name: s.name, hidden: !!s.hidden })); }
+  function planSlots() { return locSlots().filter((s) => !s.hidden && PLAN_COLS[s.key.toLowerCase()]); }
   const stickyKey = (name) => `tl_sticky_${name}_site${state.site}`;
   function restoreStickyInputs() {
     $("outField").value = localStorage.getItem(stickyKey("out_field")) || "";
@@ -462,26 +504,28 @@ button[data-ui-tooltip]{position:relative}
   function renderNeeds() {
     const date = $("planDate").value || state.planDate;
     const plan = planFor(date);
-    const counts = Object.fromEntries(locations.map((l) => [l, state.loads.filter((x) => x.location === l && sameLocalDate(x.occurred_at, date)).length]));
-    const rows = locations.map((l) => {
-      const expected = Number(plan[l.toLowerCase()] || 0);
-      const loaded = counts[l] || 0;
-      return { l, expected, loaded, remaining: Math.max(expected - loaded, 0), over: Math.max(loaded - expected, 0) };
+    const slots = visibleLocs();
+    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && sameLocalDate(x.occurred_at, date)).length]));
+    const rows = slots.map((s) => {
+      const expected = Number(plan[s.key.toLowerCase()] || 0);
+      const loaded = counts[s.key] || 0;
+      return { key: s.key, name: s.name, expected, loaded, remaining: Math.max(expected - loaded, 0), over: Math.max(loaded - expected, 0) };
     }).sort((a, b) => b.remaining - a.remaining || b.expected - a.expected);
     $("needsTitle").textContent = "Loads remaining · " + friendlyDay(date);
     const totalExpected = rows.reduce((sum, r) => sum + r.expected, 0);
     const totalLoaded = rows.reduce((sum, r) => sum + r.loaded, 0);
     const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
     $("totalNeeds").innerHTML = "<b>" + totalRemaining + "</b><span>of " + totalExpected + " left</span>";
-    $("locationNeeds").innerHTML = rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} loc-card-${r.l.toLowerCase()}"><div><div class="need-name">${r.l}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("");
+    $("locationNeeds").innerHTML = rows.length ? rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} ${locClass(r.key)}"><div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
   }
   function renderLocationTotals() {
     const date = $("planDate").value || state.planDate;
-    const counts = Object.fromEntries(locations.map((l) => [l, state.loads.filter((x) => x.location === l && sameLocalDate(x.occurred_at, date)).length]));
+    const slots = visibleLocs();
+    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && sameLocalDate(x.occurred_at, date)).length]));
     $("totalsTitle").textContent = "Loads by location · " + friendlyDay(date);
     const totalLoads = Object.values(counts).reduce((sum, count) => sum + count, 0);
     $("totalLoadsToday").textContent = totalLoads + " total";
-    $("loadsByLocation").innerHTML = locations.map((l) => `<div class="location-total loc-card-${l.toLowerCase()}"><div class="lbl">${l}</div><b>${counts[l]}</b><div class="lbl">loads</div></div>`).join("");
+    $("loadsByLocation").innerHTML = slots.length ? slots.map((s) => `<div class="location-total ${locClass(s.key)}"><div class="lbl">${esc(s.name)}</div><b>${counts[s.key]}</b><div class="lbl">loads</div></div>`).join("") : '<div class="empty-chart">No locations — press and hold the destination box to add one.</div>';
   }
   function renderChart(target, source, range, empty) {
     const cutoff = Date.now() - range * 86400000;
@@ -526,8 +570,23 @@ button[data-ui-tooltip]{position:relative}
     });
   }
   function renderLocations(container, selected, click) {
-    $(container).innerHTML = locations.map((location) => `<button type="button" class="loc ${location === selected ? "selected" : ""}" data-location="${location}">${location}</button>`).join("");
-    $(container).querySelectorAll("[data-location]").forEach((button) => { button.onclick = () => click(button.dataset.location); });
+    const slots = visibleLocs();
+    const editing = locEditMode && container === "locations";
+    $(container).classList.toggle("editing", editing);
+    let html = slots.map((s) => `<button type="button" class="loc ${s.key === selected ? "selected" : ""}" data-location="${esc(s.key)}">${editing ? `<span class="loc-minus" data-loc-minus="${esc(s.key)}" aria-hidden="true">−</span>` : ""}${esc(s.name)}</button>`).join("");
+    if (!slots.length && !editing) html = '<div class="note" style="margin:0">No locations — press and hold here for 3 seconds to add one.</div>';
+    if (editing && slots.length < 4) html += `<button type="button" class="loc loc-add" data-loc-add="1" aria-label="Add location">+</button>`;
+    $(container).innerHTML = html;
+    $(container).querySelectorAll("[data-location]").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        if (locHoldFresh()) return;
+        if (e.target.closest("[data-loc-minus]")) { hideLocation(button.dataset.location); return; }
+        if (editing) { openLocRename(button.dataset.location); return; }
+        click(button.dataset.location);
+      });
+    });
+    const addBtn = $(container).querySelector("[data-loc-add]");
+    if (addBtn) addBtn.addEventListener("click", () => { if (locHoldFresh()) return; openLocAdd(); });
   }
   function renderLoads() {
     const date = $("planDate").value || state.planDate;
@@ -537,7 +596,7 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row loc-card-${String(x.location || "").toLowerCase()}"><div class="rowtop"><span>${esc(x.location)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
@@ -615,7 +674,17 @@ button[data-ui-tooltip]{position:relative}
       if (!sn.error) { state.siteNames = {}; (sn.data || []).forEach((r) => { state.siteNames[String(r.site_id)] = r.name; }); }
       if (!fa.error) { state.fieldAliases = {}; (fa.data || []).forEach((r) => { state.fieldAliases[r.field] = r.alias; }); }
     } catch (e) { /* tables not migrated yet: fall back to defaults */ }
+    try {
+      const lp = await db.from("location_prefs").select("slots").eq("site_id", String(state.site)).maybeSingle();
+      const raw = (!lp.error && lp.data && Array.isArray(lp.data.slots)) ? lp.data.slots : null;
+      // Validate shape: only well-formed slot objects survive (guards against direct DB edits).
+      const good = raw ? raw.filter((s) => s && typeof s.key === "string" && s.key.length <= 40).map((s) => ({ key: s.key, name: typeof s.name === "string" && s.name ? s.name.slice(0, 40) : s.key, hidden: !!s.hidden })) : null;
+      state.locPrefs = (good && good.length) ? { slots: good } : null;
+    } catch (e) { state.locPrefs = null; /* table not migrated yet: fall back to defaults */ }
+    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
+    $("saveLoad").disabled = !state.selected;
     renderSiteTabs();
+    renderLocations("locations", state.selected, selectLocation);
     renderLoads();
     renderIncoming();
     renderQuick();
@@ -678,7 +747,7 @@ button[data-ui-tooltip]{position:relative}
     const vs = pl.aheadNow >= 0 ? "+" + pl.aheadNow.toFixed(1) + " ahead" : pl.aheadNow.toFixed(1) + " behind";
     $("paceFocus").style.setProperty("--pace-accent", pl.color);
     $("paceFocusBody").innerHTML =
-      '<div class="pf-name" style="color:' + pl.color + '">' + pl.loc + '</div>' +
+      '<div class="pf-name" style="color:' + pl.color + '">' + esc(locName(pl.loc)) + '</div>' +
       '<div class="pf-big">' + pl.turn.toFixed(0) + '<span style="font-size:20px">m</span></div>' +
       '<div class="pf-sub">avg turnaround per load</div>' +
       '<div style="height:10px"></div>' +
@@ -820,11 +889,11 @@ button[data-ui-tooltip]{position:relative}
       const plan = planFor(date);
       const el = $("paceChart");
       if (!el) return;
-      const needy = locations.filter((l) => Number(plan[l.toLowerCase()] || 0) > 0);
+      const needy = visibleLocs().map((s) => s.key).filter((l) => Number(plan[l.toLowerCase()] || 0) > 0);
       $("paceTitle").textContent = "Plant pace · " + friendlyDay(date);
       if (!needy.length) {
         if (paceChart) { paceChart.dispose(); paceChart = null; }
-        el.innerHTML = '<div class="empty-chart">No plant needs set for this day.</div>';
+        el.innerHTML = '<div class="empty-chart">' + (visibleLocs().length ? "No plant needs set for this day." : "Locations are hidden — press and hold the destination box.") + '</div>';
         $("paceNote").textContent = "";
         $("paceLive").textContent = "";
         closePaceFocus();
@@ -852,7 +921,7 @@ button[data-ui-tooltip]{position:relative}
       const plants = [];
       const notes = [];
       needy.forEach((loc) => {
-        const color = PACE_COLORS[loc];
+        const color = PACE_COLORS[loc] || "#7a8a7d";
         const rows = state.loads.filter((x) => x.location === loc && sameLocalDate(x.occurred_at, date)).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
         const need = Number(plan[loc.toLowerCase()] || 0);
         const done = rows.length;
@@ -941,7 +1010,7 @@ button[data-ui-tooltip]{position:relative}
         });
         const endX = pl.sm[pl.sm.length - 1][0];
         const cycBit = pl.drivers > 0 && pl.avgTurn > 0 ? fmtDur(pl.avgTurn * pl.drivers) : "—";
-        const labelText = `{b|${pl.loc}}
+        const labelText = `{b|${locName(pl.loc)}}
 {m|${pl.done}/${pl.need} · ${pl.turn.toFixed(0)}m avg turn}
 {s|${pl.drivers > 0 ? pl.drivers + " drivers auto" : "? drivers"} · ${cycBit} cycle}`;
         series.push({
@@ -1098,6 +1167,11 @@ button[data-ui-tooltip]{position:relative}
     if (isLoad) {
       const choose = (location) => { state.editLocation = location; renderLocations("editLocations", location, choose); };
       renderLocations("editLocations", state.editLocation, choose);
+      // If the load's location is currently hidden, show it as a ghost pill so
+      // the operator can see what's set instead of an empty picker.
+      if (state.editLocation && !visibleLocs().some((s) => s.key === state.editLocation)) {
+        $("editLocations").insertAdjacentHTML("beforeend", `<button type="button" class="loc selected" disabled>${esc(locName(state.editLocation))}</button>`);
+      }
     }
     $("editStatus").textContent = "";
     $("editModal").classList.add("open");
@@ -1122,21 +1196,22 @@ button[data-ui-tooltip]{position:relative}
 
   function openPlan() {
     const p = planFor($("planDate").value);
-    $("planPasco").value = p.pasco || 0;
-    $("planWarden").value = p.warden || 0;
-    $("planQuincy").value = p.quincy || 0;
-    $("planRichland").value = p.richland || 0;
+    const slots = planSlots();
+    $("planInputs").innerHTML = slots.map((s, i) => `<div class="field"><label for="plan_loc_${i}">${esc(s.name)}</label><input id="plan_loc_${i}" data-plan-key="${esc(s.key.toLowerCase())}" type="number" min="0" inputmode="numeric"></div>`).join("");
+    slots.forEach((s, i) => { $("plan_loc_" + i).value = p[s.key.toLowerCase()] || 0; });
     $("planTitle").textContent = "Plant needs · " + friendlyDay($("planDate").value);
     $("planModal").classList.add("open");
   }
   function closePlan() { $("planModal").classList.remove("open"); }
   async function savePlan() {
     const date = $("planDate").value;
-    const vals = { pasco: Number($("planPasco").value || 0), warden: Number($("planWarden").value || 0), quincy: Number($("planQuincy").value || 0), richland: Number($("planRichland").value || 0) };
+    const slots = planSlots();
+    const vals = {};
+    slots.forEach((s, i) => { vals[s.key.toLowerCase()] = Number($("plan_loc_" + i).value || 0); });
     if (Object.values(vals).some((n) => !Number.isInteger(n) || n < 0)) return message("planModalStatus", "Enter whole numbers 0 or greater.");
     const oldPlan = planFor(date);
     const oldRow = state.plans.find((p) => p.plan_date === date);
-    const changed = ["pasco", "warden", "quincy", "richland"].some((k) => Number(oldPlan[k] || 0) !== vals[k]);
+    const changed = slots.some((s) => Number(oldPlan[s.key.toLowerCase()] || 0) !== vals[s.key.toLowerCase()]);
     const { error } = await db.from("arrival_plans").upsert({ site_id: state.site, plan_date: date, ...vals, updated_at: new Date().toISOString(), updated_by: state.user.id, updated_by_name: state.name }, { onConflict: "site_id,plan_date" });
     if (error) return message("planModalStatus", errText(error));
     if (changed) {
@@ -1212,7 +1287,7 @@ button[data-ui-tooltip]{position:relative}
     message("inStatus", "Unable to load shared data: " + hint);
   }
   function subscribe() {
-    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions", "site_names", "field_aliases"].forEach((table) => {
+    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions", "site_names", "field_aliases", "location_prefs"].forEach((table) => {
       db.channel("live-" + table).on("postgres_changes", { event: "*", schema: "public", table }, () => loadData().catch(showSetupError)).subscribe();
     });
   }
@@ -1275,7 +1350,7 @@ state.deviceName = deviceName || "Unknown Device";
       { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
       { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
       { key: "site", label: "Site", get: (x) => siteName(x.site_id) },
-      { key: "location", label: "Location", get: (x) => (x.location || "") },
+      { key: "location", label: "Location", get: (x) => exportLocName(x.site_id, x.location || "") },
       { key: "truck", label: "Truck", get: (x) => (x.truck || "") },
       { key: "trailer", label: "Trailer", get: (x) => (x.trailer || "") },
       { key: "field", label: "Field", get: (x) => (x.field ? (state.fieldAliases[x.field] || x.field) : "") },
@@ -1297,6 +1372,12 @@ state.deviceName = deviceName || "Unknown Device";
     ],
   };
   const exportState = { kind: "outgoing", site: null, from: "", to: "", cols: {}, rows: [] };
+  let exportLocMaps = {}; // site_id -> { locationKey: displayName }
+  function exportLocName(siteId, key) {
+    const m = exportLocMaps[String(siteId)];
+    if (m && m[key] != null) return m[key];
+    return locName(key); // fall back to the current site's prefs
+  }
   let exportInit = false;
   function selectedExportCols() { return EXPORT_COLS[exportState.kind].filter((c) => exportState.cols[c.key]); }
   function resetExportCols() {
@@ -1325,6 +1406,18 @@ state.deviceName = deviceName || "Unknown Device";
     initExport();
     message("expStatus", "");
     let rows = [];
+    // Per-site location names so a "Both" export resolves renames correctly.
+    if (exportState.kind === "outgoing") {
+      exportLocMaps = {};
+      try {
+        const res = await db.from("location_prefs").select("site_id,slots").in("site_id", ["1", "2"]);
+        (res.data || []).forEach((r) => {
+          const m = {};
+          (Array.isArray(r.slots) ? r.slots : []).forEach((s) => { if (s && s.key) m[s.key] = s.name || s.key; });
+          exportLocMaps[String(r.site_id)] = m;
+        });
+      } catch (e) { /* fall back to current-site prefs */ }
+    }
     try {
       const table = exportState.kind === "outgoing" ? "outgoing_entries" : "incoming_entries";
       let q = db.from(table).select("*").order("occurred_at", { ascending: true });
@@ -1366,6 +1459,8 @@ state.deviceName = deviceName || "Unknown Device";
       // Stop Excel/Sheets from coercing values like 7-1 into dates (July 1):
       // ="7-1" is evaluated as the text 7-1.
       if (/^\d{1,2}[-/]\d{1,2}([-/]\d{2,4})?$/.test(v)) v = `="${v}"`;
+      // Neutralize formula injection: a leading = + - @ would execute in Excel/Sheets.
+      else if (/^[=+\-@]/.test(v)) v = "'" + v;
       return (/[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
     };
     const lines = [cols.map((c) => cell(c.label)).join(",")];
@@ -1467,6 +1562,128 @@ state.deviceName = deviceName || "Unknown Device";
     }
     closeSiteNames();
   }
+
+  // ── Location edit mode: press-and-hold the destination box for 3s ──
+  function enterLocEdit() {
+    if (locEditMode) return;
+    locEditMode = true;
+    $("locDoneBtn").classList.remove("hidden");
+    renderLocations("locations", state.selected, selectLocation);
+  }
+  function exitLocEdit() {
+    if (!locEditMode) return;
+    locEditMode = false;
+    $("locDoneBtn").classList.add("hidden");
+    renderLocations("locations", state.selected, selectLocation);
+  }
+  async function saveLocPrefs(slots, statusId) {
+    // Merge against the latest row so two devices editing at once don't
+    // silently clobber each other (last-write-wins on the whole array).
+    const clean = (arr) => arr.filter((b) => b && typeof b.key === "string").map((b) => ({ key: b.key, name: b.name || b.key, hidden: !!b.hidden }));
+    try {
+      let merged = clean(slots);
+      try {
+        const lp = await db.from("location_prefs").select("slots").eq("site_id", String(state.site)).maybeSingle();
+        const base = (!lp.error && lp.data && Array.isArray(lp.data.slots)) ? clean(lp.data.slots) : null;
+        if (base && base.length) {
+          merged = base.map((b) => { const o = merged.find((s) => s.key === b.key); return o || b; });
+          clean(slots).forEach((s) => { if (!merged.some((m) => m.key === s.key)) merged.push(s); });
+        }
+      } catch (e) { /* fall back to our snapshot */ }
+      const { error } = await db.from("location_prefs").upsert({ site_id: String(state.site), slots: merged, updated_at: new Date().toISOString() });
+      if (error) throw error;
+      state.locPrefs = { slots: clean(merged) };
+      return true;
+    } catch (e) {
+      const hint = errText(e);
+      const msg = /location_prefs|relation|table/i.test(hint)
+        ? "Location editing needs the database update — run the new supabase.sql first."
+        : "Could not save: " + hint;
+      if (statusId) message(statusId, msg);
+      return false;
+    }
+  }
+  function refreshAfterLocPrefs() {
+    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) { state.selected = ""; $("saveLoad").disabled = true; }
+    renderLocations("locations", state.selected, selectLocation);
+    renderNeeds(); renderLoads(); renderPace();
+  }
+  async function hideLocation(key) {
+    const slots = cloneSlots();
+    const s = slots.find((x) => x.key === key);
+    if (!s || s.hidden) return;
+    s.hidden = true;
+    $("locEditStatus").textContent = "";
+    if (await saveLocPrefs(slots)) { refreshAfterLocPrefs(); return; }
+    const hint = "Location editing needs the database update — run the new supabase.sql first.";
+    $("locEditStatus").textContent = hint;
+  }
+  function openLocRename(key) {
+    const s = locSlots().find((x) => x.key === key);
+    if (!s) return;
+    state.renamingLoc = key;
+    $("locNameNote").textContent = "Clear the box to reset to “" + s.key + "”.";
+    $("locNameInput").value = s.name;
+    message("locNameStatus", "");
+    $("locNameModal").classList.add("open");
+    $("locNameInput").focus();
+  }
+  function closeLocRename() { $("locNameModal").classList.remove("open"); state.renamingLoc = ""; }
+  async function saveLocName() {
+    const key = state.renamingLoc;
+    if (!key) return closeLocRename();
+    const name = $("locNameInput").value.trim();
+    message("locNameStatus", "");
+    const slots = cloneSlots();
+    const s = slots.find((x) => x.key === key);
+    if (!s) return closeLocRename();
+    if (name && slots.some((x) => x !== s && (x.key.toLowerCase() === name.toLowerCase() || x.name.toLowerCase() === name.toLowerCase()))) {
+      message("locNameStatus", "That name is already used.");
+      return;
+    }
+    s.name = name || key;
+    if (!await saveLocPrefs(slots, "locNameStatus")) return;
+    closeLocRename();
+    refreshAfterLocPrefs();
+  }
+  function openLocAdd() {
+    message("locAddStatus", "");
+    $("locNewName").value = "";
+    const hidden = locSlots().filter((s) => s.hidden);
+    $("locAddList").innerHTML = hidden.length
+      ? hidden.map((s) => `<button type="button" class="loc-add-btn" data-readd="${esc(s.key)}">Re-add ${esc(s.name)}</button>`).join("")
+      : '<div class="note">No removed locations.</div>';
+    $("locAddList").querySelectorAll("[data-readd]").forEach((b) => {
+      b.onclick = async () => {
+        message("locAddStatus", "");
+        if (visibleLocs().length >= 4) { message("locAddStatus", "Four already on the row — hide one first."); return; }
+        const slots = cloneSlots();
+        const s = slots.find((x) => x.key === b.dataset.readd);
+        if (!s) return;
+        s.hidden = false;
+        if (!await saveLocPrefs(slots, "locAddStatus")) return;
+        closeLocAdd();
+        refreshAfterLocPrefs();
+      };
+    });
+    $("locAddModal").classList.add("open");
+    $("locNewName").focus();
+  }
+  function closeLocAdd() { $("locAddModal").classList.remove("open"); }
+  async function saveLocAddNew() {
+    const name = $("locNewName").value.trim();
+    message("locAddStatus", "");
+    if (!name) { message("locAddStatus", "Type a name first."); return; }
+    if (visibleLocs().length >= 4) { message("locAddStatus", "Four already on the row — hide one first."); return; }
+    const slots = cloneSlots();
+    if (slots.some((s) => s.key.toLowerCase() === name.toLowerCase() || s.name.toLowerCase() === name.toLowerCase())) {
+      message("locAddStatus", "That location already exists."); return;
+    }
+    slots.push({ key: name, name, hidden: false });
+    if (!await saveLocPrefs(slots, "locAddStatus")) return;
+    closeLocAdd();
+    refreshAfterLocPrefs();
+  }
   function openFieldRename(field) {
     state.renamingField = field;
     $("fieldNameNote").textContent = `Field number: ${field} — clear the name to go back to the default.`;
@@ -1502,6 +1719,25 @@ state.deviceName = deviceName || "Unknown Device";
   $("saveTime").onclick = saveTimeEdit;
   $("timeModal").onclick = (e) => { if (e.target === $("timeModal")) closeTimeEdit(); };
   $("closeSiteNames").onclick = closeSiteNames;
+  // Location edit mode: press-and-hold the destination box for 3 seconds.
+  let locHoldTimer = null;
+  const cancelLocHold = () => { if (locHoldTimer) clearTimeout(locHoldTimer); locHoldTimer = null; };
+  $("destPanel").addEventListener("pointerdown", () => {
+    if (locEditMode) return;
+    cancelLocHold();
+    locHoldTimer = setTimeout(() => { locHoldAt = Date.now(); enterLocEdit(); }, 3000);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => $("destPanel").addEventListener(ev, cancelLocHold));
+  $("destPanel").addEventListener("contextmenu", (ev) => ev.preventDefault());
+  $("locDoneBtn").onclick = () => { if (locHoldFresh()) return; exitLocEdit(); };
+  $("closeLocName").onclick = closeLocRename;
+  $("cancelLocName").onclick = closeLocRename;
+  $("saveLocName").onclick = saveLocName;
+  $("locNameModal").addEventListener("click", (e) => { if (e.target === $("locNameModal")) closeLocRename(); });
+  $("closeLocAdd").onclick = closeLocAdd;
+  $("cancelLocAdd").onclick = closeLocAdd;
+  $("saveLocAdd").onclick = saveLocAddNew;
+  $("locAddModal").addEventListener("click", (e) => { if (e.target === $("locAddModal")) closeLocAdd(); });
   $("cancelSiteNames").onclick = closeSiteNames;
   $("saveSiteNames").onclick = saveSiteNames;
   $("siteNameModal").onclick = (e) => { if (e.target === $("siteNameModal")) closeSiteNames(); };
@@ -1552,7 +1788,7 @@ state.deviceName = deviceName || "Unknown Device";
   // iOS resumes the frozen page without re-running the launch-time version check.
   let appHiddenAt = Date.now();
   function anyModalOpen() {
-    return ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal"].some((id) => $(id) && $(id).classList.contains("open"))
+    return ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal", "locNameModal", "locAddModal"].some((id) => $(id) && $(id).classList.contains("open"))
       || ($("paceFocusWrap") && !$("paceFocusWrap").classList.contains("hidden"));
   }
   async function checkForAppUpdate() {

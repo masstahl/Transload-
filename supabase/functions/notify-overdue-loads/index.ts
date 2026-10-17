@@ -40,6 +40,9 @@ Deno.serve(async (req: Request) => {
   try {
     webpush.setVapidDetails(subject, publicKey, privateKey);
     const db = createClient(url, serviceKey, { auth: { persistSession: false } });
+    // Recover claims left behind if an earlier invocation crashed mid-send.
+    await db.from("push_notification_deliveries").delete()
+      .eq("status", "sending").lt("claimed_at", new Date(Date.now() - 10 * 60_000).toISOString());
     const cutoff = new Date(Date.now() - 12 * 60_000).toISOString();
     const dayStart = localDayStartIso();
 
@@ -94,7 +97,10 @@ Deno.serve(async (req: Request) => {
             await db.from("push_subscriptions")
               .update({ enabled: false, last_error_at: new Date().toISOString() }).eq("id", sub.id);
             stale++;
-          } else failed++;
+          } else {
+            failed++;
+            await db.from("push_subscriptions").update({ last_error_at: new Date().toISOString() }).eq("id", sub.id);
+          }
           // Release failed claim to allow a later scheduler retry.
           await db.from("push_notification_deliveries").delete().eq("id", claim.id);
         }

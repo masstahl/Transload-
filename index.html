@@ -161,9 +161,9 @@ button[data-ui-tooltip]{position:relative}
       <div style="display:flex;align-items:center;gap:7px"><button class="site-menu-btn" id="siteMenuButton" type="button" aria-label="Menu choose transload site" title="Choose transload site" data-ui-tooltip="Choose transload site" aria-expanded="false">Menu</button><div class="brand">Transload Log</div></div>
       <div class="sub">Shared live load tracking</div>
     </div>
-    <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button><br><button id="pushAlertsBtn" type="button">Enable overdue alerts</button><div id="pushAlertsStatus" role="status" aria-live="polite" style="max-width:190px;margin-top:3px;font-size:10px;color:#4f5e54"></div></div>
+    <div class="identity"><strong id="identityName">Connecting…</strong><br><button id="changeName">Change name</button></div>
   </header>
-  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button></nav><div class="site-content">
+  <div class="site-menu-backdrop" id="siteMenuBackdrop"></div><div class="workspace"><nav class="site-tabs" id="siteTabs" aria-label="Transload site"><button class="site-tab active" data-site="1">1</button><button class="site-tab" data-site="2">2</button><div class="menu-divider"></div><button class="menu-link" id="menuExportBtn" type="button">Export CSV</button><button class="menu-link" id="menuAlertsBtn" type="button">Overdue alerts: <span id="menuAlertsState">Off</span></button></nav><div class="site-content">
   <nav class="tabs">
     <button class="tab active" data-tab="outgoing">Outgoing Loads</button>
     <button class="tab" data-tab="incoming">Incoming Drivers</button>
@@ -375,9 +375,17 @@ button[data-ui-tooltip]{position:relative}
     <div class="status" id="locAddStatus" aria-live="polite"></div>
   </div>
 </div>
+<div class="modal" id="pushPromptModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><div class="modal-title">Overdue load alerts</div></div>
+    <div class="note">Get a notification on this phone when a truck's loading timer passes 12 minutes — even when the app is closed.</div>
+    <div class="modal-actions"><button class="cancel" id="pushPromptLater">Maybe later</button><button class="update" id="pushPromptEnable">Enable alerts</button></div>
+    <div class="status" id="pushPromptStatus" aria-live="polite"></div>
+  </div>
+</div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-17-push-cleanup-v6";
+  const APP_VERSION = "2026-10-17-push-prompt-v7";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -470,52 +478,22 @@ button[data-ui-tooltip]{position:relative}
     const raw = atob((value + padding).replace(/-/g, "+").replace(/_/g, "/"));
     return Uint8Array.from(raw, (char) => char.charCodeAt(0));
   }
-  function pushStatus(text, ok = false) {
-    const el = $("pushAlertsStatus");
-    if (!el) return;
-    el.textContent = text;
-    el.style.color = ok ? "#3f5c47" : "#8f4a42";
+  function pushSupported() {
+    return ("serviceWorker" in navigator) && ("PushManager" in window) && ("Notification" in window);
   }
-  async function refreshPushButton() {
-    const button = $("pushAlertsBtn");
-    if (!button) return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-      button.disabled = true;
-      button.textContent = "Alerts not supported here";
-      pushStatus("Open the installed Home Screen app on a supported iPhone.");
-      return;
-    }
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      button.textContent = subscription ? "Disable overdue alerts" : "Enable overdue alerts";
-      if (subscription) pushStatus("Alerts are enabled on this device.", true);
-    } catch (error) {
-      pushStatus("Could not check notification status.");
-    }
+  async function getPushSubscription() {
+    const registration = await navigator.serviceWorker.ready;
+    return registration.pushManager.getSubscription();
   }
-  async function togglePushAlerts() {
-    const button = $("pushAlertsBtn");
-    if (!state.user || !button) {
-      pushStatus("Connect to the shared log before enabling alerts.");
-      return;
-    }
-    button.disabled = true;
+  // Enable or disable overdue push alerts for this device. Returns {ok, message}.
+  async function setPushEnabled(enable) {
+    if (!state.user) return { ok: false, message: "Connect to the shared log before changing alerts." };
     try {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-        throw new Error("Web Push is not supported in this browser.");
-      }
+      if (!pushSupported()) throw new Error("Web Push is not supported in this browser.");
       const registration = await navigator.serviceWorker.ready;
       const current = await registration.pushManager.getSubscription();
-      if (current) {
-        const endpoint = current.endpoint;
-        await current.unsubscribe();
-        const { error } = await db.from("push_subscriptions")
-          .update({ enabled: false, updated_at: new Date().toISOString() })
-          .eq("endpoint", endpoint).eq("user_id", state.user.id);
-        if (error) throw error;
-        pushStatus("Overdue alerts disabled on this device.", true);
-      } else {
+      if (enable) {
+        if (current) return { ok: true, message: "Alerts are already on." };
         if (Notification.permission === "denied") {
           throw new Error("Notifications are blocked in iPhone Settings. Allow notifications for the Home Screen app, then try again.");
         }
@@ -545,14 +523,78 @@ button[data-ui-tooltip]{position:relative}
           await subscription.unsubscribe();
           throw error;
         }
-        pushStatus("Overdue alerts enabled on this device.", true);
+        return { ok: true, message: "Overdue alerts enabled on this device." };
       }
+      if (!current) return { ok: true, message: "Alerts are already off." };
+      const endpoint = current.endpoint;
+      await current.unsubscribe();
+      const { error } = await db.from("push_subscriptions")
+        .update({ enabled: false, updated_at: new Date().toISOString() })
+        .eq("endpoint", endpoint).eq("user_id", state.user.id);
+      if (error) throw error;
+      return { ok: true, message: "Overdue alerts disabled on this device." };
     } catch (error) {
       console.error("Push alerts setup failed:", error);
-      pushStatus(error?.message || "Could not update alert settings.");
-    } finally {
-      button.disabled = false;
-      await refreshPushButton();
+      return { ok: false, message: error?.message || "Could not update alert settings." };
+    }
+  }
+  async function refreshMenuAlerts() {
+    const el = $("menuAlertsState");
+    if (!el) return;
+    if (!pushSupported()) { el.textContent = "Unsupported"; return; }
+    try {
+      const subscription = await getPushSubscription();
+      el.textContent = subscription ? "On" : "Off";
+    } catch (error) {
+      el.textContent = "Off";
+    }
+  }
+  // One-time-per-visit prompt: shows on startup until the user enables alerts
+  // (or blocks notifications). "Maybe later" only dismisses it for this visit.
+  let pushPromptShown = false;
+  async function maybeShowPushPrompt() {
+    if (pushPromptShown) return;
+    pushPromptShown = true;
+    if (!pushSupported() || !state.user) return;
+    if (Notification.permission === "denied") return;
+    try {
+      const subscription = await getPushSubscription();
+      if (subscription) return;
+    } catch (error) { return; }
+    openPushDialog();
+  }
+  function openPushDialog() {
+    refreshPushDialog();
+    $("pushPromptModal").classList.add("open");
+  }
+  async function refreshPushDialog() {
+    const enableBtn = $("pushPromptEnable");
+    const laterBtn = $("pushPromptLater");
+    const status = $("pushPromptStatus");
+    status.textContent = "";
+    if (!pushSupported()) {
+      enableBtn.style.display = "none";
+      laterBtn.textContent = "Close";
+      status.textContent = "Push alerts need the installed Home Screen app on iPhone (iOS 16.4 or newer).";
+      return;
+    }
+    enableBtn.style.display = "";
+    try {
+      const subscription = await getPushSubscription();
+      if (subscription) {
+        enableBtn.textContent = "Disable alerts";
+        laterBtn.textContent = "Close";
+        status.textContent = "Alerts are on for this phone.";
+        status.style.color = "#3f5c47";
+      } else {
+        enableBtn.textContent = "Enable alerts";
+        laterBtn.textContent = "Maybe later";
+        if (Notification.permission === "denied") {
+          status.textContent = "Notifications are blocked in iPhone Settings.";
+        }
+      }
+    } catch (error) {
+      status.textContent = "Could not check alert status.";
     }
   }
 
@@ -1419,8 +1461,28 @@ button[data-ui-tooltip]{position:relative}
       }
       if (!user) throw new Error("Could not sign in to the shared log.");
       state.user = user;
-      $("pushAlertsBtn").addEventListener("click", togglePushAlerts);
-      refreshPushButton();
+      $("menuAlertsBtn").addEventListener("click", () => { closeSiteMenu(); openPushDialog(); });
+      $("pushPromptEnable").addEventListener("click", async () => {
+        const button = $("pushPromptEnable");
+        button.disabled = true;
+        try {
+          const subscription = await getPushSubscription().catch(() => null);
+          const result = await setPushEnabled(!subscription);
+          if (result.ok) {
+            await refreshMenuAlerts();
+            $("pushPromptModal").classList.remove("open");
+          } else {
+            const status = $("pushPromptStatus");
+            status.textContent = result.message;
+            status.style.color = "#8f4a42";
+          }
+        } finally {
+          button.disabled = false;
+        }
+      });
+      $("pushPromptLater").addEventListener("click", () => { $("pushPromptModal").classList.remove("open"); });
+      refreshMenuAlerts();
+      setTimeout(maybeShowPushPrompt, 1500);
       state.name = localStorage.getItem("tl_operator_name") || "";
       let deviceName = localStorage.getItem("tl_device_name");
 

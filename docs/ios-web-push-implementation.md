@@ -1,25 +1,49 @@
 # Transload Log iOS Web Push
 
-This is a preview-only implementation on `feature/turnaround-wave-chart-push`. The production app and Supabase database have not been changed.
+Overdue load push notifications for iPhones. Live on `main` (served by GitHub Pages).
 
-## Implemented in source
-- HTTPS service-worker registration without automatically prompting for permission.
-- An operator-tap “Enable overdue alerts” control; it requests permission only after a tap, saves the device subscription under the current Supabase user, and offers a disable action.
-- A server-side sender at `supabase/functions/notify-overdue-loads/index.ts`.
-- Additive SQL for per-user push subscriptions and unique per-entry/per-subscription delivery claims.
-- The sender only considers unfinished loads started at least 12 minutes ago and since midnight in America/Los_Angeles. Old unfinished rows from prior operating days are excluded.
-- A unique delivery claim prevents overlapping scheduled runs from sending duplicate alerts. Failed claims are released for retry; stale 404/410 endpoints are disabled.
-- UI audit has passed on the feature branch after correcting alert-button touch target sizing.
+## How it works
 
-## Still required before live activation
-1. Review and merge the PR only after the Edge Function type-check workflow passes.
-2. Apply the SQL migration to the intended Supabase project. It is **not** applied yet.
-3. Configure Edge Function secrets in Supabase: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (a mailto: address), and a strong random `PUSH_CRON_SECRET`. Supabase provides `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the Edge Function environment. Never expose the service-role key or VAPID private key in client code or Git.
-4. Deploy the function with JWT verification disabled only because it authenticates requests using `PUSH_CRON_SECRET`. The secret must be passed as a bearer token only from the scheduler.
-5. Configure a scheduler to POST to the function on a short interval (for example every minute) using the bearer secret. Do not enable it until migration, secrets and manual function tests are confirmed.
-6. Test permission grant/denial, enable/disable, duplicate scheduler calls, completed loads, stale subscriptions, DST/day boundary, and real iOS Home Screen delivery while the app is backgrounded.
+- The app registers `sw.js` (persistent; it no longer unregisters itself) and shows an
+  "Enable overdue alerts" button in the header. Tapping it requests notification
+  permission, creates a Web Push subscription with the VAPID public key baked into
+  `index.html`, and saves it to `push_subscriptions` (one row per device endpoint).
+- `sw.js` handles `push` (shows the notification) and `notificationclick` (focuses/opens the app).
+- The Edge Function `supabase/functions/notify-overdue` is the single sender. It finds
+  outgoing loads with `load_started_at` 12+ minutes ago and no `load_finished_at`
+  (today in America/Los_Angeles), then sends one push per enabled subscription.
+- `push_overdue_deliveries` holds one idempotency claim per (load, subscription) so
+  overlapping runs never double-notify; failed claims are released for retry and
+  dead endpoints (404/410) are disabled automatically.
+- `.github/workflows/transload-overdue-push.yml` invokes the function. It is
+  **manual-only** (`workflow_dispatch`) until a real end-to-end delivery test passes.
 
-## Important limitations
-- GitHub Actions UI audit does not test real iOS push delivery.
-- No preview Supabase project is currently configured, so live database/function changes are deliberately held until runtime configuration and testing can be done safely.
-- No production migration, function deployment, secrets, or scheduler has been changed.
+## Server setup (Supabase dashboard)
+
+1. Run `supabase/migrations/20261017000000_add_transload_web_push.sql` and
+   `supabase/migrations/20261017010000_add_per_subscription_push_claims.sql` in the
+   SQL editor (the tables already exist in production as of 2026-10-17).
+2. Deploy the function: `supabase functions deploy notify-overdue`.
+3. Set Edge Function secrets: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+   `VAPID_SUBJECT` (a `mailto:` address), and `NOTIFICATION_KEY` (strong random
+   string; also saved as the `NOTIFICATION_KEY` GitHub repo secret for the workflow).
+   `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided by Supabase.
+4. The VAPID keypair was reset on 2026-10-17: the public key in `index.html`
+   (`VAPID_PUBLIC_KEY`) is the only one the server must use. After any key rotation,
+   every device must Disable then re-Enable alerts to subscribe under the new key.
+
+## Testing before enabling the schedule
+
+1. On the iPhone Home Screen app (iOS 16.4+; web push does not work in Safari tabs),
+   tap "Enable overdue alerts" and grant permission.
+2. Start a load timer, wait 12 minutes, then run the workflow manually from the
+   GitHub Actions tab. The phone should buzz even with the app backgrounded.
+3. Only then add a `schedule` trigger (every minute) to `transload-overdue-push.yml`.
+
+## Removed 2026-10-17
+
+- Deleted the duplicate sender `supabase/functions/notify-overdue-loads` (it used a
+  different auth scheme and was never wired to the scheduler).
+- Deleted the competing migration `supabase/migrations/20261017_push_subscriptions.sql`
+  (it created an unused `push_notification_deliveries` table and a duplicate RLS policy).
+- The type-check workflow now checks the live function.

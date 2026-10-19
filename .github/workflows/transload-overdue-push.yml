@@ -1,7 +1,10 @@
 name: Transload overdue push check
 
 on:
-  # Keep scheduling disabled until real iPhone push delivery is verified.
+  on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:

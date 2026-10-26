@@ -24,8 +24,8 @@ self.addEventListener("push", (event) => {
       body,
       tag: typeof payload.tag === "string" ? payload.tag : "transload-overdue",
       renotify: false,
-      icon: "./apple-touch-icon.png",
-      badge: "./apple-touch-icon.png",
+      icon: "./apple-touch-icon-v9.png",
+      badge: "./apple-touch-icon-v9.png",
       data: { url: "./", location, entryId: typeof payload.entryId === "string" ? payload.entryId : "" }
     };
     await self.registration.showNotification(title, options);

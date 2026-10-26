@@ -8,13 +8,13 @@
   "description": "Fast transload truck, trailer, location, time and driver log.",
   "icons": [
     {
-      "src": "apple-touch-icon.png",
+      "src": "apple-touch-icon-v9.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-512-v9.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

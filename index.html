@@ -37,7 +37,6 @@ button:active{transform:scale(.985)}
  #outgoingView:not(.hidden) .panel:has(#loadList),
  #outgoingView:not(.hidden) .panel:has(#fieldChart),
  #incomingView:not(.hidden) .panel:has(#quickList),
- #incomingView:not(.hidden) .panel:has(#inCount),
  #incomingView:not(.hidden) .panel:has(#incomingList),
  #incomingView:not(.hidden) .panel:has(#inFieldChart){
   animation:transload-panel-view linear both;animation-timeline:view();animation-range:entry 0% exit 100%;
@@ -256,14 +255,6 @@ button[data-ui-tooltip]{position:relative}
       </div>
     </div>
     <div class="panel">
-      <div class="title">Incoming activity today</div>
-      <div class="summary">
-        <div class="stat"><div class="num" id="inCount">0</div><div class="lbl">Entries</div></div>
-        <div class="stat"><div class="num" id="driverCount">0</div><div class="lbl">Drivers</div></div>
-        <div class="stat"><div class="num" id="inFieldCount">0</div><div class="lbl">Fields</div></div>
-      </div>
-    </div>
-    <div class="panel">
       <div class="title">Incoming driver log</div>
       <div class="list" id="incomingList"></div>
     </div>
@@ -387,7 +378,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-28-plan-entry-v12";
+  const APP_VERSION = "2026-10-28-incoming-v13";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -857,10 +848,6 @@ button[data-ui-tooltip]{position:relative}
   }
   function renderIncoming() {
     const records = state.incoming;
-    const todayRows = records.filter((x) => workDateOf(x) === state.workDate);
-    $("inCount").textContent = todayRows.length;
-    $("driverCount").textContent = new Set(todayRows.map((x) => x.driver.toLowerCase())).size;
-    $("inFieldCount").textContent = new Set(todayRows.map((x) => x.field)).size;
     renderChart("inFieldChart", state.sharedFieldIncoming, state.inRange, "No incoming field loads in this period.");
     $("incomingList").innerHTML = records.length ? records.map((x) => `<article class="row"><div class="rowtop"><span>${esc(x.driver)}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta"><b>${esc(x.field ? fieldLabel(x.field) : "—")}</b></div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-in="${x.id}">Edit</button><button class="delete-btn" data-delete-in="${x.id}">Delete</button></div></article>`).join("") : '<div class="empty">No incoming drivers recorded yet.</div>';
     $("incomingList").querySelectorAll("[data-edit-in]").forEach((b) => { b.onclick = () => openEdit("incoming", b.dataset.editIn); });

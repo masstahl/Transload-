@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon-v9.png">
   <title>Transload Log</title>
   <style>
-    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#28352e;background:#f5f3ee;--sage:#78927b;--sage-dark:#506b56;--sage-soft:#e8f0e5;--slate:#68766e;--border:#dcded6;--panel:#fffefa;--soft:#f0efe8}*{box-sizing:border-box}body{margin:0;background:#f5f3ee;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.workspace{display:block;position:relative}.site-tabs{position:fixed;z-index:51;left:0;top:0;bottom:0;width:min(78vw,290px);padding:calc(18px + env(safe-area-inset-top)) 14px 18px;background:var(--panel);box-shadow:8px 0 28px #0002;display:flex;flex-direction:column;gap:10px;transform:translateX(-105%);transition:transform .22s ease;visibility:hidden}.site-tabs.open{transform:translateX(0);visibility:visible}.site-tab{height:64px;flex:0 0 64px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:900;color:var(--slate)}.site-tab.active{background:var(--sage);color:#fff;border-color:var(--sage)}.site-content{min-width:0}.site-menu-btn{height:34px;min-width:36px;padding:0 8px;border:1px solid var(--border);border-radius:9px;background:var(--soft);color:var(--sage-dark);font-size:19px;font-weight:800;line-height:1}.site-menu-backdrop{position:fixed;inset:0;z-index:50;background:#0006;display:none}.site-menu-backdrop.open{display:block}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.8px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{display:inline-block;min-height:26px;line-height:1.35;border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:4px 0;font-size:11px;margin-top:5px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:10px;margin-bottom:8px;box-shadow:0 2px 9px #3c4a3d08}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-width:0;min-height:46px;padding:4px 2px;font-size:12px;border:1px solid var(--border);border-radius:11px;background:var(--soft);color:#34423a;font-weight:800;box-shadow:0 1px 0 #fff9 inset}:root{--quincy-bg:#e9f0e5;--quincy-border:#cad9c3;--pasco-bg:#e5eef5;--pasco-border:#c9dbe9;--warden-bg:#f7ebd8;--warden-border:#e8d5b7;--richland-bg:#f3e5eb;--richland-border:#e4cbd6}.loc:nth-child(1){background:var(--quincy-bg);border-color:var(--quincy-border)}.loc:nth-child(2){background:var(--pasco-bg);border-color:var(--pasco-border)}.loc:nth-child(3){background:var(--warden-bg);border-color:var(--warden-border)}.loc:nth-child(4){background:var(--richland-bg);border-color:var(--richland-border)}.loc.selected{box-shadow:0 0 0 2px #667f6b inset,0 2px 5px #0000000a;font-weight:900;color:#263b2d}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1.5px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#5d6b61}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#5d6b61;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#5d6b61;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddeda}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 52px;gap:6px}.dash-btn{font-size:11px;white-space:nowrap}.add-variety{font-size:10px;white-space:nowrap}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#5d6b61}.need-number{font-size:20px;font-weight:900}.plan-actions{display:grid;grid-template-columns:44px 1fr 44px auto;gap:6px;margin-top:7px;align-items:center}.secondary{background:var(--soft);color:var(--sage-dark)}.nav-btn{height:44px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900}.location-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.location-total{min-width:0;padding:8px 6px;border:1px solid var(--border);border-radius:12px;background:var(--soft);overflow-wrap:anywhere}.location-total .lbl{font-size:10px}.location-total b{font-size:20px}.loc-card-quincy{background:var(--quincy-bg);border-color:var(--quincy-border)}.loc-card-pasco{background:var(--pasco-bg);border-color:var(--pasco-border)}.loc-card-warden{background:var(--warden-bg);border-color:var(--warden-border)}.loc-card-richland{background:var(--richland-bg);border-color:var(--richland-border)}.row.loc-card-quincy,.need-row.loc-card-quincy{background:var(--quincy-bg);border-color:var(--quincy-border)}.row.loc-card-pasco,.need-row.loc-card-pasco{background:var(--pasco-bg);border-color:var(--pasco-border)}.row.loc-card-warden,.need-row.loc-card-warden{background:var(--warden-bg);border-color:var(--warden-border)}.row.loc-card-richland,.need-row.loc-card-richland{background:var(--richland-bg);border-color:var(--richland-border)}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.field-chart-item{border:1px solid var(--border);border-radius:10px;overflow:hidden}.chart-expand{width:100%;border:0;background:transparent;padding:7px;text-align:left}.expand-mark{font-size:15px;color:var(--sage);padding-left:2px}.field-detail{padding:8px 10px 10px;background:#faf9f5;border-top:1px solid var(--border)}.field-detail-summary{display:flex;flex-direction:column;gap:3px;font-size:12px}.field-detail-summary span{font-size:11px;color:var(--slate)}.field-day{padding:7px 0;border-top:1px solid #e5e0d7}.field-day-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}.field-day:first-of-type{margin-top:5px}.chart-row{display:grid;grid-template-columns:58px 1fr 34px;gap:7px;align-items:center;font-size:12px}.bar-wrap{height:18px;background:#edf0ed;border-radius:8px;overflow:hidden}.bar{height:100%;background:#a9c5aa;border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#5d6b61;font-size:12px;padding:12px}.hidden{display:none!important}.span2{grid-column:1/-1}@media(max-width:430px){.fields{grid-template-columns:1fr 1fr}.brand{font-size:22px}}
+    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif;color:#28352e;background:#f5f3ee;--sage:#78927b;--sage-dark:#506b56;--sage-soft:#e8f0e5;--slate:#68766e;--border:#dcded6;--panel:#fffefa;--soft:#f0efe8}*{box-sizing:border-box}body{margin:0;background:#f5f3ee;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;padding:calc(8px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom))}.workspace{display:block;position:relative}.site-tabs{position:fixed;z-index:51;left:0;top:0;bottom:0;width:min(78vw,290px);padding:calc(18px + env(safe-area-inset-top)) 14px 18px;background:var(--panel);box-shadow:8px 0 28px #0002;display:flex;flex-direction:column;gap:10px;transform:translateX(-105%);transition:transform .22s ease;visibility:hidden}.site-tabs.open{transform:translateX(0);visibility:visible}.site-tab{height:64px;flex:0 0 64px;border:1px solid var(--border);border-radius:11px;background:var(--soft);font-weight:900;color:var(--slate)}.site-tab.active{background:var(--sage);color:#fff;border-color:var(--sage)}.site-content{min-width:0}.site-menu-btn{height:34px;min-width:36px;padding:0 8px;border:1px solid var(--border);border-radius:9px;background:var(--soft);color:var(--sage-dark);font-size:19px;font-weight:800;line-height:1}.site-menu-backdrop{position:fixed;inset:0;z-index:50;background:#0006;display:none}.site-menu-backdrop.open{display:block}.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}.brand{font-size:24px;font-weight:850;letter-spacing:-.8px}.sub,.note,.meta,.hint{color:var(--slate);font-size:12px}.identity{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:7px 9px;text-align:right;font-size:11px}.identity button{display:inline-block;min-height:26px;line-height:1.35;border:0;background:none;color:var(--sage-dark);text-decoration:underline;padding:4px 0;font-size:11px;margin-top:5px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#e8ece8;padding:3px;border-radius:11px;margin-bottom:8px}.tab{min-height:40px;border:0;border-radius:10px;background:transparent;color:#617066;font-weight:800}.tab.active{background:var(--panel);color:#1c2721;box-shadow:0 1px 5px #00000012}.panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:10px;margin-bottom:8px;box-shadow:0 2px 9px #3c4a3d08}.title{font-size:13px;font-weight:850;margin-bottom:3px}.needs-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.total-needs{flex:0 0 auto;padding:4px 7px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--slate);font-size:10px;font-weight:800;line-height:1.1;text-align:right}.total-needs b{display:block;color:var(--sage-dark);font-size:16px;line-height:1.05}.note{margin-bottom:7px}.locations{display:flex;gap:5px}.loc{flex:1;min-width:0;min-height:46px;padding:4px 2px;font-size:12px;border:1px solid var(--border);border-radius:11px;background:var(--soft);color:#34423a;font-weight:800;box-shadow:0 1px 0 #fff9 inset}:root{--quincy-bg:#e9f0e5;--quincy-border:#cad9c3;--pasco-bg:#e5eef5;--pasco-border:#c9dbe9;--warden-bg:#f7ebd8;--warden-border:#e8d5b7;--richland-bg:#f3e5eb;--richland-border:#e4cbd6}.loc:nth-child(1){background:var(--quincy-bg);border-color:var(--quincy-border)}.loc:nth-child(2){background:var(--pasco-bg);border-color:var(--pasco-border)}.loc:nth-child(3){background:var(--warden-bg);border-color:var(--warden-border)}.loc:nth-child(4){background:var(--richland-bg);border-color:var(--richland-border)}.loc.selected{box-shadow:0 0 0 2px #667f6b inset,0 2px 5px #0000000a;font-weight:900;color:#263b2d}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;font-size:12px;font-weight:800;color:var(--slate);margin:0 0 6px}.field input,.field select,.plan-date{width:100%;height:44px;border:1.5px solid #d8e1da;border-radius:12px;padding:0 12px;font-size:16px;background:#fff;outline:0}.field input:focus,.field select:focus{border-color:var(--sage)}.save,.small{width:100%;height:46px;border:0;border-radius:13px;background:var(--sage);color:#fff;font-weight:850;font-size:16px;margin-top:8px}.save:disabled{opacity:.45}.status{min-height:19px;margin-top:7px;font-size:12px;font-weight:700;color:#8f4a42}.ok{color:#3f5c47}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:7px}.num{font-size:22px;font-weight:850}.lbl{font-size:11px;color:#5d6b61}.list{display:flex;flex-direction:column;gap:8px}.row{border:1px solid var(--border);border-radius:11px;padding:8px 10px}.rowtop{display:flex;justify-content:space-between;gap:9px;font-weight:800}.meta{margin-top:4px;line-height:1.4}.entered{font-size:11px;color:#5d6b61;margin-top:6px}.row-actions{display:flex;gap:6px;margin-top:7px}.edit-btn,.delete-btn{height:40px;padding:0 11px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-weight:800}.edit-btn{color:#406249}.delete-btn{color:#8f4a42}.empty{text-align:center;color:#5d6b61;font-size:13px;padding:19px 6px}.quick-section{margin-top:14px;padding-top:12px;border-top:1px solid #dddeda}.quick-title{font-size:12px;font-weight:850;color:var(--slate);margin-bottom:8px}.quick-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick{min-height:50px;border:1px solid var(--border);border-radius:12px;background:var(--soft);text-align:left;padding:8px 10px;font-weight:800}.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:14px;background:#0000004d}.modal.open{display:flex}.modal-card{width:min(100%,570px);background:#fff;border-radius:19px;padding:16px;box-shadow:0 10px 40px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-title{font-size:18px;font-weight:850}.close{width:40px;height:40px;border:0;border-radius:11px;background:var(--soft);font-size:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cancel,.update{height:52px;border-radius:12px;font-weight:850}.cancel{border:1px solid var(--border);background:#fff}.update{border:0;background:var(--sage);color:#fff}.field-entry{display:grid;grid-template-columns:1fr 52px;gap:6px}.dash-btn{font-size:11px;white-space:nowrap}.add-variety{font-size:10px;white-space:nowrap}.dash-btn{border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900;font-size:22px}.select-add{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:6px}.add-variety{border:0;border-radius:12px;background:#e5f0e6;color:var(--sage-dark);font-size:24px;font-weight:900}.hint{font-size:10px;margin-top:4px}.needs-list{display:flex;flex-direction:column;gap:7px}.need-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:7px 9px;background:var(--soft)}.need-row.hot{border-color:#a8bba9;background:var(--sage-soft)}.need-name{font-weight:850}.need-detail{font-size:11px;color:#5d6b61}.need-number{font-size:20px;font-weight:900}.workday-bar{margin-top:8px;padding:9px 11px;border-radius:12px;background:#fdf0dc;border:1.5px solid #dd8a26;color:#6b4a12;font-size:13.5px;line-height:1.35;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.plan-actions{display:grid;grid-template-columns:44px 1fr 44px auto;gap:6px;margin-top:7px;align-items:center}.secondary{background:var(--soft);color:var(--sage-dark)}.nav-btn{height:44px;border:1px solid var(--border);border-radius:12px;background:var(--soft);font-weight:900}.location-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.location-total{min-width:0;padding:8px 6px;border:1px solid var(--border);border-radius:12px;background:var(--soft);overflow-wrap:anywhere}.location-total .lbl{font-size:10px}.location-total b{font-size:20px}.loc-card-quincy{background:var(--quincy-bg);border-color:var(--quincy-border)}.loc-card-pasco{background:var(--pasco-bg);border-color:var(--pasco-border)}.loc-card-warden{background:var(--warden-bg);border-color:var(--warden-border)}.loc-card-richland{background:var(--richland-bg);border-color:var(--richland-border)}.row.loc-card-quincy,.need-row.loc-card-quincy{background:var(--quincy-bg);border-color:var(--quincy-border)}.row.loc-card-pasco,.need-row.loc-card-pasco{background:var(--pasco-bg);border-color:var(--pasco-border)}.row.loc-card-warden,.need-row.loc-card-warden{background:var(--warden-bg);border-color:var(--warden-border)}.row.loc-card-richland,.need-row.loc-card-richland{background:var(--richland-bg);border-color:var(--richland-border)}.location-total b{font-size:20px}.chart-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.range-btn{height:32px;border:1px solid var(--border);border-radius:9px;background:var(--soft);padding:0 10px;font-size:12px;font-weight:800}.range-btn.active{background:var(--sage-soft);border-color:var(--sage)}.field-chart{display:flex;flex-direction:column;gap:7px}.field-chart-item{border:1px solid var(--border);border-radius:10px;overflow:hidden}.chart-expand{width:100%;border:0;background:transparent;padding:7px;text-align:left}.expand-mark{font-size:15px;color:var(--sage);padding-left:2px}.field-detail{padding:8px 10px 10px;background:#faf9f5;border-top:1px solid var(--border)}.field-detail-summary{display:flex;flex-direction:column;gap:3px;font-size:12px}.field-detail-summary span{font-size:11px;color:var(--slate)}.field-day{padding:7px 0;border-top:1px solid #e5e0d7}.field-day-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}.field-day:first-of-type{margin-top:5px}.chart-row{display:grid;grid-template-columns:58px 1fr 34px;gap:7px;align-items:center;font-size:12px}.bar-wrap{height:18px;background:#edf0ed;border-radius:8px;overflow:hidden}.bar{height:100%;background:#a9c5aa;border-radius:8px;min-width:2px}.empty-chart{text-align:center;color:#5d6b61;font-size:12px;padding:12px}.hidden{display:none!important}.span2{grid-column:1/-1}@media(max-width:430px){.fields{grid-template-columns:1fr 1fr}.brand{font-size:22px}}
   
 /* Scroll-driven Transload refresh — presentation only; app/data logic remains unchanged */
 :root{color-scheme:light;--sage:#78927b;--sage-dark:#48634e;--sage-soft:#e8f0e5;--slate:#66736b;--border:#e0e2dc;--panel:#fffefa;--soft:#f1f1eb}
@@ -200,6 +200,7 @@ button[data-ui-tooltip]{position:relative}
         <button class="nav-btn" id="nextDay" aria-label="Next day" title="Next day" data-ui-tooltip="Next day">Next</button>
         <button class="small secondary" id="jumpToday" style="margin:0;height:44px">Today</button>
       </div>
+      <div id="workDayBar" class="workday-bar" style="display:none"></div>
       <div id="locationNeeds" class="needs-list"></div>
       <button class="small secondary" id="setPlan">Set plant needs for this day</button>
       <div class="status" id="planStatus" aria-live="polite"></div>
@@ -385,7 +386,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-25-logo-v9";
+  const APP_VERSION = "2026-10-28-workday-v10";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -409,6 +410,102 @@ button[data-ui-tooltip]{position:relative}
     return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" }).format(new Date(yy, mm - 1, dd));
   };
   const sameLocalDate = (value, date) => localDateString(value) === date;
+  // ---- Work day (2026-10-28) ----
+  // A work day ends when its plant needs are met, not at midnight. Entries
+  // carry a work_date stamp; day views read the stamp, never the raw clock.
+  const PLAN_KEYS = ["quincy", "pasco", "warden", "richland"];
+  function workDateOf(x) { return x.work_date || localDateString(x.occurred_at); }
+  function stampFor(occurredIso) {
+    // An entry timed "today" on the clock belongs to the open work day
+    // (which may still be yesterday); a backdated entry keeps its own day.
+    const d = localDateString(occurredIso);
+    return d === localDateString() ? state.workDate : d;
+  }
+  function dayProgress(date) {
+    const plan = planFor(date);
+    let expected = 0, remaining = 0;
+    PLAN_KEYS.forEach((k) => {
+      const exp = Number(plan[k] || 0);
+      if (exp <= 0) return;
+      expected += exp;
+      const loaded = state.loads.filter((x) => String(x.location || "").toLowerCase() === k && workDateOf(x) === date).length;
+      remaining += Math.max(exp - loaded, 0);
+    });
+    return { expected, remaining };
+  }
+  function dayIsClosed(date) { return state.closures.some((c) => c.work_date === date); }
+  function computeWorkDate() {
+    const today = localDateString();
+    // Hold the oldest recent day whose needs are still unmet (up to 3 days
+    // back), so a long night — or a day off mid-shortfall — can't strand the
+    // count. Closing a day out is the crew's way to release it early.
+    for (let back = 3; back >= 1; back--) {
+      const d = shiftDate(today, -back);
+      if (dayIsClosed(d)) continue;
+      const p = dayProgress(d);
+      if (p.expected > 0 && p.remaining > 0) return d;
+    }
+    return today;
+  }
+  function dayLabel(date) {
+    if (date === localDateString()) return "today";
+    if (date === shiftDate(localDateString(), -1)) return "yesterday";
+    return friendlyDay(date);
+  }
+  let workDayInitDone = false;
+  function refreshWorkDay() {
+    const initial = !workDayInitDone; workDayInitDone = true;
+    const prev = state.workDate;
+    const next = computeWorkDate();
+    state.workDate = next;
+    $("jumpToday").textContent = next === localDateString() ? "Today" : "Current day";
+    if (state.followingWorkDay && $("planDate").value !== next) {
+      state.planDate = next;
+      $("planDate").value = next;
+      state.loadsExpanded = false;
+    }
+    if (!initial && prev !== next && next === localDateString() && !dayIsClosed(prev) && dayProgress(prev).expected > 0) {
+      message("planStatus", "Plant needs for " + dayLabel(prev) + " are done — you're on today's board now.", true);
+      clearMessage("planStatus");
+    }
+    renderWorkDayBar();
+  }
+  let lastBarHtml = null;
+  function renderWorkDayBar() {
+    const bar = $("workDayBar");
+    if (!bar) return;
+    const wd = state.workDate;
+    const viewed = $("planDate").value || state.planDate;
+    let html = "";
+    if (viewed === wd) {
+      const p = dayProgress(wd);
+      if (wd !== localDateString()) {
+        html = `<span><b>Still on ${esc(dayLabel(wd))}'s loads</b> — ${p.remaining} left to meet plant needs. New loads count here until they're done.</span>`;
+      } else if (dayIsClosed(wd)) {
+        html = `<span><b>Today is closed out.</b> It won't hold the board tomorrow.</span>`;
+      }
+      if (!dayIsClosed(wd) && p.expected > 0 && p.remaining > 0) {
+        html += `<button type="button" class="small secondary" id="closeDayBtn" style="margin:0 0 0 auto;width:auto;padding:0 14px">Close out day</button>`;
+      }
+    }
+    if (html !== lastBarHtml) {
+      lastBarHtml = html;
+      bar.innerHTML = html;
+      const btn = $("closeDayBtn");
+      if (btn) btn.onclick = closeOutDay;
+    }
+    bar.style.display = html ? "flex" : "none";
+  }
+  async function closeOutDay() {
+    const wd = state.workDate;
+    const p = dayProgress(wd);
+    if (!window.confirm(`Close out ${dayLabel(wd)} with ${p.remaining} load${p.remaining === 1 ? "" : "s"} still remaining? The day stops holding the board; the shortfall stays in the history.`)) return;
+    const { error } = await db.from("day_closures").upsert({ site_id: state.site, work_date: wd, closed_by_name: state.name }, { onConflict: "site_id,work_date" });
+    if (error) return message("planStatus", "Could not close out the day: " + errText(error));
+    await loadData();
+    message("planStatus", "Day closed out.", true);
+    clearMessage("planStatus");
+  }
   const shiftDate = (date, days) => {
     const [yy, mm, dd] = date.split("-").map(Number);
     return localDateString(new Date(yy, mm - 1, dd + days));
@@ -421,7 +518,7 @@ button[data-ui-tooltip]{position:relative}
     return "&#39;";
   });
   const driverKey = (driver) => "driver:" + driver.trim().toLowerCase();
-  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false, siteNames: {}, fieldAliases: {}, renamingField: "", locPrefs: null, renamingLoc: "" };
+  const state = { user: null, name: "", site: Number(localStorage.getItem("tl_active_site") || 1), selected: "", loads: [], incoming: [], sharedFieldLoads: [], sharedFieldIncoming: [], quick: [], varieties: [], plans: [], planRevisions: [], editing: null, editLocation: "", planDate: localDateString(), closures: [], workDate: localDateString(), followingWorkDay: true, fieldRange: 30, inRange: 7, expandedField: "", loadsExpanded: false, siteNames: {}, fieldAliases: {}, renamingField: "", locPrefs: null, renamingLoc: "" };
   const siteName = (id) => state.siteNames[String(id)] || ("Site " + id);
   const fieldLabel = (f) => (state.fieldAliases[f] || ("Field " + f));
   // ── Location slots (per site, editable) ──
@@ -652,7 +749,7 @@ button[data-ui-tooltip]{position:relative}
     const date = $("planDate").value || state.planDate;
     const plan = planFor(date);
     const slots = visibleLocs();
-    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && sameLocalDate(x.occurred_at, date)).length]));
+    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && workDateOf(x) === date).length]));
     const rows = slots.map((s) => {
       const expected = Number(plan[s.key.toLowerCase()] || 0);
       const loaded = counts[s.key] || 0;
@@ -663,12 +760,13 @@ button[data-ui-tooltip]{position:relative}
     const totalLoaded = rows.reduce((sum, r) => sum + r.loaded, 0);
     const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
     $("totalNeeds").innerHTML = "<b>" + totalRemaining + "</b><span>of " + totalExpected + " left</span>";
+    renderWorkDayBar();
     $("locationNeeds").innerHTML = rows.length ? rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} ${locClass(r.key)}" style="${locStyle(r.key)}"><div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
   }
   function renderLocationTotals() {
     const date = $("planDate").value || state.planDate;
     const slots = visibleLocs();
-    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && sameLocalDate(x.occurred_at, date)).length]));
+    const counts = Object.fromEntries(slots.map((s) => [s.key, state.loads.filter((x) => x.location === s.key && workDateOf(x) === date).length]));
     $("totalsTitle").textContent = "Loads by location · " + friendlyDay(date);
     const totalLoads = Object.values(counts).reduce((sum, count) => sum + count, 0);
     $("totalLoadsToday").textContent = totalLoads + " total";
@@ -687,7 +785,7 @@ button[data-ui-tooltip]{position:relative}
       const start = fieldRows.length ? fieldRows.reduce((earliest, x) => x.occurred_at < earliest ? x.occurred_at : earliest, fieldRows[0].occurred_at) : null;
       const byDay = {};
       fieldRows.forEach((x) => {
-        const day = localDateString(x.occurred_at);
+        const day = workDateOf(x);
         (byDay[day] ||= []).push(x);
       });
       const detail = Object.keys(byDay).sort().reverse().map((day) => {
@@ -737,8 +835,8 @@ button[data-ui-tooltip]{position:relative}
   }
   function renderLoads() {
     const date = $("planDate").value || state.planDate;
-    const isToday = date === localDateString();
-    const records = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
+    const isToday = date === state.workDate; // timers stay live on the open work day, even past midnight
+    const records = state.loads.filter((x) => workDateOf(x) === date);
     $("listTitle").textContent = "Loads for " + friendlyDay(date);
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
@@ -752,9 +850,8 @@ button[data-ui-tooltip]{position:relative}
     updateTimerAlerts();
   }
   function renderIncoming() {
-    const today = localDateString();
     const records = state.incoming;
-    const todayRows = records.filter((x) => sameLocalDate(x.occurred_at, today));
+    const todayRows = records.filter((x) => workDateOf(x) === state.workDate);
     $("inCount").textContent = todayRows.length;
     $("driverCount").textContent = new Set(todayRows.map((x) => x.driver.toLowerCase())).size;
     $("inFieldCount").textContent = new Set(todayRows.map((x) => x.field)).size;
@@ -799,7 +896,7 @@ button[data-ui-tooltip]{position:relative}
       db.from("potato_varieties").select("*").eq("site_id", state.site).eq("active", true).order("name"),
       db.from("arrival_plans").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }),
     ]);
-    const [allLoads, allIncoming] = await Promise.all([db.from("outgoing_entries").select("field,occurred_at,truck,trailer,location,variety"), db.from("incoming_entries").select("field,occurred_at")]);
+    const [allLoads, allIncoming] = await Promise.all([db.from("outgoing_entries").select("field,occurred_at,work_date,truck,trailer,location,variety"), db.from("incoming_entries").select("field,occurred_at,work_date")]);
     const error = loads.error || incoming.error || quick.error || varieties.error || plans.error || allLoads.error || allIncoming.error;
     if (error) throw error;
     state.loads = loads.data || [];
@@ -813,6 +910,10 @@ button[data-ui-tooltip]{position:relative}
       const rev = await db.from("plan_revisions").select("*").eq("site_id", state.site).order("plan_date", { ascending: false }).limit(500);
       state.planRevisions = rev.error ? [] : (rev.data || []);
     } catch (e) { state.planRevisions = []; }
+    try {
+      const cl = await db.from("day_closures").select("*").eq("site_id", state.site);
+      state.closures = cl.error ? [] : (cl.data || []);
+    } catch (e) { state.closures = []; }
     try {
       const [sn, fa] = await Promise.all([
         db.from("site_names").select("site_id,name"),
@@ -830,6 +931,7 @@ button[data-ui-tooltip]{position:relative}
     } catch (e) { state.locPrefs = null; /* table not migrated yet: fall back to defaults */ }
     if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
     $("saveLoad").disabled = !state.selected;
+    refreshWorkDay();
     renderSiteTabs();
     renderLocations("locations", state.selected, selectLocation);
     renderLoads();
@@ -1060,12 +1162,12 @@ button[data-ui-tooltip]{position:relative}
       if (my !== paceToken || !window.echarts) return;
       const revs = planRevisionsFor(date);
       const dayStart = new Date(date + "T06:00:00").getTime();
-      const dayLoads = state.loads.filter((x) => sameLocalDate(x.occurred_at, date));
+      const dayLoads = state.loads.filter((x) => workDateOf(x) === date);
       // Right edge: end of the 10-hour day, always at least an hour ahead of now/loads
       // so late-day pills never fall off the edge.
       let xMax = dayStart + 10 * 3600 * 1000;
       if (dayLoads.length) xMax = Math.max(xMax, Math.max(...dayLoads.map((x) => new Date(x.occurred_at).getTime())) + 3600000);
-      if (date === localDateString()) xMax = Math.max(xMax, Date.now() + 3600000);
+      if (date === state.workDate) xMax = Math.max(xMax, Date.now() + 3600000);
       // Chart starts at the first load actually entered (early site vs afternoon site).
       let xMin = dayStart;
       if (dayLoads.length) {
@@ -1079,7 +1181,7 @@ button[data-ui-tooltip]{position:relative}
       const notes = [];
       needy.forEach((loc) => {
         const color = PACE_COLORS[loc] || "#7a8a7d";
-        const rows = state.loads.filter((x) => x.location === loc && sameLocalDate(x.occurred_at, date)).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
+        const rows = state.loads.filter((x) => x.location === loc && workDateOf(x) === date).sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
         const need = Number(plan[loc.toLowerCase()] || 0);
         const done = rows.length;
         if (!rows.length) { notes.push(`${loc}: 0/${need} · no loads yet`); return; }
@@ -1213,7 +1315,7 @@ button[data-ui-tooltip]{position:relative}
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => { b.classList.toggle("active", Number(b.dataset.site) === state.site); b.textContent = siteName(b.dataset.site); }); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; state.followingWorkDay = true; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
@@ -1227,7 +1329,8 @@ button[data-ui-tooltip]{position:relative}
       if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
       // Capture the timestamp at the moment the operator presses Add load.
       const occurredAt = new Date();
-      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
+      refreshWorkDay();
+      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), work_date: stampFor(occurredAt.toISOString()), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
       const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
       if (error) throw error;
       if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];
@@ -1249,12 +1352,13 @@ button[data-ui-tooltip]{position:relative}
   }
 
   async function addIncoming(values) {
+    refreshWorkDay();
     const field = (values?.field || $("fieldNumber").value).trim();
     const driver = (values?.driver || $("driver").value).trim();
     const occurredAt = values?.occurred_at || new Date($("inDate").value).toISOString();
     if (!field || !driver) return message("inStatus", "Enter driver name and field number.");
     const truck = driverKey(driver);
-    const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
+    const entry = { site_id: state.site, truck, field, driver, occurred_at: occurredAt, work_date: stampFor(occurredAt), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name };
     const { error } = await db.from("incoming_entries").insert(entry);
     if (error) return message("inStatus", errText(error));
     const { error: quickError } = await db.from("quick_drivers").upsert({ site_id: state.site, truck, driver, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "site_id,truck" });
@@ -1342,6 +1446,10 @@ button[data-ui-tooltip]{position:relative}
     if (!second || !occurredAt || !field || (isLoad && (!$("editFirst").value.trim() || !$("editVariety").value))) return message("editStatus", "Complete every field.");
     if (isLoad && !state.editLocation) return message("editStatus", "Select a location.");
     const payload = { occurred_at: new Date(occurredAt).toISOString(), updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() };
+    // If the edit moves the entry to a different calendar date, its work day
+    // follows; a time-only touch-up keeps the day it was entered under.
+    const edited = (isLoad ? state.loads : state.incoming).find((x) => x.id === state.editing.id);
+    if (edited && localDateString(edited.occurred_at) !== localDateString(payload.occurred_at)) payload.work_date = stampFor(payload.occurred_at);
     if (isLoad) Object.assign(payload, { truck: $("editFirst").value.trim(), location: state.editLocation, trailer: second, field, variety: $("editVariety").value });
     else Object.assign(payload, { truck: driverKey(second), driver: second, field });
     const { error } = await db.from(isLoad ? "outgoing_entries" : "incoming_entries").update(payload).eq("id", state.editing.id).eq("site_id", state.site);
@@ -1444,7 +1552,7 @@ button[data-ui-tooltip]{position:relative}
     message("inStatus", "Unable to load shared data: " + hint);
   }
   function subscribe() {
-    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions", "site_names", "field_aliases", "location_prefs"].forEach((table) => {
+    ["outgoing_entries", "incoming_entries", "quick_drivers", "potato_varieties", "arrival_plans", "plan_revisions", "site_names", "field_aliases", "location_prefs", "day_closures"].forEach((table) => {
       db.channel("live-" + table).on("postgres_changes", { event: "*", schema: "public", table }, () => loadData().catch(showSetupError)).subscribe();
     });
   }
@@ -1526,7 +1634,7 @@ state.deviceName = deviceName || "Unknown Device";
   }
   const EXPORT_COLS = {
     outgoing: [
-      { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
+      { key: "date", label: "Date", get: (x) => workDateOf(x) },
       { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
       { key: "site", label: "Site", get: (x) => siteName(x.site_id) },
       { key: "location", label: "Location", get: (x) => exportLocName(x.site_id, x.location || "") },
@@ -1541,7 +1649,7 @@ state.deviceName = deviceName || "Unknown Device";
       { key: "editedby", label: "Last edited by", get: (x) => (x.updated_by_name || x.created_by_name || "") },
     ],
     incoming: [
-      { key: "date", label: "Date", get: (x) => (x.occurred_at || "").slice(0, 10) },
+      { key: "date", label: "Date", get: (x) => workDateOf(x) },
       { key: "time", label: "Time", get: (x) => (x.occurred_at ? fmtClock(new Date(x.occurred_at).getTime()) : "") },
       { key: "site", label: "Site", get: (x) => siteName(x.site_id) },
       { key: "driver", label: "Driver", get: (x) => (x.driver || "") },
@@ -1601,11 +1709,13 @@ state.deviceName = deviceName || "Unknown Device";
       const table = exportState.kind === "outgoing" ? "outgoing_entries" : "incoming_entries";
       let q = db.from(table).select("*").order("occurred_at", { ascending: true });
       if (exportState.site !== "both") q = q.eq("site_id", exportState.site);
-      if (exportState.from) q = q.gte("occurred_at", new Date(exportState.from + "T00:00:00").toISOString());
-      if (exportState.to) q = q.lte("occurred_at", new Date(exportState.to + "T23:59:59").toISOString());
+      // Fetch a padded window, then keep rows whose WORK day is in range —
+      // a load entered at 1 AM can belong to the previous work day.
+      if (exportState.from) q = q.gte("occurred_at", new Date(shiftDate(exportState.from, -1) + "T00:00:00").toISOString());
+      if (exportState.to) q = q.lte("occurred_at", new Date(shiftDate(exportState.to, 1) + "T23:59:59").toISOString());
       const res = await q;
       if (res.error) throw res.error;
-      rows = res.data || [];
+      rows = (res.data || []).filter((r) => { const wd = workDateOf(r); return (!exportState.from || wd >= exportState.from) && (!exportState.to || wd <= exportState.to); });
     } catch (e) {
       message("expStatus", "Could not load rows: " + errText(e));
     }
@@ -1699,6 +1809,9 @@ state.deviceName = deviceName || "Unknown Device";
   renderSiteTabs();
   updateLiveClock();
   setInterval(updateLiveClock, 1000);
+  // Re-check the work day as the clock moves: at midnight a finished day
+  // rolls forward on its own, an unfinished one keeps holding.
+  setInterval(() => { const before = state.workDate; refreshWorkDay(); if (state.workDate !== before && state.followingWorkDay) { renderNeeds(); renderLoads(); renderPace(); } }, 15000);
   setInterval(tickTimerPills, 100);
   window.addEventListener("resize", () => { if (paceChart) paceChart.resize(); });
   $("saveLoad").onclick = addLoad;
@@ -1929,10 +2042,10 @@ state.deviceName = deviceName || "Unknown Device";
   $("cancelFieldName").onclick = closeFieldRename;
   $("saveFieldName").onclick = saveFieldName;
   $("fieldNameModal").onclick = (e) => { if (e.target === $("fieldNameModal")) closeFieldRename(); };
-  $("planDate").onchange = () => { state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
-  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
-  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
-  $("jumpToday").onclick = () => { $("planDate").value = localDateString(); state.planDate = $("planDate").value; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("planDate").onchange = () => { state.planDate = $("planDate").value; state.followingWorkDay = false; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("prevDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, -1); state.planDate = $("planDate").value; state.followingWorkDay = false; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("nextDay").onclick = () => { $("planDate").value = shiftDate($("planDate").value, 1); state.planDate = $("planDate").value; state.followingWorkDay = false; state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
+  $("jumpToday").onclick = () => { state.followingWorkDay = true; refreshWorkDay(); state.loadsExpanded = false; renderNeeds(); renderLoads(); renderPace(); };
   $("addVariety").onclick = addVariety;
   $("expandLoadsBtn").onclick = () => { state.loadsExpanded = !state.loadsExpanded; renderLoads(); };
   $("outField").addEventListener("input", () => saveStickyInput("out_field", $("outField").value));

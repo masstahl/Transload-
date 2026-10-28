@@ -191,3 +191,31 @@ end $$;
 
 -- ── 2026-10-16: allow custom location names (drop the 4-name CHECK) ──
 alter table public.outgoing_entries drop constraint if exists outgoing_entries_location_check;
+
+-- ── 2026-10-28: work days — a day ends when its plant needs are met, not at
+-- midnight. Every entry is stamped with the work day it counts toward;
+-- day filters read the stamp instead of the raw timestamp. day_closures
+-- records a manual close-out so an unfinished day stops holding.
+alter table public.outgoing_entries add column if not exists work_date date;
+alter table public.incoming_entries add column if not exists work_date date;
+update public.outgoing_entries
+  set work_date = (occurred_at at time zone 'America/Los_Angeles')::date
+  where work_date is null;
+update public.incoming_entries
+  set work_date = (occurred_at at time zone 'America/Los_Angeles')::date
+  where work_date is null;
+create table if not exists public.day_closures (
+  site_id integer not null,
+  work_date date not null,
+  closed_at timestamptz not null default now(),
+  closed_by_name text,
+  primary key (site_id, work_date)
+);
+alter table public.day_closures enable row level security;
+drop policy if exists "shared day closures" on public.day_closures;
+create policy "shared day closures" on public.day_closures
+  for all to authenticated using (true) with check (true);
+do $$ begin
+  alter publication supabase_realtime add table public.day_closures;
+exception when duplicate_object then null;
+end $$;

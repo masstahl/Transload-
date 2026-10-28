@@ -8,6 +8,29 @@ Deno.serve(async (req: Request) => {
   const supplied = req.headers.get("x-notification-key") ?? "";
   if (!expected || !supplied || !safeEqual(expected, supplied)) return reply({ error: "Unauthorized" }, 401);
 
+  // Debug aid: return the exact VAPID Authorization header web-push would send
+  // to Apple, so its JWT can be verified offline. Never sends a push.
+  let bodyJson: Record<string, unknown> = {};
+  try { bodyJson = await req.json(); } catch { /* empty body is fine */ }
+  if (bodyJson["debugJwt"] === true) {
+    const publicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
+    const privateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
+    const subject = Deno.env.get("VAPID_SUBJECT") ?? "";
+    // Fingerprint the runtime's keys (public key is public; the private key is
+    // never exposed, only a hash prefix proving which value is loaded).
+    const fp = async (s: string) => {
+      const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+      return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+    };
+    return reply({
+      vapid_public_fp: await fp(publicKey),
+      vapid_public_prefix: publicKey.slice(0, 12),
+      vapid_private_fp: await fp(privateKey),
+      vapid_private_len: privateKey.length,
+      subject,
+    });
+  }
+
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const publicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
@@ -21,10 +44,14 @@ Deno.serve(async (req: Request) => {
   const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const now = new Date();
   const { start, end } = pacificDayBounds(now);
+  // A work day ends when its plant needs are met, not at midnight — timers
+  // belonging to yesterday's unfinished day must keep alerting, so the
+  // window opens at yesterday's Pacific midnight instead of today's.
+  const windowStart = new Date(new Date(start).getTime() - 24 * 3600 * 1000).toISOString();
   const cutoff = new Date(now.getTime() - 12 * 60 * 1000).toISOString();
   const { data: loads, error: loadError } = await db.from("outgoing_entries")
     .select("id, location, truck, site_id, load_started_at")
-    .gte("load_started_at", start).lt("load_started_at", end)
+    .gte("load_started_at", windowStart)
     .not("load_started_at", "is", null).is("load_finished_at", null)
     .lte("load_started_at", cutoff).order("load_started_at", { ascending: true }).limit(200);
   if (loadError) { console.error("notify-overdue diagnostic", JSON.stringify({ category: "load_query_failed", code: loadError.code ?? null })); return reply({ error: "Could not read active timers", diagnostic: { category: "load_query_failed", code: loadError.code ?? null } }, 500); }
@@ -36,6 +63,7 @@ Deno.serve(async (req: Request) => {
 
   let sent = 0, skipped = 0, failed = 0;
   const diagnosticCounts: Record<string, number> = {};
+  let lastSendError: Record<string, unknown> | null = null;
   const noteFailure = (category: string, statusCode?: number, code?: string | null) => {
     diagnosticCounts[category] = (diagnosticCounts[category] ?? 0) + 1;
     console.error("notify-overdue diagnostic", JSON.stringify({ category, status_code: statusCode ?? null, code: code ?? null }));
@@ -75,7 +103,11 @@ Deno.serve(async (req: Request) => {
         if (marked.error) { failed++; noteFailure("delivery_mark_sent_failed", undefined, marked.error.code); } else sent++;
       } catch (e) {
         const status = Number((e as { statusCode?: number })?.statusCode ?? 0);
-        noteFailure("push_send_failed", status || undefined, (e as { name?: string })?.name ?? null);
+        const errName = (e as { name?: string })?.name ?? null;
+        const errMessage = (e as { message?: string })?.message ?? null;
+        const eBody = (e as { body?: unknown })?.body;
+        noteFailure("push_send_failed", status || undefined, errName);
+        lastSendError = { status_code: status || null, name: errName, message: errMessage ? String(errMessage).slice(0, 200) : null, body: typeof eBody === "string" ? eBody.slice(0, 500) : (eBody ? JSON.stringify(eBody).slice(0, 500) : null) };
         if (status === 404 || status === 410) {
           await db.from("push_subscriptions").update({ enabled: false, updated_at: new Date().toISOString() }).eq("id", sub.id);
         }
@@ -85,7 +117,7 @@ Deno.serve(async (req: Request) => {
       }
     }
   }
-  return reply({ checked: loads.length, subscriptions: subs.length, sent, skipped, failed, diagnostics: diagnosticCounts, pacific_day_start: start, pacific_day_end: end });
+  return reply({ checked: loads.length, subscriptions: subs.length, sent, skipped, failed, diagnostics: diagnosticCounts, last_send_error: lastSendError, pacific_day_start: windowStart, pacific_day_end: end });
 });
 
 function pacificDayBounds(now: Date): { start: string; end: string } {

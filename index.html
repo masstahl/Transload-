@@ -387,7 +387,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-28-workday-v11";
+  const APP_VERSION = "2026-10-28-plan-entry-v12";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -1468,8 +1468,16 @@ button[data-ui-tooltip]{position:relative}
   function openPlan() {
     const p = planFor($("planDate").value);
     const slots = planSlots();
-    $("planInputs").innerHTML = slots.map((s, i) => `<div class="field"><label for="plan_loc_${i}">${esc(s.name)}</label><input id="plan_loc_${i}" data-plan-key="${esc(s.key.toLowerCase())}" type="number" min="0" inputmode="numeric"></div>`).join("");
-    slots.forEach((s, i) => { $("plan_loc_" + i).value = p[s.key.toLowerCase()] || 0; });
+    $("planInputs").innerHTML = slots.map((s, i) => `<div class="field"><label for="plan_loc_${i}">${esc(s.name)}</label><input id="plan_loc_${i}" data-plan-key="${esc(s.key.toLowerCase())}" type="number" min="0" inputmode="numeric" placeholder="0"></div>`).join("");
+    slots.forEach((s, i) => { $("plan_loc_" + i).value = Number(p[s.key.toLowerCase()] || 0) || ""; });
+    // Typing in a needs field replaces what's there: tapping a field selects
+    // its whole value, so changing 14 to 15 is just tapping and typing — no
+    // deleting the old number first while the keyboard covers the field.
+    $("planInputs").querySelectorAll("input").forEach((el) => {
+      const pick = () => { try { el.select(); } catch (e) {} };
+      el.addEventListener("focus", pick);
+      el.addEventListener("click", pick);
+    });
     $("planTitle").textContent = "Plant needs · " + friendlyDay($("planDate").value);
     $("planModal").classList.add("open");
   }

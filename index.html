@@ -151,9 +151,41 @@ button[data-ui-tooltip]{position:relative}
   .exp-table th{background:var(--soft);font-weight:800}
   .exp-table tr:last-child td{border-bottom:0}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
+  /* Preview branch banner. Removed on the live GitHub Pages host. */
+  .preview-banner{background:#7a1f1a;color:#fff;text-align:center;font-size:12px;font-weight:800;letter-spacing:.03em;line-height:1.35;padding:calc(6px + env(safe-area-inset-top)) 10px 6px}
+  .preview-banner[hidden]{display:none!important}
+  /* Q4: on-screen keypad for truck, trailer, and field. Stays in the page so the layout does not jump. */
+  .field input.keypad-input[readonly]{background:#fff;color:#28352e;opacity:1;-webkit-text-fill-color:#28352e}
+  .field input.keypad-target{border-color:var(--sage);box-shadow:0 0 0 3px #78927b24}
+  .keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+  .keypad button{height:52px;border:1px solid var(--border);border-radius:12px;background:var(--soft);color:#28352e;font-size:24px;font-weight:800;padding:0}
+  .keypad button[data-key="-"],.keypad button[data-key="back"]{font-size:16px}
+  .keypad button:active{background:var(--sage-soft)}
+  /* P5: one progress ring per plant. */
+  #locationNeeds.needs-list{flex-direction:row;flex-wrap:wrap;align-items:stretch}
+  .need-ring{flex:1 1 76px;min-width:76px;max-width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;border:1px solid var(--border);border-radius:12px;padding:8px 4px 7px}
+  .need-ring .ring{position:relative;width:56px;height:56px;flex:0 0 56px}
+  .need-ring svg{display:block}
+  .ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:#28352e;pointer-events:none}
+  .ring-num b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+  .ring-num span{font-size:10px;font-weight:700;color:#4f5e54;margin-top:1px}
+  .need-ring .need-name{font-size:12px;font-weight:850;line-height:1.2}
+  .need-ring .need-detail{font-size:11px;line-height:1.2}
+  #locationNeeds > .note{flex:1 0 100%}
+  /* F2: loads and days on one line. */
+  .chart-row{grid-template-columns:minmax(0,1fr) auto auto}
+  .chart-row > b:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .field-progress{font-weight:800;font-variant-numeric:tabular-nums;color:#28352e;white-space:nowrap}
+  /* H8: in-app duplicate warning. Same colors as the work-day bar. */
+  .dup-warn{margin-top:8px;padding:10px;border:1.5px solid #dd8a26;border-radius:12px;background:#fdf0dc}
+  .dup-warn-text{margin:0 0 8px;font-size:13px;font-weight:700;line-height:1.35;color:#6b4a12}
+  .dup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .dup-actions .cancel,.dup-actions .update{height:44px;margin:0}
 </style>
 </head>
 <body>
+<div id="previewBanner" class="preview-banner" role="status">PREVIEW · live database · Site 2 only</div>
+<script>if(location.hostname==="masstahl.github.io")document.getElementById("previewBanner").hidden=true;</script>
 <main class="app">
   <header class="top">
     <div>
@@ -177,18 +209,39 @@ button[data-ui-tooltip]{position:relative}
     <div class="panel">
       <div class="needs-head" style="margin-bottom:5px"><div class="title">Load details</div><div class="title" id="outNow" style="margin:0;white-space:nowrap;font-variant-numeric:tabular-nums"></div></div>
       <div class="fields">
-        <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" inputmode="numeric" autocomplete="off" placeholder="Truck #"></div>
-        <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" inputmode="numeric" autocomplete="off" placeholder="Trailer #"></div>
+        <div class="field"><label for="outTruck">Truck number</label><input id="outTruck" class="keypad-input" inputmode="none" readonly autocomplete="off" placeholder="Truck #"></div>
+        <div class="field"><label for="outTrailer">Trailer number</label><input id="outTrailer" class="keypad-input" inputmode="none" readonly autocomplete="off" placeholder="Trailer #"></div>
         <div class="field">
           <label for="outField">Field number</label>
-          <div class="field-entry"><input id="outField" inputmode="numeric" autocomplete="off" placeholder="e.g. 6-4"><button type="button" class="dash-btn" data-dash="outField" aria-label="− Dash" title="Insert dash in field number" data-ui-tooltip="Insert dash in field number">− Dash</button></div>
+          <input id="outField" class="keypad-input" inputmode="none" readonly autocomplete="off" placeholder="e.g. 6-4">
         </div>
         <div class="field">
           <label for="outVariety">Potato variety</label>
           <div class="select-add"><select id="outVariety"><option value="">Select variety</option></select><button type="button" class="add-variety" id="addVariety" aria-label="＋ Add" title="Add potato variety" data-ui-tooltip="Add potato variety">＋ Add</button></div>
         </div>
       </div>
+      <div class="keypad" id="numKeypad" role="group" aria-label="Number keypad">
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="-">− Dash</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key="back">Del</button>
+      </div>
       <button class="save" id="saveLoad" disabled>Add load</button>
+      <div id="dupWarn" class="dup-warn hidden">
+        <p id="dupWarnText" class="dup-warn-text"></p>
+        <div class="dup-actions">
+          <button type="button" class="cancel" id="dupCancel">Cancel</button>
+          <button type="button" class="update" id="dupConfirm">Add anyway</button>
+        </div>
+      </div>
       <div class="status" id="outStatus" aria-live="polite"></div>
     </div>
     <div class="panel">
@@ -378,7 +431,10 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-28-closeout-note-v17";
+  // Preview branch. Do not ship this version suffix on main.
+  // Banner and push registration are host-gated: masstahl.github.io keeps the live behavior.
+  const APP_VERSION = "2026-10-29-picks-q4-p5-f2-h8-preview";
+  const PREVIEW_BUILD = location.hostname !== "masstahl.github.io";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -606,6 +662,8 @@ button[data-ui-tooltip]{position:relative}
     return Uint8Array.from(raw, (char) => char.charCodeAt(0));
   }
   function pushSupported() {
+    // Preview hosts must not register or subscribe, so they cannot collide with the live app's push rows.
+    if (PREVIEW_BUILD) return false;
     return ("serviceWorker" in navigator) && ("PushManager" in window) && ("Notification" in window);
   }
   async function getPushSubscription() {
@@ -668,6 +726,7 @@ button[data-ui-tooltip]{position:relative}
   async function refreshMenuAlerts() {
     const el = $("menuAlertsState");
     if (!el) return;
+    if (PREVIEW_BUILD) { el.textContent = "Off"; return; }
     if (!pushSupported()) { el.textContent = "Unsupported"; return; }
     try {
       const subscription = await getPushSubscription();
@@ -702,7 +761,9 @@ button[data-ui-tooltip]{position:relative}
     if (!pushSupported()) {
       enableBtn.style.display = "none";
       laterBtn.textContent = "Close";
-      status.textContent = "Push alerts need the installed Home Screen app on iPhone (iOS 16.4 or newer).";
+      status.textContent = PREVIEW_BUILD
+        ? "Alerts stay off on the preview so this phone keeps the live app's notifications."
+        : "Push alerts need the installed Home Screen app on iPhone (iOS 16.4 or newer).";
       return;
     }
     enableBtn.style.display = "";
@@ -791,7 +852,22 @@ button[data-ui-tooltip]{position:relative}
     const totalRemaining = rows.reduce((sum, r) => sum + r.remaining, 0);
     $("totalNeeds").innerHTML = "<b>" + totalRemaining + "</b><span>of " + totalExpected + " left</span>";
     renderWorkDayBar();
-    $("locationNeeds").innerHTML = rows.length ? rows.map((r) => `<div class="need-row ${r.remaining ? "hot" : ""} ${locClass(r.key)}" style="${locStyle(r.key)}"><div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} loaded of ${r.expected}${r.over ? " · " + r.over + " over" : ""}</div></div><div class="need-number">${r.remaining}</div><div class="need-detail">left</div></div>`).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
+    $("locationNeeds").innerHTML = rows.length ? rows.map(needRingHtml).join("") : '<div class="note">No locations visible — press and hold the destination box to add one.</div>';
+  }
+  function needRingHtml(r) {
+    const size = 56, stroke = 5, radius = (size - stroke) / 2, circ = 2 * Math.PI * radius;
+    const cx = size / 2, cy = size / 2;
+    const progress = r.expected > 0 ? Math.min(r.loaded / r.expected, 1) : 0;
+    const color = r.expected > 0 && r.remaining === 0 ? "#506b56" : "#78927b";
+    let arc = "";
+    if (progress >= 1) {
+      arc = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${color}" stroke-width="${stroke}"></circle>`;
+    } else if (progress > 0) {
+      const dash = (progress * circ).toFixed(2);
+      arc = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${dash} ${circ.toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
+    }
+    const over = r.over ? " · " + r.over + " over" : "";
+    return `<div class="need-ring ${r.remaining ? "hot" : ""} ${locClass(r.key)}" style="${locStyle(r.key)}"><div class="ring"><svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#dcded6" stroke-width="${stroke}"></circle>${arc}</svg><div class="ring-num"><b>${r.remaining}</b><span>left</span></div></div><div class="need-name">${esc(r.name)}</div><div class="need-detail">${r.loaded} of ${r.expected}${over}</div></div>`;
   }
   function renderLocationTotals() {
     const date = $("planDate").value || state.planDate;
@@ -805,10 +881,13 @@ button[data-ui-tooltip]{position:relative}
   function renderChart(target, source, range, empty) {
     const cutoff = Date.now() - range * 86400000;
     const counts = {};
-    source.filter((x) => x.field && new Date(x.occurred_at).getTime() >= cutoff).forEach((x) => { counts[x.field] = (counts[x.field] || 0) + 1; });
+    const daySets = {};
+    source.filter((x) => x.field && new Date(x.occurred_at).getTime() >= cutoff).forEach((x) => {
+      counts[x.field] = (counts[x.field] || 0) + 1;
+      (daySets[x.field] ||= new Set()).add(workDateOf(x));
+    });
     const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     if (!entries.length) { $(target).innerHTML = `<div class="empty-chart">${empty}</div>`; return; }
-    const max = entries[0][1];
     $(target).innerHTML = entries.map(([field, n]) => {
       const expanded = state.expandedField === field && target === "fieldChart";
       const fieldRows = source.filter((x) => String(x.field) === field && x.occurred_at);
@@ -825,7 +904,9 @@ button[data-ui-tooltip]{position:relative}
         const varieties = [...new Set(rows.map((x) => x.variety).filter(Boolean))];
         return `<div class="field-day"><div class="field-day-head"><b>${esc(friendlyDay(day))}</b><b>${rows.length} load${rows.length === 1 ? "" : "s"}</b></div><div class="meta">Truck numbers: ${trucks.length ? trucks.map(esc).join(", ") : "Not recorded"}${trailers.length ? " · Trailers: " + trailers.map(esc).join(", ") : ""}${varieties.length ? " · Variety: " + varieties.map(esc).join(", ") : ""}</div></div>`;
       }).join("");
-      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>${esc(fieldLabel(field))}</b><div class="bar-wrap"><div class="bar" style="width:${Math.round(n / max * 100)}%"></div></div><b>${n} <span class="expand-mark">${expanded ? "−" : "+"}</span></b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>${esc(fieldLabel(field))} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
+      const days = (daySets[field] || new Set()).size;
+      const progress = n + (n === 1 ? " load" : " loads") + " · " + days + (days === 1 ? " day" : " days");
+      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>${esc(fieldLabel(field))}</b><span class="field-progress">${progress}</span><b class="expand-mark">${expanded ? "−" : "+"}</b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>${esc(fieldLabel(field))} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
     }).join("");
     $(target).querySelectorAll("[data-field-expand]").forEach((button) => {
       let holdTimer = null, held = false;
@@ -956,7 +1037,7 @@ button[data-ui-tooltip]{position:relative}
       state.locPrefs = (good && good.length) ? { slots: good } : null;
     } catch (e) { state.locPrefs = null; /* table not migrated yet: fall back to defaults */ }
     if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
-    $("saveLoad").disabled = !state.selected;
+    syncSaveLoadEnabled();
     refreshWorkDay();
     renderSiteTabs();
     renderLocations("locations", state.selected, selectLocation);
@@ -1341,18 +1422,76 @@ button[data-ui-tooltip]{position:relative}
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => { b.classList.toggle("active", Number(b.dataset.site) === state.site); b.textContent = siteName(b.dataset.site); }); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; state.followingWorkDay = true; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; if (dupWarnOpen) closeDupWarn(); state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; state.followingWorkDay = true; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
-    $("saveLoad").disabled = false;
+    if (dupWarnOpen) closeDupWarn();
+    else syncSaveLoadEnabled();
   }
 
-  async function addLoad() {
+  let savingLoad = false;
+  let dupWarnOpen = false;
+  function syncSaveLoadEnabled() {
+    const button = $("saveLoad");
+    button.disabled = !!(savingLoad || dupWarnOpen || !state.selected);
+    button.setAttribute("aria-busy", savingLoad ? "true" : "false");
+  }
+  // Same truck and plant inside 5 minutes. Local rows cover this phone; the read covers another phone.
+  async function latestDuplicateAt(truck, location) {
+    const now = Date.now();
+    const windowMs = 5 * 60 * 1000;
+    let best = null;
+    const consider = (value) => {
+      const t = new Date(value).getTime();
+      if (!Number.isFinite(t) || Math.abs(now - t) >= windowMs) return;
+      if (best == null || t > best) best = t;
+    };
+    state.loads.forEach((row) => {
+      if (String(row.location) !== String(location)) return;
+      if (String(row.truck || "").trim() !== truck) return;
+      if (row.site_id != null && Number(row.site_id) !== Number(state.site)) return;
+      consider(row.occurred_at);
+    });
     try {
-      if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
-      const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
-      if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
+      const since = new Date(now - windowMs).toISOString();
+      const { data, error } = await db.from("outgoing_entries").select("occurred_at").eq("site_id", state.site).eq("location", location).eq("truck", truck).gte("occurred_at", since).order("occurred_at", { ascending: false }).limit(1);
+      if (!error && data && data[0]) consider(data[0].occurred_at);
+    } catch (e) { /* local list still covers this phone */ }
+    return best;
+  }
+  function openDupWarn(truck, location, at) {
+    dupWarnOpen = true;
+    const mins = Math.floor(Math.abs(Date.now() - at) / 60000);
+    const when = mins <= 0 ? "just now" : mins === 1 ? "1 minute ago" : mins + " minutes ago";
+    $("dupWarnText").textContent = "Truck " + truck + " at " + locName(location) + " was entered " + when + ". Add this load again?";
+    $("dupWarn").classList.remove("hidden");
+    message("outStatus", "");
+    syncSaveLoadEnabled();
+    $("dupWarn").scrollIntoView({ block: "nearest" });
+  }
+  function closeDupWarn() {
+    dupWarnOpen = false;
+    $("dupWarn").classList.add("hidden");
+    $("dupWarnText").textContent = "";
+    syncSaveLoadEnabled();
+  }
+
+  async function addLoad(skipDup) {
+    if (savingLoad || dupWarnOpen) return;
+    if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
+    const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
+    if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
+    savingLoad = true;
+    syncSaveLoadEnabled();
+    try {
+      if (!skipDup) {
+        const dupAt = await latestDuplicateAt(truck, state.selected);
+        if (dupAt) {
+          openDupWarn(truck, state.selected, dupAt);
+          return;
+        }
+      }
       // Capture the timestamp at the moment the operator presses Add load.
       const occurredAt = new Date();
       refreshWorkDay();
@@ -1374,6 +1513,9 @@ button[data-ui-tooltip]{position:relative}
       clearMessage("outStatus");
     } catch (error) {
       message("outStatus", "Could not add load: " + errText(error));
+    } finally {
+      savingLoad = false;
+      syncSaveLoadEnabled();
     }
   }
 
@@ -1930,7 +2072,8 @@ state.deviceName = deviceName || "Unknown Device";
     }
   }
   function refreshAfterLocPrefs() {
-    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) { state.selected = ""; $("saveLoad").disabled = true; }
+    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
+    syncSaveLoadEnabled();
     renderLocations("locations", state.selected, selectLocation);
     renderNeeds(); renderLoads(); renderPace();
   }
@@ -2087,6 +2230,43 @@ state.deviceName = deviceName || "Unknown Device";
   $("fieldNumber").addEventListener("input", () => saveStickyInput("in_field", $("fieldNumber").value));
   $("outVariety").addEventListener("change", () => saveStickyInput("variety", $("outVariety").value));
   document.querySelectorAll("[data-dash]").forEach((b) => { b.onclick = () => insertDash(b.dataset.dash); });
+  const keypadIds = ["outTruck", "outTrailer", "outField"];
+  let keypadTarget = "outTruck";
+  function setKeypadTarget(id) {
+    if (!keypadIds.includes(id)) return;
+    keypadTarget = id;
+    keypadIds.forEach((key) => $(key).classList.toggle("keypad-target", key === id));
+  }
+  function keypadApply(id, next) {
+    const el = $(id);
+    if (el.value === next) return;
+    el.value = next;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    if (dupWarnOpen) closeDupWarn();
+  }
+  function keypadType(ch) { keypadApply(keypadTarget, $(keypadTarget).value + ch); }
+  function keypadBackspace() { keypadApply(keypadTarget, $(keypadTarget).value.slice(0, -1)); }
+  keypadIds.forEach((id) => {
+    const el = $(id);
+    el.addEventListener("pointerdown", () => setKeypadTarget(id));
+    el.addEventListener("focus", () => setKeypadTarget(id));
+    el.addEventListener("keydown", (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); setKeypadTarget(id); keypadType(e.key); }
+      else if (e.key === "-" || e.key === "−") { e.preventDefault(); setKeypadTarget(id); keypadType("-"); }
+      else if (e.key === "Backspace") { e.preventDefault(); setKeypadTarget(id); keypadBackspace(); }
+    });
+  });
+  document.querySelectorAll("#numKeypad [data-key]").forEach((button) => {
+    button.addEventListener("pointerdown", (e) => { e.preventDefault(); });
+    button.addEventListener("click", () => {
+      setKeypadTarget(keypadTarget);
+      if (button.dataset.key === "back") keypadBackspace();
+      else keypadType(button.dataset.key);
+    });
+  });
+  $("dupCancel").onclick = () => closeDupWarn();
+  $("dupConfirm").onclick = () => { closeDupWarn(); addLoad(true); };
   document.querySelectorAll("[data-range]").forEach((b) => {
     b.onclick = () => {
       state.fieldRange = Number(b.dataset.range);
@@ -2109,7 +2289,15 @@ state.deviceName = deviceName || "Unknown Device";
   $("updateEntry").onclick = updateEntry;
   // Register the persistent worker needed for iOS Home Screen Web Push.
   // Registration alone does not request permission or subscribe the operator.
-  if ("serviceWorker" in navigator && location.protocol === "https:") {
+  // Preview builds skip registration and drop any worker on this origin so they
+  // cannot share or replace the live app's push subscription.
+  if (PREVIEW_BUILD) {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations()
+        .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
+        .catch(() => {});
+    }
+  } else if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register("./sw.js")
       .catch((error) => console.warn("Transload service worker registration failed:", error));
   }
@@ -2126,7 +2314,7 @@ state.deviceName = deviceName || "Unknown Device";
   // iOS resumes the frozen page without re-running the launch-time version check.
   let appHiddenAt = Date.now();
   function anyModalOpen() {
-    return ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal", "locNameModal", "locAddModal"].some((id) => $(id) && $(id).classList.contains("open"))
+    return dupWarnOpen || ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal", "locNameModal", "locAddModal"].some((id) => $(id) && $(id).classList.contains("open"))
       || ($("paceFocusWrap") && !$("paceFocusWrap").classList.contains("hidden"));
   }
   async function checkForAppUpdate() {

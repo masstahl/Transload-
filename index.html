@@ -378,7 +378,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-28-closeout-note-v16";
+  const APP_VERSION = "2026-10-28-closeout-note-v17";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -490,7 +490,7 @@ button[data-ui-tooltip]{position:relative}
     if (note) {
       if (closure) {
         const when = closure.closed_at ? new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(closure.closed_at)) : "";
-        note.textContent = "Closed out" + (closure.closed_by_name ? " by " + closure.closed_by_name : "") + (when ? " · " + when : "");
+        note.textContent = "Closed out" + (when ? " · " + when : "");
         note.dataset.closedDate = viewed;
         note.style.display = "";
       } else {
@@ -519,7 +519,7 @@ button[data-ui-tooltip]{position:relative}
   }
   async function undoCloseOut(date) {
     const c = state.closures.find((x) => x.work_date === date);
-    if (!window.confirm("Undo the close-out for " + dayLabel(date) + (c && c.closed_by_name ? " (closed by " + c.closed_by_name + ")" : "") + "? The day will hold the board again until its plant needs are met.")) return;
+    if (!window.confirm("Undo the close-out for " + dayLabel(date) + "? The day will hold the board again until its plant needs are met.")) return;
     const { error } = await db.from("day_closures").delete().eq("site_id", state.site).eq("work_date", date);
     if (error) return message("planStatus", "Could not undo the close-out: " + errText(error));
     await loadData();

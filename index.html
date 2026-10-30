@@ -378,7 +378,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-29-outbox-triggers-v20";
+  const APP_VERSION = "2026-10-29-instant-add-v21";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -1414,20 +1414,24 @@ button[data-ui-tooltip]{position:relative}
       const occurredAt = new Date();
       refreshWorkDay();
       const payload = { id: newUuid(), site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), work_date: stampFor(occurredAt.toISOString()), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
-      let inserted = null, insertError = null;
-      try { const res = await withTimeout(db.from("outgoing_entries").insert(payload).select("*").single(), 7000); inserted = res.data; insertError = res.error; } catch (e) { insertError = e; }
-      const offline = !!(insertError || !inserted);
-      if (offline) {
-        // Too little service to reach the database: keep the load on this
-        // phone instead of losing it. It counts on this phone's board
-        // right away and uploads by itself when service returns.
-        queueLoad(payload);
-        inserted = { ...payload, pending: true };
+      // Double-press guard: the identical load entered again within a few
+      // seconds is the same press, not a second truck. (On a weak signal
+      // the old flow waited on the server before clearing the form, so a
+      // second press quietly created a duplicate that had to be deleted.)
+      const dupe = state.loads.find((x) => x.truck === truck && x.trailer === trailer && x.field === field && x.variety === variety && x.location === state.selected && Math.abs(new Date(x.occurred_at).getTime() - occurredAt.getTime()) < 10000);
+      if (dupe) {
+        message("outStatus", "That load was just added — it's already on the list.", true);
+        clearMessage("outStatus");
+        return;
       }
-      if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];
+      // Save on this phone FIRST — instantly, without waiting on the
+      // signal — so the load is on the board and the form clears the
+      // moment Add is pressed. The upload chases right behind it and the
+      // "waiting for service" tag clears when the server has it.
+      queueLoad(payload);
+      state.loads = [{ ...payload, pending: true }, ...state.loads];
       renderLoads();
       renderNeeds();
-      if (!offline) await loadData();
       $("outTruck").value = ""; $("outTrailer").value = "";
       // Keep field and variety selected so consecutive loads from the same field and variety are faster.
       // They remain editable at any time before the next load is added.
@@ -1435,13 +1439,9 @@ button[data-ui-tooltip]{position:relative}
       renderLocations("locations", "", selectLocation);
       renderSiteTabs();
       setDefaultDates();
-      if (offline) {
-        message("outStatus", "No service — load saved on this phone. It will upload by itself when service returns.", true);
-        flushOutbox();
-      } else {
-        message("outStatus", "Load added.", true);
-      }
+      message("outStatus", "Load added.", true);
       clearMessage("outStatus");
+      flushOutbox();
     } catch (error) {
       message("outStatus", "Could not add load: " + errText(error));
     }

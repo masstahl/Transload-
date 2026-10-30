@@ -378,7 +378,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-29-offline-queue-v18";
+  const APP_VERSION = "2026-10-29-jwt-refresh-v19";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -1668,17 +1668,31 @@ button[data-ui-tooltip]{position:relative}
       db.channel("live-" + table).on("postgres_changes", { event: "*", schema: "public", table }, () => loadData().catch(showSetupError)).subscribe();
     });
   }
+  // Returns a user holding a live login pass. The stored pass (JWT)
+  // expires after about an hour, and iOS freezes the background renewal
+  // while the app sits — so a reopened app can be holding an expired
+  // pass, and every request then fails with a JWT error until the app is
+  // force-closed. Renew up front when the pass is expired or close to
+  // it; if renewal fails, drop the dead session and sign in fresh.
+  async function ensureSession() {
+    const { data, error } = await db.auth.getSession();
+    if (error) throw error;
+    let session = data.session || null;
+    if (session && session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
+      let renewed = null;
+      try { const r = await db.auth.refreshSession(); renewed = r.data && r.data.session; } catch (e) { renewed = null; }
+      if (renewed) session = renewed;
+      else { session = null; try { await db.auth.signOut({ scope: "local" }); } catch (e) {} }
+    }
+    if (session && session.user) return session.user;
+    const result = await db.auth.signInAnonymously();
+    if (result.error) throw result.error;
+    return result.data.user;
+  }
   async function start() {
     try {
       await bustOldCache();
-      const { data, error } = await db.auth.getSession();
-      if (error) throw error;
-      let user = data.session?.user || null;
-      if (!user) {
-        const result = await db.auth.signInAnonymously();
-        if (result.error) throw result.error;
-        user = result.data.user;
-      }
+      const user = await ensureSession();
       if (!user) throw new Error("Could not sign in to the shared log.");
       state.user = user;
       $("menuAlertsBtn").addEventListener("click", () => { closeSiteMenu(); openPushDialog(); });
@@ -1926,6 +1940,19 @@ state.deviceName = deviceName || "Unknown Device";
   setInterval(() => { const before = state.workDate; refreshWorkDay(); if (state.workDate !== before && state.followingWorkDay) { renderNeeds(); renderLoads(); renderPace(); } }, 15000);
   setInterval(tickTimerPills, 100);
   setInterval(flushOutbox, 25000); window.addEventListener("online", () => flushOutbox());
+  // Keep the login pass fresh while the app is in use: renew it before it
+  // expires, and if renewal fails, reload so startup signs in cleanly
+  // instead of every request failing with a JWT error.
+  setInterval(async () => {
+    try {
+      const { data } = await db.auth.getSession();
+      const s = data && data.session;
+      if (s && s.expires_at && s.expires_at * 1000 < Date.now() + 60000) {
+        const r = await db.auth.refreshSession().catch(() => null);
+        if (!r || !r.data || !r.data.session) location.reload();
+      }
+    } catch (e) {}
+  }, 60000);
   window.addEventListener("resize", () => { if (paceChart) paceChart.resize(); });
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;

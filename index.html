@@ -151,15 +151,6 @@ button[data-ui-tooltip]{position:relative}
   .exp-table th{background:var(--soft);font-weight:800}
   .exp-table tr:last-child td{border-bottom:0}
   .timer-pill.done{background:#e5f0e6;border:1px solid #c8d9ca;color:#3f5c47}
-  /* F2: loads and days on one line. */
-  .chart-row{grid-template-columns:minmax(0,1fr) auto auto}
-  .chart-row > b:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .field-progress{font-weight:800;font-variant-numeric:tabular-nums;color:#28352e;white-space:nowrap}
-  /* H8: in-app duplicate warning. Same colors as the work-day bar. */
-  .dup-warn{margin-top:8px;padding:10px;border:1.5px solid #dd8a26;border-radius:12px;background:#fdf0dc}
-  .dup-warn-text{margin:0 0 8px;font-size:13px;font-weight:700;line-height:1.35;color:#6b4a12}
-  .dup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .dup-actions .cancel,.dup-actions .update{height:44px;margin:0}
 </style>
 </head>
 <body>
@@ -198,13 +189,6 @@ button[data-ui-tooltip]{position:relative}
         </div>
       </div>
       <button class="save" id="saveLoad" disabled>Add load</button>
-      <div id="dupWarn" class="dup-warn hidden">
-        <p id="dupWarnText" class="dup-warn-text"></p>
-        <div class="dup-actions">
-          <button type="button" class="cancel" id="dupCancel">Cancel</button>
-          <button type="button" class="update" id="dupConfirm">Add anyway</button>
-        </div>
-      </div>
       <div class="status" id="outStatus" aria-live="polite"></div>
     </div>
     <div class="panel">
@@ -394,7 +378,7 @@ button[data-ui-tooltip]{position:relative}
 </div>
 <script>
 (() => {
-  const APP_VERSION = "2026-10-29-field-progress-dup-guard";
+  const APP_VERSION = "2026-10-29-offline-queue-v18";
   const VAPID_PUBLIC_KEY = "BGDhR_yB5fpsF4YqxjGnBy4qSuUGAP2X3DGpZvBUNj7zl6WFtg6CwbxIy0FYiTxgC3ZIXQreOUIrUsDFJa9bGVk";
   const SUPABASE_URL = "https://ngoibulnsvdcstnyrjki.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_n_UCfBaRgoR6JTiY1nzwCg_2eK77CK8";
@@ -821,13 +805,10 @@ button[data-ui-tooltip]{position:relative}
   function renderChart(target, source, range, empty) {
     const cutoff = Date.now() - range * 86400000;
     const counts = {};
-    const daySets = {};
-    source.filter((x) => x.field && new Date(x.occurred_at).getTime() >= cutoff).forEach((x) => {
-      counts[x.field] = (counts[x.field] || 0) + 1;
-      (daySets[x.field] ||= new Set()).add(workDateOf(x));
-    });
+    source.filter((x) => x.field && new Date(x.occurred_at).getTime() >= cutoff).forEach((x) => { counts[x.field] = (counts[x.field] || 0) + 1; });
     const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     if (!entries.length) { $(target).innerHTML = `<div class="empty-chart">${empty}</div>`; return; }
+    const max = entries[0][1];
     $(target).innerHTML = entries.map(([field, n]) => {
       const expanded = state.expandedField === field && target === "fieldChart";
       const fieldRows = source.filter((x) => String(x.field) === field && x.occurred_at);
@@ -844,9 +825,7 @@ button[data-ui-tooltip]{position:relative}
         const varieties = [...new Set(rows.map((x) => x.variety).filter(Boolean))];
         return `<div class="field-day"><div class="field-day-head"><b>${esc(friendlyDay(day))}</b><b>${rows.length} load${rows.length === 1 ? "" : "s"}</b></div><div class="meta">Truck numbers: ${trucks.length ? trucks.map(esc).join(", ") : "Not recorded"}${trailers.length ? " · Trailers: " + trailers.map(esc).join(", ") : ""}${varieties.length ? " · Variety: " + varieties.map(esc).join(", ") : ""}</div></div>`;
       }).join("");
-      const days = (daySets[field] || new Set()).size;
-      const progress = n + (n === 1 ? " load" : " loads") + " · " + days + (days === 1 ? " day" : " days");
-      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>${esc(fieldLabel(field))}</b><span class="field-progress">${progress}</span><b class="expand-mark">${expanded ? "−" : "+"}</b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>${esc(fieldLabel(field))} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
+      return `<div class="field-chart-item"><button type="button" class="chart-row chart-expand" data-field-expand="${esc(field)}" aria-expanded="${expanded}"><b>${esc(fieldLabel(field))}</b><div class="bar-wrap"><div class="bar" style="width:${Math.round(n / max * 100)}%"></div></div><b>${n} <span class="expand-mark">${expanded ? "−" : "+"}</span></b></button>${expanded ? `<div class="field-detail"><div class="field-detail-summary"><b>${esc(fieldLabel(field))} details</b><span>Started: ${start ? esc(friendlyDay(localDateString(start))) : "Unknown"} · ${fieldRows.length} total recorded loads</span></div>${detail || '<div class="meta">No daily records available.</div>'}</div>` : ""}</div>`;
     }).join("");
     $(target).querySelectorAll("[data-field-expand]").forEach((button) => {
       let holdTimer = null, held = false;
@@ -892,7 +871,7 @@ button[data-ui-tooltip]{position:relative}
     renderLocationTotals();
     renderChart("fieldChart", state.sharedFieldLoads, state.fieldRange, "No field loads recorded in this period.");
     const visible = state.loadsExpanded ? records : records.slice(0, 3);
-    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}" style="${locStyle(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
+    $("loadList").innerHTML = records.length ? visible.map((x) => `<article class="row ${locClass(x.location)}" style="${locStyle(x.location)}"><div class="rowtop"><span>${esc(locName(x.location))}</span><span>${friendlyTime(x.occurred_at)}</span></div><div class="meta meta-row"><span>Truck <b>${esc(x.truck)}</b> · Trailer <b>${esc(x.trailer)}</b> · <b>${esc(x.field ? fieldLabel(x.field) : "—")}</b> · <b>${esc(x.variety || "—")}</b></span>${timedMetaHtml(x)}</div><div class="entered">Entered by ${esc(x.created_by_name || "Unknown")} · last edited by ${esc(x.updated_by_name || x.created_by_name || "Unknown")}${x.pending ? ` · <b>On this phone — waiting for service</b>` : ""}</div><div class="row-actions"><button class="edit-btn" data-edit-load="${x.id}">Edit</button><button class="delete-btn" data-delete-load="${x.id}">Delete</button>${timerPillHtml(x, isToday)}</div></article>`).join("") : '<div class="empty">No loads recorded for this day.</div>';
     const expandButton = $("expandLoadsBtn"); expandButton.style.display = records.length > 3 ? "block" : "none"; expandButton.textContent = state.loadsExpanded ? "Show last 3 loads" : "Show all loads";
     $("loadList").querySelectorAll("[data-timer]").forEach((b) => { b.onclick = () => toggleTimer(b.dataset.timer); });
     $("loadList").querySelectorAll("[data-edit-time]").forEach((b) => { b.onclick = () => openTimeEdit(b.dataset.editTime); });
@@ -947,6 +926,12 @@ button[data-ui-tooltip]{position:relative}
     const error = loads.error || incoming.error || quick.error || varieties.error || plans.error || allLoads.error || allIncoming.error;
     if (error) throw error;
     state.loads = loads.data || [];
+    // Fold in loads saved on this phone that have not uploaded yet, and
+    // drop any the server already has (an upload whose answer got lost).
+    const serverIds = new Set(state.loads.map((x) => x.id));
+    const pendingRows = readOutbox().filter((p) => !serverIds.has(p.id));
+    if (pendingRows.length !== readOutbox().length) writeOutbox(pendingRows);
+    if (pendingRows.length) state.loads = [...pendingRows.map((p) => ({ ...p, pending: true })), ...state.loads];
     state.sharedFieldLoads = allLoads.data || [];
     state.incoming = incoming.data || [];
     state.sharedFieldIncoming = allIncoming.data || [];
@@ -977,8 +962,9 @@ button[data-ui-tooltip]{position:relative}
       state.locPrefs = (good && good.length) ? { slots: good } : null;
     } catch (e) { state.locPrefs = null; /* table not migrated yet: fall back to defaults */ }
     if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
-    syncSaveLoadEnabled();
+    $("saveLoad").disabled = !state.selected;
     refreshWorkDay();
+    flushOutbox();
     renderSiteTabs();
     renderLocations("locations", state.selected, selectLocation);
     renderLoads();
@@ -1105,6 +1091,15 @@ button[data-ui-tooltip]{position:relative}
     patch.updated_by = state.user.id;
     patch.updated_by_name = state.name;
     patch.updated_at = now;
+    if (x.pending) {
+      // Not uploaded yet: keep the timing inside the queued load on this
+      // phone so it rides along when the load uploads.
+      Object.assign(x, patch);
+      patchOutbox(id, patch);
+      state.loads.sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at));
+      renderLoads(); renderPace();
+      return;
+    }
     const { error } = await db.from("outgoing_entries").update(patch).eq("id", id).eq("site_id", state.site);
     if (error) {
       const hint = errText(error);
@@ -1176,6 +1171,7 @@ button[data-ui-tooltip]{position:relative}
       load_finished_at: new Date(new Date(startIso).getTime() + mins * 60000).toISOString(),
       updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString(),
     };
+    if (x.pending) { Object.assign(x, patch); patchOutbox(id, patch); closeTimeEdit(); renderLoads(); renderPace(); return; }
     const { error } = await db.from("outgoing_entries").update(patch).eq("id", id).eq("site_id", state.site);
     if (error) {
       const hint = errText(error);
@@ -1362,86 +1358,76 @@ button[data-ui-tooltip]{position:relative}
   function renderSiteTabs() { document.querySelectorAll("[data-site]").forEach((b) => { b.classList.toggle("active", Number(b.dataset.site) === state.site); b.textContent = siteName(b.dataset.site); }); }
   function closeSiteMenu() { $("siteTabs").classList.remove("open"); $("siteMenuBackdrop").classList.remove("open"); $("siteMenuButton").setAttribute("aria-expanded", "false"); }
   function openSiteMenu() { $("siteTabs").classList.add("open"); $("siteMenuBackdrop").classList.add("open"); $("siteMenuButton").setAttribute("aria-expanded", "true"); }
-  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; if (dupWarnOpen) closeDupWarn(); state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; state.followingWorkDay = true; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
+  async function switchSite(site) { if (![1,2].includes(site)) return; closeSiteMenu(); if (!$("exportView").classList.contains("hidden")) document.querySelector('[data-tab="outgoing"]').click(); if (site === state.site) return; state.site = site; localStorage.setItem("tl_active_site", String(site)); state.selected = ""; state.followingWorkDay = true; renderSiteTabs(); renderLocations("locations", "", selectLocation); await loadData().catch(showSetupError); restoreStickyInputs(); }
   function selectLocation(location) {
     state.selected = location;
     renderLocations("locations", location, selectLocation);
-    if (dupWarnOpen) closeDupWarn();
-    else syncSaveLoadEnabled();
+    $("saveLoad").disabled = false;
   }
 
-  let savingLoad = false;
-  let dupWarnOpen = false;
-  function syncSaveLoadEnabled() {
-    const button = $("saveLoad");
-    button.disabled = !!(savingLoad || dupWarnOpen || !state.selected);
-    button.setAttribute("aria-busy", savingLoad ? "true" : "false");
+  // ---- Offline outbox -------------------------------------------------
+  // Loads added with weak or no service are saved on this phone
+  // (localStorage, kept per site) and uploaded automatically when service
+  // returns. Each queued load carries its own id, so a retry can never
+  // create a duplicate: if an upload actually landed but its answer got
+  // lost, the retry hits the same id and counts as done.
+  function newUuid() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === "x" ? r : (r & 0x3) | 0x8).toString(16); });
   }
-  // Same truck and plant inside 5 minutes. Local rows cover this phone; the read covers another phone.
-  async function latestDuplicateAt(truck, location) {
-    const now = Date.now();
-    const windowMs = 5 * 60 * 1000;
-    let best = null;
-    const consider = (value) => {
-      const t = new Date(value).getTime();
-      if (!Number.isFinite(t) || Math.abs(now - t) >= windowMs) return;
-      if (best == null || t > best) best = t;
-    };
-    state.loads.forEach((row) => {
-      if (String(row.location) !== String(location)) return;
-      if (String(row.truck || "").trim() !== truck) return;
-      if (row.site_id != null && Number(row.site_id) !== Number(state.site)) return;
-      consider(row.occurred_at);
-    });
+  function withTimeout(promise, ms) {
+    return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+  }
+  const outboxKey = () => "tl_outbox_" + state.site;
+  function readOutbox() { try { return JSON.parse(localStorage.getItem(outboxKey()) || "[]"); } catch (e) { return []; } }
+  function writeOutbox(rows) { try { localStorage.setItem(outboxKey(), JSON.stringify(rows)); } catch (e) {} }
+  function queueLoad(payload) { const q = readOutbox(); q.push(payload); writeOutbox(q); }
+  function removeOutboxId(id) { writeOutbox(readOutbox().filter((p) => p.id !== id)); }
+  function patchOutbox(id, patch) { const q = readOutbox(); const p = q.find((x) => x.id === id); if (p) { Object.assign(p, patch); writeOutbox(q); } }
+  let outboxFlushing = false;
+  async function flushOutbox() {
+    if (outboxFlushing || !state.user) return;
+    if (!readOutbox().length) return;
+    outboxFlushing = true;
     try {
-      const since = new Date(now - windowMs).toISOString();
-      const { data, error } = await db.from("outgoing_entries").select("occurred_at").eq("site_id", state.site).eq("location", location).eq("truck", truck).gte("occurred_at", since).order("occurred_at", { ascending: false }).limit(1);
-      if (!error && data && data[0]) consider(data[0].occurred_at);
-    } catch (e) { /* local list still covers this phone */ }
-    return best;
-  }
-  function openDupWarn(truck, location, at) {
-    dupWarnOpen = true;
-    const mins = Math.floor(Math.abs(Date.now() - at) / 60000);
-    const when = mins <= 0 ? "just now" : mins === 1 ? "1 minute ago" : mins + " minutes ago";
-    $("dupWarnText").textContent = "Truck " + truck + " at " + locName(location) + " was entered " + when + ". Add this load again?";
-    $("dupWarn").classList.remove("hidden");
-    message("outStatus", "");
-    syncSaveLoadEnabled();
-    $("dupWarn").scrollIntoView({ block: "nearest" });
-  }
-  function closeDupWarn() {
-    dupWarnOpen = false;
-    $("dupWarn").classList.add("hidden");
-    $("dupWarnText").textContent = "";
-    syncSaveLoadEnabled();
-  }
-
-  async function addLoad(skipDup) {
-    if (savingLoad || dupWarnOpen) return;
-    if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
-    const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
-    if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
-    savingLoad = true;
-    syncSaveLoadEnabled();
-    try {
-      if (!skipDup) {
-        const dupAt = await latestDuplicateAt(truck, state.selected);
-        if (dupAt) {
-          openDupWarn(truck, state.selected, dupAt);
-          return;
-        }
+      let uploaded = 0;
+      for (const payload of [...readOutbox()]) {
+        let error = null;
+        try { const res = await withTimeout(db.from("outgoing_entries").insert(payload), 12000); error = res.error; } catch (e) { error = e; }
+        if (!error || error.code === "23505") { removeOutboxId(payload.id); uploaded++; }
+        else break; // still no service — stop and try again later
       }
+      if (uploaded) {
+        message("outStatus", uploaded + (uploaded === 1 ? " load" : " loads") + " saved on this phone just uploaded.", true);
+        clearMessage("outStatus");
+        await loadData();
+      }
+    } finally { outboxFlushing = false; }
+  }
+
+  async function addLoad() {
+    try {
+      if (!state.user) return message("outStatus", "Shared connection is not ready yet.");
+      const truck = $("outTruck").value.trim(), trailer = $("outTrailer").value.trim(), field = $("outField").value.trim(), variety = $("outVariety").value;
+      if (!state.selected || !truck || !trailer || !field || !variety) return message("outStatus", "Select a location and enter truck, trailer, field, and variety.");
       // Capture the timestamp at the moment the operator presses Add load.
       const occurredAt = new Date();
       refreshWorkDay();
-      const payload = { site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), work_date: stampFor(occurredAt.toISOString()), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
-      const { data: inserted, error } = await db.from("outgoing_entries").insert(payload).select("*").single();
-      if (error) throw error;
+      const payload = { id: newUuid(), site_id: state.site, location: state.selected, truck, trailer, field, variety, occurred_at: occurredAt.toISOString(), work_date: stampFor(occurredAt.toISOString()), created_by: state.user.id, created_by_name: state.name, updated_by: state.user.id, updated_by_name: state.name, updated_at: occurredAt.toISOString() };
+      let inserted = null, insertError = null;
+      try { const res = await withTimeout(db.from("outgoing_entries").insert(payload).select("*").single(), 7000); inserted = res.data; insertError = res.error; } catch (e) { insertError = e; }
+      const offline = !!(insertError || !inserted);
+      if (offline) {
+        // Too little service to reach the database: keep the load on this
+        // phone instead of losing it. It counts on this phone's board
+        // right away and uploads by itself when service returns.
+        queueLoad(payload);
+        inserted = { ...payload, pending: true };
+      }
       if (inserted) state.loads = [inserted, ...state.loads.filter((x) => x.id !== inserted.id)];
       renderLoads();
       renderNeeds();
-      await loadData();
+      if (!offline) await loadData();
       $("outTruck").value = ""; $("outTrailer").value = "";
       // Keep field and variety selected so consecutive loads from the same field and variety are faster.
       // They remain editable at any time before the next load is added.
@@ -1449,13 +1435,15 @@ button[data-ui-tooltip]{position:relative}
       renderLocations("locations", "", selectLocation);
       renderSiteTabs();
       setDefaultDates();
-      message("outStatus", "Load added.", true);
+      if (offline) {
+        message("outStatus", "No service — load saved on this phone. It will upload by itself when service returns.", true);
+        flushOutbox();
+      } else {
+        message("outStatus", "Load added.", true);
+      }
       clearMessage("outStatus");
     } catch (error) {
       message("outStatus", "Could not add load: " + errText(error));
-    } finally {
-      savingLoad = false;
-      syncSaveLoadEnabled();
     }
   }
 
@@ -1502,6 +1490,7 @@ button[data-ui-tooltip]{position:relative}
 
   async function remove(table, id, status) {
     if (!confirm("Delete this entry for everyone?")) return;
+    if (table === "outgoing_entries") removeOutboxId(id);
     const direct = await db.from(table).delete().eq("id", id).eq("site_id", state.site);
     if (direct.error) {
       const rpc = await db.rpc("delete_transload_entry", { p_entry_type: table === "outgoing_entries" ? "outgoing" : "incoming", p_entry_id: id, p_deleted_by: state.user.id, p_deleted_by_name: state.name });
@@ -1560,6 +1549,13 @@ button[data-ui-tooltip]{position:relative}
     if (edited && localDateString(edited.occurred_at) !== localDateString(payload.occurred_at)) payload.work_date = stampFor(payload.occurred_at);
     if (isLoad) Object.assign(payload, { truck: $("editFirst").value.trim(), location: state.editLocation, trailer: second, field, variety: $("editVariety").value });
     else Object.assign(payload, { truck: driverKey(second), driver: second, field });
+    if (isLoad && edited && edited.pending) {
+      Object.assign(edited, payload);
+      patchOutbox(edited.id, payload);
+      closeEdit();
+      renderNeeds(); renderLoads(); renderFields(); renderPace();
+      return;
+    }
     const { error } = await db.from(isLoad ? "outgoing_entries" : "incoming_entries").update(payload).eq("id", state.editing.id).eq("site_id", state.site);
     if (error) return message("editStatus", errText(error));
     if (!isLoad) await db.from("quick_drivers").upsert({ site_id: state.site, truck: driverKey(second), driver: second, updated_by: state.user.id, updated_by_name: state.name, updated_at: new Date().toISOString() }, { onConflict: "site_id,truck" });
@@ -1929,6 +1925,7 @@ state.deviceName = deviceName || "Unknown Device";
   // rolls forward on its own, an unfinished one keeps holding.
   setInterval(() => { const before = state.workDate; refreshWorkDay(); if (state.workDate !== before && state.followingWorkDay) { renderNeeds(); renderLoads(); renderPace(); } }, 15000);
   setInterval(tickTimerPills, 100);
+  setInterval(flushOutbox, 25000); window.addEventListener("online", () => flushOutbox());
   window.addEventListener("resize", () => { if (paceChart) paceChart.resize(); });
   $("saveLoad").onclick = addLoad;
   $("setPlan").onclick = openPlan;
@@ -2012,8 +2009,7 @@ state.deviceName = deviceName || "Unknown Device";
     }
   }
   function refreshAfterLocPrefs() {
-    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) state.selected = "";
-    syncSaveLoadEnabled();
+    if (state.selected && !visibleLocs().some((s) => s.key === state.selected)) { state.selected = ""; $("saveLoad").disabled = true; }
     renderLocations("locations", state.selected, selectLocation);
     renderNeeds(); renderLoads(); renderPace();
   }
@@ -2170,8 +2166,6 @@ state.deviceName = deviceName || "Unknown Device";
   $("fieldNumber").addEventListener("input", () => saveStickyInput("in_field", $("fieldNumber").value));
   $("outVariety").addEventListener("change", () => saveStickyInput("variety", $("outVariety").value));
   document.querySelectorAll("[data-dash]").forEach((b) => { b.onclick = () => insertDash(b.dataset.dash); });
-  $("dupCancel").onclick = () => closeDupWarn();
-  $("dupConfirm").onclick = () => { closeDupWarn(); addLoad(true); };
   document.querySelectorAll("[data-range]").forEach((b) => {
     b.onclick = () => {
       state.fieldRange = Number(b.dataset.range);
@@ -2211,7 +2205,7 @@ state.deviceName = deviceName || "Unknown Device";
   // iOS resumes the frozen page without re-running the launch-time version check.
   let appHiddenAt = Date.now();
   function anyModalOpen() {
-    return dupWarnOpen || ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal", "locNameModal", "locAddModal"].some((id) => $(id) && $(id).classList.contains("open"))
+    return ["editModal", "planModal", "timeModal", "siteNameModal", "fieldNameModal", "locNameModal", "locAddModal"].some((id) => $(id) && $(id).classList.contains("open"))
       || ($("paceFocusWrap") && !$("paceFocusWrap").classList.contains("hidden"));
   }
   async function checkForAppUpdate() {

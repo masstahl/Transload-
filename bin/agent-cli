@@ -1,0 +1,232 @@
+#!/usr/bin/env node
+// agent-cli — Transload Log: every repeated lookup/check from past sessions, one place.
+// Node stdlib only. Read-only except `deploy` (wraps the existing commit->push->Pages flow).
+'use strict';
+const { execFileSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const ROOT = path.resolve(__dirname, '..');
+const LIVE = 'https://masstahl.github.io/Transload-/';
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+const WF = '.github/workflows/transload-overdue-push.yml';
+
+const args = process.argv.slice(2);
+const cmd = args[0];
+const JSON_OUT = args.includes('--json');
+const flags = {};
+for (let i = 1; i < args.length; i++) {
+  if (args[i].startsWith('--')) { const k = args[i].slice(2); flags[k] = (args[i + 1] && !args[i + 1].startsWith('--')) ? args[++i] : true; }
+}
+const positional = args.slice(1).filter(a => !a.startsWith('--') && a !== flags[Object.keys(flags).find(k => flags[k] === a)]);
+
+function git(...a) {
+  try { return execFileSync('git', a, { cwd: ROOT, encoding: 'utf8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }
+  catch (e) { return null; }
+}
+function fetchLive(file) {
+  const url = LIVE + file + (file.includes('?') ? '&' : '?') + 'ac=' + Date.now();
+  try {
+    return execFileSync('curl', ['-s', '-f', '-A', UA, url], { encoding: 'utf8', timeout: 30000, maxBuffer: 8 * 1024 * 1024 });
+  } catch (e) { return null; }
+}
+function tryFetch() {
+  try { execFileSync('git', ['fetch', 'origin', '--quiet'], { cwd: ROOT, timeout: 30000, stdio: 'ignore' }); return 'ok'; }
+  catch (e) { return 'failed'; }
+}
+const sha256 = s => crypto.createHash('sha256').update(s).digest('hex').slice(0, 12);
+const appVersion = html => { const m = html && html.match(/APP_VERSION\s*=\s*"([^"]+)"/); return m ? m[1] : null; };
+const localFile = f => { try { return fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (e) { return null; } };
+const atRef = (ref, f) => git('show', ref + ':' + f);
+
+function out(obj, lines, code = 0) {
+  if (JSON_OUT) console.log(JSON.stringify(obj));
+  else console.log(lines.join('\n'));
+  process.exit(code);
+}
+function help(text) { console.log(text.trim()); process.exit(0); }
+
+const HELP = {
+  main: `usage: agent-cli <cmd> [--json]
+cmds:
+  version    APP_VERSION + commit at local / HEAD / origin/main / live
+  drift      three-way drift: refs, tree content, live served bytes, dirty tree
+  served     is a string present in the LIVE served file?  served "<text>" [--file index.html]
+  hash       sha256 of a repo file, local vs live served  hash [file]
+  log        recent commits, local + remote, divergence marked  log [-n 10]
+  workflow   overdue-push workflow: schedule present? duplicate keys? local vs remote
+  deploy     wrap existing flow: gate on drift, git push, wait for live to match (WRITES)
+every cmd has --help; every cmd supports --json. read-only except deploy.`,
+  version: `usage: agent-cli version [--json]
+APP_VERSION string and commit sha for: working tree file, HEAD, origin/main, live served page.
+exit 0 if all four versions equal, 1 otherwise.`,
+  drift: `usage: agent-cli drift [--json]
+three-way drift check (the check that bit us twice):
+  refs: HEAD vs origin/main ahead/behind (NOTE: refs can diverge while trees are identical)
+  trees: HEAD tree vs origin/main tree (git diff), local index.html vs origin/main copy
+  live: served index.html sha vs local file sha
+  tree: uncommitted changes?
+exit 0 if live content == local content, 1 if content differs.`,
+  served: `usage: agent-cli served "<text>" [--file index.html] [--json]
+fetch the live served file (cache-busted, browser UA) and grep for <text>;
+also reports presence in the local file. exit 0 if in live, 1 if not.`,
+  hash: `usage: agent-cli hash [file] [--json]
+sha256 (first 12) of local file vs live served file. default file: index.html.
+exit 0 if identical, 1 otherwise.`,
+  log: `usage: agent-cli log [-n 10] [--json]
+recent commits on HEAD and origin/main with left/right divergence marks,
+plus APP_VERSION at each tip.`,
+  workflow: `usage: agent-cli workflow [--json]
+inspect ${WF} in working tree and at origin/main:
+schedule block present? workflow_dispatch count (>1 = the known duplicate-key defect)? copies identical?`,
+  deploy: `usage: agent-cli deploy [--json]
+WRAPS the existing deploy flow (commit is yours; Pages serves origin/main):
+  1. refuse if working tree dirty
+  2. fetch; refuse if HEAD tree content != origin/main tree content, or HEAD is not a fast-forward of origin/main (refs diverged => reconcile first)
+  3. git push origin main
+  4. poll live until served index.html sha == local sha (timeout 180s)
+does not commit, does not edit files.`,
+};
+
+if (!cmd || cmd === '--help' || cmd === '-h') help(HELP.main);
+if (flags.help && HELP[cmd]) help(HELP[cmd]);
+
+if (cmd === 'version') {
+  const fetched = tryFetch();
+  const lv = appVersion(localFile('index.html'));
+  const hv = appVersion(atRef('HEAD', 'index.html'));
+  const rv = appVersion(atRef('origin/main', 'index.html'));
+  const liveHtml = fetchLive('index.html');
+  const sv = appVersion(liveHtml);
+  const o = {
+    fetch: fetched, local: lv, head: hv, remote: rv, live: sv,
+    head_sha: git('rev-parse', '--short', 'HEAD'), remote_sha: git('rev-parse', '--short', 'origin/main'),
+    all_equal: lv === hv && hv === rv && rv === sv,
+  };
+  out(o, [
+    `local:  ${o.local}`, `head:   ${o.head} (${o.head_sha})`, `remote: ${o.remote} (${o.remote_sha})`,
+    `live:   ${o.live}`, `fetch:  ${o.fetch}`, `match:  ${o.all_equal}`,
+  ], o.all_equal ? 0 : 1);
+}
+
+if (cmd === 'drift') {
+  const fetched = tryFetch();
+  const lr = git('rev-list', '--left-right', '--count', 'HEAD...origin/main');
+  const [ahead, behind] = lr ? lr.split(/\s+/).map(Number) : [null, null];
+  const treesEqual = git('diff', '--name-only', 'HEAD', 'origin/main') === '';
+  const localHtml = localFile('index.html');
+  const liveHtml = fetchLive('index.html');
+  const o = {
+    fetch: fetched,
+    head: git('rev-parse', '--short', 'HEAD'), remote: git('rev-parse', '--short', 'origin/main'),
+    ahead, behind, refs_diverged: ahead > 0 && behind > 0,
+    trees_equal: treesEqual,
+    dirty: (git('status', '--porcelain') || '') !== '',
+    local_sha: localHtml ? sha256(localHtml) : null,
+    live_sha: liveHtml ? sha256(liveHtml) : null,
+    live_matches_local: liveHtml !== null && localHtml !== null && sha256(liveHtml) === sha256(localHtml),
+  };
+  o.verdict = o.live_sha === null ? 'live-unreachable'
+    : !o.live_matches_local ? 'CONTENT-DRIFT: live != local'
+    : !o.trees_equal ? 'live==local but local tree != origin/main tree'
+    : o.refs_diverged ? 'content in sync; refs diverged (same content, different commits) — reconcile before any push'
+    : 'in sync';
+  out(o, [
+    `head: ${o.head}  origin/main: ${o.remote}  ahead ${o.ahead} / behind ${o.behind}  fetch: ${o.fetch}`,
+    `trees equal: ${o.trees_equal}  dirty: ${o.dirty}`,
+    `index.html sha  local ${o.local_sha}  live ${o.live_sha}  match: ${o.live_matches_local}`,
+    `verdict: ${o.verdict}`,
+  ], o.live_matches_local ? 0 : 1);
+}
+
+if (cmd === 'served') {
+  const needle = positional[0] || args.slice(1).find(a => !a.startsWith('--'));
+  if (!needle) help(HELP.served);
+  const file = typeof flags.file === 'string' ? flags.file : 'index.html';
+  const liveHtml = fetchLive(file);
+  const localHtml = localFile(file);
+  const o = {
+    needle, file,
+    in_live: liveHtml ? liveHtml.includes(needle) : null,
+    in_local: localHtml ? localHtml.includes(needle) : null,
+    live_reachable: liveHtml !== null,
+  };
+  out(o, [`"${needle}" in ${file}:  live: ${o.in_live}  local: ${o.in_local}`], o.in_live ? 0 : 1);
+}
+
+if (cmd === 'hash') {
+  const file = positional[0] || 'index.html';
+  const localHtml = localFile(file);
+  const liveHtml = fetchLive(file);
+  const o = {
+    file,
+    local_sha: localHtml !== null ? sha256(localHtml) : null,
+    live_sha: liveHtml !== null ? sha256(liveHtml) : null,
+  };
+  o.match = o.local_sha !== null && o.local_sha === o.live_sha;
+  out(o, [`${file}  local ${o.local_sha}  live ${o.live_sha}  match: ${o.match}`], o.match ? 0 : 1);
+}
+
+if (cmd === 'log') {
+  const n = typeof flags.n === 'string' ? flags.n : '10';
+  const fetched = tryFetch();
+  const rows = git('log', '--left-right', '--oneline', '-n', String(Number(n) * 2), 'HEAD...origin/main');
+  const o = {
+    fetch: fetched,
+    head: git('rev-parse', '--short', 'HEAD'), remote: git('rev-parse', '--short', 'origin/main'),
+    head_version: appVersion(atRef('HEAD', 'index.html')), remote_version: appVersion(atRef('origin/main', 'index.html')),
+    commits: rows ? rows.split('\n') : [],
+  };
+  out(o, [
+    `HEAD ${o.head} (APP_VERSION ${o.head_version})   origin/main ${o.remote} (APP_VERSION ${o.remote_version})   fetch: ${o.fetch}`,
+    ...o.commits.map(c => (c.startsWith('<') ? 'local  ' : c.startsWith('>') ? 'remote ' : '       ') + c.slice(1).trim()),
+  ]);
+}
+
+if (cmd === 'workflow') {
+  const fetched = tryFetch();
+  const inspect = txt => txt === null ? null : {
+    schedule: /^\s+schedule:/m.test(txt),
+    dispatch_count: (txt.match(/workflow_dispatch:/g) || []).length,
+    cron: (txt.match(/cron:\s*'([^']+)'/) || [])[1] || null,
+  };
+  const l = inspect(localFile(WF));
+  const r = inspect(atRef('origin/main', WF));
+  const localTxt = localFile(WF);
+  const o = { fetch: fetched, file: WF, local: l, remote: r, copies_identical: localTxt !== null && localTxt.trim() === atRef('origin/main', WF) };
+  o.known_defect = l && l.dispatch_count > 1 ? `workflow_dispatch appears ${l.dispatch_count}x (duplicate key — the defect found 2026-10-20, still present)` : null;
+  const fmt = (w, tag) => w ? `${tag}: schedule ${w.schedule}  cron ${w.cron}  workflow_dispatch x${w.dispatch_count}` : `${tag}: missing`;
+  out(o, [fmt(l, 'local '), fmt(r, 'remote'), `identical: ${o.copies_identical}`, o.known_defect ? `defect: ${o.known_defect}` : 'defect: none']);
+}
+
+if (cmd === 'deploy') {
+  const dirty = (git('status', '--porcelain') || '') !== '';
+  if (dirty) out({ step: 'gate', ok: false, reason: 'working tree dirty — commit or stash first' }, ['deploy refused: working tree dirty — commit or stash first'], 1);
+  const fetched = tryFetch();
+  const treesEqual = git('diff', '--name-only', 'HEAD', 'origin/main') === '';
+  const ff = git('merge-base', '--is-ancestor', 'origin/main', 'HEAD') !== null;
+  if (!treesEqual) out({ step: 'gate', ok: false, reason: 'HEAD tree != origin/main tree — reconcile first' }, ['deploy refused: HEAD tree differs from origin/main — reconcile first (see: agent-cli drift)'], 1);
+  if (!ff && git('rev-parse', 'HEAD') !== git('rev-parse', 'origin/main'))
+    out({ step: 'gate', ok: false, reason: 'refs diverged (trees equal) — reset/reconcile to origin/main before pushing' }, ['deploy refused: refs diverged though trees are equal — reconcile to origin/main first (see: agent-cli drift)'], 1);
+  let pushed = 'nothing-to-push';
+  if (git('rev-parse', 'HEAD') !== git('rev-parse', 'origin/main')) {
+    try { execFileSync('git', ['push', 'origin', 'main'], { cwd: ROOT, timeout: 120000, stdio: 'pipe' }); pushed = 'pushed'; }
+    catch (e) { out({ step: 'push', ok: false, reason: String(e.message).slice(0, 200) }, ['deploy failed at git push'], 1); }
+  }
+  const target = sha256(localFile('index.html'));
+  const t0 = Date.now();
+  let liveSha = null;
+  while (Date.now() - t0 < 180000) {
+    const h = fetchLive('index.html');
+    liveSha = h ? sha256(h) : null;
+    if (liveSha === target) break;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 10000);
+  }
+  const ok = liveSha === target;
+  out({ step: 'verify', ok, pushed, fetch: fetched, live_sha: liveSha, target_sha: target, waited_s: Math.round((Date.now() - t0) / 1000) },
+    [`push: ${pushed}`, `live sha ${liveSha} == local ${target}: ${ok} (waited ${Math.round((Date.now() - t0) / 1000)}s)`], ok ? 0 : 1);
+}
+
+console.error(`unknown cmd: ${cmd}\n`);
+help(HELP.main);
